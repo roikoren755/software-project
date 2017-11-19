@@ -10,6 +10,14 @@
 #include <ctype.h>
 
 int toDecimalFromInput(int base);
+char A = 'A';
+char F = 'F';
+char zero = '0';
+char nine = '9';
+char endOfString = '\0';
+int inputOutputLimit = 100;
+int minBase = 2;
+int maxBase = 16;
 
 int main() {
 	int fromBase = 0, toBase = 0, scanned = 0;
@@ -19,7 +27,7 @@ int main() {
 		printf("An error occurred!\n");
 		return 0;
 	}
-	if (fromBase < 2 || fromBase > 16) {
+	if (fromBase < minBase || fromBase > maxBase) {
 		printf("Invalid input base\n");
 		return 0;
 	}
@@ -29,7 +37,7 @@ int main() {
 		printf("An error occurred!\n");
 		return 0;
 	}
-	if (toBase < 2 || toBase > 16) {
+	if (toBase < minBase || toBase > maxBase) {
 		printf("Invalid desired base\n");
 		return 0;
 	}
@@ -41,18 +49,18 @@ int main() {
 }
 
 int toDecimalFromInput(int base) {
-	char input[1000];
+	char input[inputOutputLimit];
 	int res = 0;
 	scanf("%s", input);
-	for (int i = 0; i < 1000 && input[i] != '\0' && !isspace(input[i]); i++) {
+	for (int i = 0; i < inputOutputLimit && input[i] != endOfString && !isspace(input[i]); i++) {
 		char currentDigit = input[i];
-		int digitVal = currentDigit - '0';
-		int letterVal = currentDigit - 'A' + 10;
+		int digitVal = currentDigit - zero;
+		int letterVal = currentDigit - A + 10;
 		if ((digitVal >= 0 && digitVal <= 9 && digitVal >= base) ||
 				(letterVal >= 10 && letterVal <= 15 && letterVal >= base) ||
-				currentDigit < '0' ||
-				(currentDigit > '9' && currentDigit < 'A') ||
-				currentDigit > 'F') {
+				currentDigit < zero ||
+				(currentDigit > nine && currentDigit < A) ||
+				currentDigit > F) {
 			printf("Invalid number!\n");
 			return -1;
 		}
