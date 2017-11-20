@@ -10,6 +10,7 @@
 #include <ctype.h>
 
 int toDecimalFromInput(int base);
+void toNewBase(int num, int base);
 char A = 'A';
 char F = 'F';
 char zero = '0';
@@ -73,5 +74,19 @@ int toDecimalFromInput(int base) {
 }
 
 void toNewBase(int num, int base) {
-
+	char res[102];
+	int len = 0;
+	int num0  = num;
+	int curDigit;
+	while(num0){
+    	curDigit = num0%base;
+    	num0 = num0/base;
+	   // printf("is: %d,%d\n",curDigit,num0);
+        if(curDigit>9){
+            res[len]='A'+curDigit-10;}
+        else{res[len]='0'+curDigit;}
+        len++;
+    	}
+    	for(int i = len-1;i>=0;i--)
+    	    {printf("%c",res[i]);}
 }
