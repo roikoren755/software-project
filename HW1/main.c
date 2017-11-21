@@ -2,7 +2,7 @@
  * main.c
  *
  *  Created on: Nov 13, 2017
- *      Author: Roi
+ *      Author: Roi Koren, Nadav Gasner
  */
 
 
@@ -47,6 +47,8 @@ int main() {
 	if (toNum == -1) {
 		return 0;
 	}
+	toNewBase(toNum, toBase);
+	return 0;
 }
 
 int toDecimalFromInput(int base) {
@@ -74,19 +76,28 @@ int toDecimalFromInput(int base) {
 }
 
 void toNewBase(int num, int base) {
-	char res[102];
+	char res[inputOutputLimit];
 	int len = 0;
 	int num0  = num;
 	int curDigit;
-	while(num0){
-    	curDigit = num0%base;
-    	num0 = num0/base;
-	   // printf("is: %d,%d\n",curDigit,num0);
-        if(curDigit>9){
-            res[len]='A'+curDigit-10;}
-        else{res[len]='0'+curDigit;}
+	while (num0) {
+		curDigit = num0 % base;
+    	num0 = num0 / base;
+    	if(curDigit > 9) {
+        	res[len] = A + curDigit - 10;
+        }
+        else {
+        	res[len] = zero + curDigit;
+        }
         len++;
-    	}
-    	for(int i = len-1;i>=0;i--)
-    	    {printf("%c",res[i]);}
+	}
+	if (!num) {
+		len = 1;
+		res[0] = zero;
+	}
+	printf("The result is : ");
+	for(int i = len - 1; i >= 0; i--) {
+    	printf("%c",res[i]);
+	}
+	printf("\n");
 }
