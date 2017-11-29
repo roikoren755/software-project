@@ -7,7 +7,7 @@
  */
 #include<stdio.h>
 #include "SPBufferset.h"
-#include "sp_nim.h"
+#include "sp_nim.c"
 
 #define N 32
 
