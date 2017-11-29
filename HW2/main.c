@@ -2,12 +2,12 @@
 
  * main.c
  *
- *  Created on: 28 бреб 2017
+ *  Created on: 28 ГЎГ°ГҐГЎ 2017
  *      Author: user
  */
 #include<stdio.h>
 #include "SPBufferset.h"
-#include "sp"
+#include "sp_nim.h"
 
 #define N 32
 
