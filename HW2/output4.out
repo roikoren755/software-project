@@ -1,0 +1,25 @@
+Enter the number of heaps:
+Enter the heap sizes:
+In turn 1 heap sizes are: h1=1 h2=2 h3=3 h4=6 h5=6.
+Computer takes 1 objects from heap 1.
+In turn 2 heap sizes are: h1=0 h2=2 h3=3 h4=6 h5=6.
+Your turn: please enter the heap index and the number of removed objects.
+You take 1 objects from heap 3.
+In turn 3 heap sizes are: h1=0 h2=2 h3=2 h4=6 h5=6.
+Computer takes 1 objects from heap 2.
+In turn 4 heap sizes are: h1=0 h2=1 h3=2 h4=6 h5=6.
+Your turn: please enter the heap index and the number of removed objects.
+You take 1 objects from heap 2.
+In turn 5 heap sizes are: h1=0 h2=0 h3=2 h4=6 h5=6.
+Computer takes 2 objects from heap 3.
+In turn 6 heap sizes are: h1=0 h2=0 h3=0 h4=6 h5=6.
+Your turn: please enter the heap index and the number of removed objects.
+You take 5 objects from heap 4.
+In turn 7 heap sizes are: h1=0 h2=0 h3=0 h4=1 h5=6.
+Computer takes 5 objects from heap 5.
+In turn 8 heap sizes are: h1=0 h2=0 h3=0 h4=1 h5=1.
+Your turn: please enter the heap index and the number of removed objects.
+You take 1 objects from heap 5.
+In turn 9 heap sizes are: h1=0 h2=0 h3=0 h4=1 h5=0.
+Computer takes 1 objects from heap 4.
+Computer wins!

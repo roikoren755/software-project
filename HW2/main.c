@@ -5,10 +5,10 @@
  *  Created on: 28 Nov 2017
  *      Author: Nadav Gasner & Roi Koren
  */
-#include<stdio.h>
+#include <stdio.h>
 #include "SPBufferset.h"
-#include "sp_nim.c"
-#include "main_aux.c"
+#include "sp_nim.h"
+#include "main_aux.h"
 
 #define MAX_NUM_OF_HEAPS 32
 

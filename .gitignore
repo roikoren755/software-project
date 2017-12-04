@@ -4,3 +4,10 @@ HW1/.project
 HW1/Debug/main.o
 HW1/Debug/HW1.exe
 HW1/.settings/org.eclipse.cdt.managedbuilder.core.prefs
+.cproject
+.project
+.settings/org.eclipse.cdt.managedbuilder.core.prefs
+*.o
+*.exe
+*.in
+*.pdf

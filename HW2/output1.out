@@ -1,0 +1,16 @@
+Enter the number of heaps:
+Enter the heap sizes:
+In turn 1 heap sizes are: h1=1 h2=2 h3=3.
+Computer takes 1 objects from heap 1.
+In turn 2 heap sizes are: h1=0 h2=2 h3=3.
+Your turn: please enter the heap index and the number of removed objects.
+Error: Invalid input.
+Please enter again the heap index and the number of removed objects.
+Error: Invalid input.
+Please enter again the heap index and the number of removed objects.
+Error: Invalid input.
+Please enter again the heap index and the number of removed objects.
+You take 2 objects from heap 2.
+In turn 3 heap sizes are: h1=0 h2=0 h3=3.
+Computer takes 3 objects from heap 3.
+Computer wins!
