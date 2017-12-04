@@ -2,7 +2,7 @@
  * main_aux.h
  *
  *  Created on: Dec 4, 2017
- *      Author: Roi
+ *      Author: Roi Koren & Nadav Gasner
  */
 
 #ifndef MAIN_AUX_H_

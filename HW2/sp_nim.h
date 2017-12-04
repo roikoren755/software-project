@@ -2,7 +2,7 @@
  * sp_nim.h
  *
  *  Created on: Dec 4, 2017
- *      Author: Roi
+ *      Author: Roi Koren & Nadav Gasner
  */
 
 #ifndef SP_NIM_H_
