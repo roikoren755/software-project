@@ -27,5 +27,5 @@ void play_computer_turn(int *arr, int size) {
 	}
 	int amount = s_nim? arr[heap] - heap_s_nim: 1;
 	arr[heap] -= amount;
-	printf("Computer takes %d objects from heap %d.\n", amount, heap);
+	printf("Computer takes %d objects from heap %d.\n", amount, heap + 1);
 }

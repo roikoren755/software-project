@@ -18,10 +18,10 @@ void play_user_turn(int *arr, int size) {
 	int heap, amount;
 	printf("Your turn: please enter the heap index and the number of removed objects.\n");
 	scanf(" %d %d", &heap, &amount);
-	while (!heap || heap > size || !amount || amount > arr[heap]) {
+	while (heap <= 0 || heap > size || amount <= 0 || amount > arr[heap - 1]) {
 		printf("Error: Invalid input.\nPlease enter again the heap index and the number of removed objects.\n");
 		scanf(" %d %d", &heap, &amount);
 	}
 	printf("You take %d objects from heap %d.\n", amount, heap);
-	arr[heap] -= amount;
+	arr[heap - 1] -= amount;
 }
