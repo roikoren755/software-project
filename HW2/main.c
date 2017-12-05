@@ -33,7 +33,7 @@ int main() {
 	for (int i = 0; i < num_of_heaps; i++) {
     	scanf("%d", &game[i]);
         if (game[i] <= 0) {
-        	printf("Error: the size of heap %d should be positive.\n", i);
+        	printf("Error: the size of heap %d should be positive.\n", i + 1);
             return 0;
         }
 	}
