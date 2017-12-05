@@ -51,7 +51,3 @@ int main() {
     !computers_turn? printf("Computer wins!\n"): printf("You win!\n");
     return 0;
 }
-
-
-
-
