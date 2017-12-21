@@ -14,7 +14,7 @@ SPArrayList* spArrayListCreate(int maxSize){
 		return NULL;
 	}
 	list->maxSize = maxSize;
-	list->elements[maxSize];
+	list->elements = malloc(maxSize*sizeof(int));
 	return list;
 }
 
