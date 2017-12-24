@@ -6,6 +6,8 @@
  */
 #include "SPArrayList.h"
 #include <string.h>
+#include <malloc.h>
+
 
 SPArrayList* spArrayListCreate(int maxSize){
 
@@ -25,7 +27,7 @@ SPArrayList* spArrayListCopy(SPArrayList* src){
 		}
 	list->maxSize = src->maxSize;
 	list->actualSize = src->actualSize;
-	list->elements[list->maxSize];
+	list->elements = malloc(list->maxSize*sizeof(int));
 	for (int i = 0; i < src->maxSize; i++){
 		list->elements[i] = src->elements[i];
 	}
@@ -33,6 +35,7 @@ SPArrayList* spArrayListCopy(SPArrayList* src){
 }
 
 void spArrayListDestroy(SPArrayList* src){
+	free(src->elements);
 	free(src);
 }
 
