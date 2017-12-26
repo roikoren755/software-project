@@ -10,7 +10,7 @@
 #include "SPMinimaxNode.h"
 
 
-MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid,int score){
+MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid){
 	if (!game){return NULL;}
 
 	MM_Node *node = malloc(sizeof(MM_Node));
@@ -25,7 +25,6 @@ MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid,int score)
 	node->game = game;
 	node->childs = childs;
 	node->height = height;
-	node->score = score;
 	node->valid = valid;
 	node->turn = turn;
 	return node;

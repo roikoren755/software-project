@@ -29,7 +29,7 @@ int spMinimaxSuggestMove(SPFiarGame* currentGame,unsigned int maxDepth){
 MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth){
 	SPFiarGame* currentGameCopy = spFiarGameCopy(currentGame);
 	if(!currentGameCopy){return NULL;}
-	MM_Node *root = createNode(currentGameCopy,maxDepth,true,true,0);
+	MM_Node *root = createNode(currentGameCopy,maxDepth,true,true);
 	int success = createNodeChilds(root);
 	if(!success){return NULL;}
 	return root;
@@ -46,7 +46,7 @@ int createNodeChilds(MM_Node* parent){
 		if (!nextGame){return 0;}
 
 		if (!spFiarGameIsValidMove(nextGame,i)){
-			MM_Node* child = createNode(nextGame,0,true,false,0);
+			MM_Node* child = createNode(nextGame,0,true,false);
 			if (!child){return 0;}
 			parent->childs[i] = child;
 			break;
@@ -55,13 +55,13 @@ int createNodeChilds(MM_Node* parent){
 		spFiarGameSetMove(nextGame,i);
 
 		if(spFiarCheckWinner(nextGame)){
-			MM_Node* child = createNode(nextGame,0,true,true,0);
+			MM_Node* child = createNode(nextGame,0,true,true);
 			if (!child){return 0;}
 			parent->childs[i] = child;
 			break;
 		}
 
-		MM_Node* child = createNode(nextGame,height-1,!parent.turn,true,0);
+		MM_Node* child = createNode(nextGame,height-1,!parent.turn,true);
 		if (!child){return 0;}
 		parent->childs[i] = child;
 		if(!createNodeChilds(child)){return 0;}

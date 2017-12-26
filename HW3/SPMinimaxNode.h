@@ -10,12 +10,11 @@ typedef struct MM_Node_t {
 	int height;
 	bool valid;
 	bool turn;
-	int score;
 	MM_Node* childs;
 } MM_Node;
 
 
-MM_Node* createNode(SPFiarGame* game,int Depth,bool turn,bool valid,int score);
+MM_Node* createNode(SPFiarGame* game,int Depth,bool turn,bool valid);
 void destroyNode(MM_Node* node);
 int scoreBoard(SPFiarGame* src);
 int spEvalnode(MM_Node* node);
