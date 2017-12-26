@@ -114,7 +114,7 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveAt(SPArrayList* src, int index){
 	if (!src->actualSize) {
 		return SP_ARRAY_LIST_EMPTY;
 	}
-	for (int i = index; i < src->actualSize-1; i++) {
+	for (int i = index; i < src->actualSize - 1; i++) {
 		src->elements[i] = src->elements[i + 1];
 	}
 	src->actualSize--;
@@ -195,6 +195,3 @@ bool spArrayListIsEmpty(SPArrayList* src){
 	}
 	return !src->actualSize;
 }
-
-
-
