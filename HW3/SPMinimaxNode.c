@@ -33,7 +33,7 @@ MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid){
 
 void destroyNode(MM_Node* node){
 	free(node->childs);
-	free(node->game);
+	spFiarGameDestroy(node->game);
 	free(node);
 }
 
