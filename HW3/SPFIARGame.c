@@ -150,38 +150,37 @@ char spFiarCheckWinner(SPFiarGame* src) {
 	}
 	char symbol;
 	for (int i = 0; i < SP_FIAR_GAME_N_ROWS; i++) {
-		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN; j++) {
-			symbol = src->gameBoard[i][j];
-			if (symbol == src->gameBoard[i][j + 1] &&
-					symbol == src->gameBoard[i][j + 2] &&
-					symbol == src->gameBoard[i][j + 3]) {
-				return symbol;
+		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS; j++) {
+			if (j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
+				symbol = src->gameBoard[i][j];
+				if (symbol == src->gameBoard[i][j + 1] &&
+						symbol == src->gameBoard[i][j + 2] &&
+						symbol == src->gameBoard[i][j + 3]) {
+					return symbol;
+				}
 			}
-		}
-	}
-	for (int i = 0; i < SP_FIAR_GAME_N_COLUMNS; i++) {
-		for (int j = 0; j < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN; j++) {
-			symbol = src->gameBoard[j][i];
-			if (symbol == src->gameBoard[j + 1][i] &&
-					symbol == src->gameBoard[j + 2][i] &&
-					symbol == src->gameBoard[j + 3][i]) {
-				return symbol;
+			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1) {
+				symbol = src->gameBoard[i][j];
+				if (symbol == src->gameBoard[i + 1][j] &&
+						symbol == src->gameBoard[i + 2][j] &&
+						symbol == src->gameBoard[i + 3][j]) {
+					return symbol;
+				}
 			}
-		}
-	}
-	for (int i = 0; i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN; i++) {
-		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN; j++) {
-			symbol = src->gameBoard[i][j];
-			if (symbol == src->gameBoard[i + 1][j + 1] &&
-					symbol == src->gameBoard[i + 2][j + 2] &&
-					symbol == src->gameBoard[i + 3][j + 3]) {
-				return symbol;
-			}
-			symbol = src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 1)][j];
-			if (symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 2)][j + 1] &&
-					symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 3)][j + 2] &&
-					symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 4)][j + 3]) {
-				return src->gameBoard[SP_FIAR_GAME_N_ROWS - i][j];
+			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1 &&
+					j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
+				symbol = src->gameBoard[i][j];
+				if (symbol == src->gameBoard[i + 1][j + 1] &&
+						symbol == src->gameBoard[i + 2][j + 2] &&
+						symbol == src->gameBoard[i + 3][j + 3]) {
+					return symbol;
+				}
+				symbol = src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 1)][j];
+				if (symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 2)][j + 1] &&
+						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 3)][j + 2] &&
+						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 4)][j + 3]) {
+					return src->gameBoard[SP_FIAR_GAME_N_ROWS - i][j];
+				}
 			}
 		}
 	}
