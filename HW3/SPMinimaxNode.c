@@ -16,7 +16,7 @@ MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid,int score)
 	MM_Node *node = malloc(sizeof(MM_Node));
 	if (!node){return NULL;}
 
-	MM_Node* childs = malloc(SP_FIAR_GAME_N_COLUMNS*sizeof(MM_Node));
+	MM_Node* childs = malloc(Node_Childs_Num*sizeof(MM_Node));
 	if (!node){
 		free(node);
 		return NULL;
@@ -31,16 +31,60 @@ MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid,int score)
 	return node;
 }
 
-MM_Node* copyNode(MM_Node* node){
-	if (!node){return NULL;}
-	MM_Node *copy = createNode(node.game,node.Depth,node.turn,node.score);
-	if(!copy){return NULL;}
-	return copy;
-}
+
 void destroyNode(MM_Node* node){
 	free(node->childs);
+	free(node->game);
 	free(node);
 }
+
+
+
+
+int spMaxIndex(MM_Node* root){
+	int maxMove = INT_MIN;
+	int index = 0;
+	for(int i=0;i<Node_Childs_Num;i++){
+		if(!root->childs[i].valid){
+			if(index==i){index++;}
+			break;}
+		int score = spEvalnode(root->childs[i]);
+		if(score>maxMove){index = i;}
+	}
+	return index;
+}
+
+int spEvalnode(MM_Node* node){
+	if (node->height==0){
+		return scoreBoard(node->game);
+	}
+
+	if (node->turn){return spMaxScore(node->childs);}
+	else {return spMinScore(node->childs);}
+
+}
+
+int spMaxScore(MM_Node* childs){
+	int maxMove = INT_MIN;
+	for(int i=0;i<Node_Childs_Num;i++){
+			if(!childs[i].valid){break;}
+			int score = spEvalnode(childs[i]);
+			if(score>maxMove){maxMove = score;}
+		}
+	return maxMove;
+}
+
+int spMinScore(MM_Node* childs){
+	int minMove = INT_MAX;
+		for(int i=0;i<Node_Childs_Num;i++){
+				if(!childs[i].valid){break;}
+				int score = spEvalnode(childs[i]);
+				if(score<minMove){minMove = score;}
+			}
+		return minMove;
+}
+
+
 
 
 int scoreBoard(SPFiarGame* src) {
@@ -126,11 +170,5 @@ int scoreBoard(SPFiarGame* src) {
 	return score;
 }
 
-int spEvalGame(SPFiarGame* game, unsigned int height, bool turn){
-	if (!game){
-	}
-}
-int spMaxIndex(SPFiarGame* game);
-int spMaxScore(SPFiarGame* game, unsigned int height);
-int spMinScore(SPFiarGame* game, unsigned int height);
+
 

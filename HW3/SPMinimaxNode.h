@@ -1,6 +1,6 @@
 #ifndef SPMINIMAXNODE_H_
 #define SPMINIMAXNODE_H_
-#define SP_FIAR_GAME_N_COLUMNS 7
+#define Node_Childs_Num 7
 
 
 typedef struct MM_Node_t {
@@ -15,7 +15,6 @@ typedef struct MM_Node_t {
 //Put all decleartions and constants here
 
 MM_Node* createNode(SPFiarGame* game,int Depth,bool turn,bool valid,int score);
-MM_Node* copyNode(MM_Node* node);
 void destroyNode(MM_Node* node);
 
 int scoreBoard(SPFiarGame* src);
