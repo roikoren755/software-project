@@ -28,6 +28,7 @@ int spMinimaxSuggestMove(SPFiarGame* currentGame,unsigned int maxDepth){
 
 MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth){
 	SPFiarGame* currentGameCopy = spFiarGameCopy(currentGame);
+	if(!currentGameCopy){return NULL;}
 	MM_Node *root = createNode(currentGameCopy,maxDepth,true,true,0);
 	int success = createNodeChilds(root);
 	if(!success){return NULL;}
