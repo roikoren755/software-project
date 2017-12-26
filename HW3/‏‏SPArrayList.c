@@ -114,7 +114,6 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveAt(SPArrayList* src, int index){
 	if (!src->actualSize) {
 		return SP_ARRAY_LIST_EMPTY;
 	}
-
 	for (int i = index; i < src->actualSize; i++) {
 		src->elements[i] = src->elements[i + 1];
 	}
@@ -164,7 +163,7 @@ int spArrayListGetFirst(SPArrayList* src){
 
 int spArrayListGetLast(SPArrayList* src){
 	if (!src || !src->actualSize) {
-			return 0;
+		return 0;
 	}
 	return src->elements[src->actualSize-1];
 }
