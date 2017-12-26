@@ -90,3 +90,13 @@ int scoreBoard(SPFiarGame* src) {
 	}
 	return score;
 }
+
+MMreturn spEvalGame(SPFiarGame* game, unsigned int height, bool turn){
+	if (!game){
+
+	}
+}
+MMreturn spMaxIndex(SPFiarGame* game);
+MMreturn spMaxScore(SPFiarGame* game, unsigned int height);
+MMreturn spMinScore(SPFiarGame* game, unsigned int height);
+
