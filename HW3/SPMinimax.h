@@ -1,7 +1,12 @@
 #ifndef SPMINIMAX_H_
 #define SPMINIMAX_H_
-
+#include <limits.h>
+#include <stdio.h>
 #include "SPFIARGame.h"
+#include "SPMinimaxNode.h"
+#include "SPFIARGame.h"
+
+#define Error -1
 
 /**
  * Given a game state, this function evaluates the best move according to
@@ -18,5 +23,8 @@
  */
 int spMinimaxSuggestMove(SPFiarGame* currentGame,
 		unsigned int maxDepth);
+
+MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth);
+int createNodeChilds(MM_Node* parent);
 
 #endif

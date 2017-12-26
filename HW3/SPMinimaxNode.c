@@ -7,6 +7,41 @@
 #include <limits.h>
 #include <stdio.h>
 #include "SPFIARGame.h"
+#include "SPMinimaxNode.h"
+
+
+MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid,int score){
+	if (!game){return NULL;}
+
+	MM_Node *node = malloc(sizeof(MM_Node));
+	if (!node){return NULL;}
+
+	MM_Node* childs = malloc(SP_FIAR_GAME_N_COLUMNS*sizeof(MM_Node));
+	if (!node){
+		free(node);
+		return NULL;
+	}
+
+	node->game = game;
+	node->childs = childs;
+	node->height = height;
+	node->score = score;
+	node->valid = valid;
+	node->turn = turn;
+	return node;
+}
+
+MM_Node* copyNode(MM_Node* node){
+	if (!node){return NULL;}
+	MM_Node *copy = createNode(node.game,node.Depth,node.turn,node.score);
+	if(!copy){return NULL;}
+	return copy;
+}
+void destroyNode(MM_Node* node){
+	free(node->childs);
+	free(node);
+}
+
 
 int scoreBoard(SPFiarGame* src) {
 	int spans[SP_FIAR_GAME_SPAN * 2 + 1];
@@ -91,12 +126,11 @@ int scoreBoard(SPFiarGame* src) {
 	return score;
 }
 
-MMreturn spEvalGame(SPFiarGame* game, unsigned int height, bool turn){
+int spEvalGame(SPFiarGame* game, unsigned int height, bool turn){
 	if (!game){
-
 	}
 }
-MMreturn spMaxIndex(SPFiarGame* game);
-MMreturn spMaxScore(SPFiarGame* game, unsigned int height);
-MMreturn spMinScore(SPFiarGame* game, unsigned int height);
+int spMaxIndex(SPFiarGame* game);
+int spMaxScore(SPFiarGame* game, unsigned int height);
+int spMinScore(SPFiarGame* game, unsigned int height);
 
