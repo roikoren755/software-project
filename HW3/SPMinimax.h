@@ -23,8 +23,8 @@
  */
 int spMinimaxSuggestMove(SPFiarGame* currentGame,
 		unsigned int maxDepth);
-
 MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth);
 int createNodeChilds(MM_Node* parent);
+void TreeDesrtoy(MM_Node* root);
 
 #endif
