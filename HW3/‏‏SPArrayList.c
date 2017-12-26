@@ -1,7 +1,7 @@
 /*
  * SPArrayList.c
  *
- *  Created on: 18 בדצמ 2017
+ *  Created on: 18 Dec 2017
  *      Author: user
  */
 #include "SPArrayList.h"
