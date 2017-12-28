@@ -2,6 +2,6 @@
 #define SPMAINAUX_H_
 
 //put auxiliary functions and constants used by the main function here.
-
+int spGetDifficulty();
 
 #endif

@@ -6,13 +6,11 @@
 
 #define MAX_NODE_CHILDREN_NUM 7
 
-typedef struct MM_Node_t {
+typedef struct Minimax_Node_t {
 	SPFiarGame* game;
-	int height;
-	bool valid;
-	bool turn;
-	struct MM_Node_t* children[MAX_NODE_CHILDREN_NUM];
-} MM_Node;
+	int depth;
+	struct Minimax_Node_t* children[MAX_NODE_CHILDREN_NUM];
+} Minimax_Node;
 
 /**
  * Creates a node with the given parameters:
@@ -25,52 +23,54 @@ typedef struct MM_Node_t {
  * NULL, if an allocation error occurred or game is NULL.
  * An instant of a Minimax Node otherwise.
  */
-MM_Node* createMinimaxNode(SPFiarGame* game,int height,bool turn,bool valid);
+Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, int depth);
 
 /**
  * Frees all memory resources associated with the source node. If the
  * source node is NULL, then the function does nothing.
  * @param src - the source node
  */
-void destroyMinimaxNode(MM_Node* node);
+void spDestroyMinimaxNode(Minimax_Node* node);
+
+int spCreateMinimaxNodeChildren(Minimax_Node* parent, unsigned int maxDepth);
 
 /**
  * Given a node, evaluates the score of each of the node's children (by calling
  * spEvalNode on them).
  * returns the index of the max.
  *
- * @param MM_Node* root - The node (the user has to check this isn't null)
+ * @param Minimax_Node* root - The node (the user has to check this isn't null)
  * @return the index of the child with the highest score.
  */
-int spGetMaximumScoreIndex(MM_Node* root);
+int spGetMaximumScoreIndex(Minimax_Node* root);
 
 /**
  * Given a node, evaluates the score of the node according to his children.
  * if the node's height is 0, calls scoreBoard on the node's game.
  * otherwise, calls spMaxScore or spMinScore on the node's children.
  *
- * @param MM_Node* node - The node (the user has to check this isn't null)
+ * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the node.
  */
-int spEvaluateMinimaxNode(MM_Node* node);
+int spEvaluateMinimaxNode(Minimax_Node* node);
 
 /**
  * Given a node, evaluates the score of each child node (by calling
  * spEvalNode on it) and returns the max score.
  *
- * @param MM_Node* node - The node (the user has to check this isn't null)
+ * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the max node.
  */
-int spGetMaximumScore(MM_Node* node);
+int spGetMaximumScore(Minimax_Node* node);
 
 /**
  * Given a node, evaluates the score of each child node (by calling
  * spEvalNode on it) and returns the min score.
  *
- * @param MM_Node* node - The node (the user has to check this isn't null)
+ * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the min node.
  */
-int spGetMinimumScore(MM_Node* node);
+int spGetMinimumScore(Minimax_Node* node);
 
 /**
  * Given a game, evaluates the score of the game's board according to the scoring
@@ -79,4 +79,5 @@ int spGetMinimumScore(MM_Node* node);
  * @return the score of the game's board.
  */
 int scoreBoard(SPFiarGame* src);
+
 #endif

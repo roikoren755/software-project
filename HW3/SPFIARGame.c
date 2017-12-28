@@ -191,3 +191,10 @@ char spFiarCheckWinner(SPFiarGame* src) {
 	}
 	return SP_FIAR_GAME_TIE_SYMBOL;
 }
+
+int spFiarGameGetLastMovePlayed(SPFiarGame* src) {
+	if (!src || spArrayListIsEmpty(src->history)) {
+		return -1;
+	}
+	return spArrayListGetFirst(src->history);
+}
