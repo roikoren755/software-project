@@ -6,85 +6,107 @@
  */
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "SPFIARGame.h"
 #include "SPMinimaxNode.h"
 
 
-MM_Node* createNode(SPFiarGame* game,int height, bool turn,bool valid){
-	if (!game){return NULL;}
-
-	MM_Node *node = malloc(sizeof(MM_Node));
-	if (!node){return NULL;}
-
-	MM_Node* childs = malloc(Node_Childs_Num*sizeof(MM_Node));
-	if (!node){
-		free(node);
+MM_Node* createMinimaxNode(SPFiarGame* game, int height, bool turn, bool valid) {
+	if (!game) {
 		return NULL;
 	}
-
+	MM_Node *node = malloc(sizeof(MM_Node));
+	if (!node) {
+		return NULL;
+	}
+	for (int  i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		node->children[i] = 0;
+	}
 	node->game = game;
-	node->childs = childs;
 	node->height = height;
 	node->valid = valid;
 	node->turn = turn;
 	return node;
 }
 
-
-void destroyNode(MM_Node* node){
-	free(node->childs);
+void destroyMinimaxNode(MM_Node* node) {
+	if (!node) {
+		return;
+	}
 	spFiarGameDestroy(node->game);
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if (node->children[i]) {
+			destroyMinimaxNode(node->children[i]);
+		}
+	}
 	free(node);
 }
 
-
-
-
-int spMaxIndex(MM_Node* root){
+int spGetMaximumScoreIndex(MM_Node* root) {
 	int maxMove = INT_MIN;
 	int index = 0;
-	for(int i=0;i<Node_Childs_Num;i++){
-		if(!root->childs[i].valid){
-			if(index==i){index++;}
-			break;}
-		int score = spEvalnode(root->childs[i]);
-		if(score>maxMove){index = i;}
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if (!root->children[i]->valid) {
+			if (index == i) {
+				index++;
+			}
+		}
+		else {
+			int score = spEvaluateMinimaxNode(root->children[i]);
+			if (score > maxMove) {
+				index = i;
+			}
+		}
 	}
 	return index;
 }
 
-int spEvalnode(MM_Node* node){
-	if (node->height==0){
+int spEvaluateMinimaxNode(MM_Node* node){
+	bool leaf = true;
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if (node->children[i]->valid) {
+			leaf = false;
+		}
+	}
+	if (!node->height || leaf) {
 		return scoreBoard(node->game);
 	}
-
-	if (node->turn){return spMaxScore(node->childs);}
-	else {return spMinScore(node->childs);}
+	if (node->turn) {
+		return spGetMaximumScore(node);
+	}
+	else {
+		return spGetMinimumScore(node);
+	}
 
 }
 
-int spMaxScore(MM_Node* childs){
+int spGetMaximumScore(MM_Node* node){
 	int maxMove = INT_MIN;
-	for(int i=0;i<Node_Childs_Num;i++){
-			if(!childs[i].valid){break;}
-			int score = spEvalnode(childs[i]);
-			if(score>maxMove){maxMove = score;}
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if (!node->children[i]->valid) {
+			continue;
 		}
+		int score = spEvaluateMinimaxNode(node->children[i]);
+		if (score > maxMove) {
+			maxMove = score;
+		}
+	}
 	return maxMove;
 }
 
-int spMinScore(MM_Node* childs){
+int spGetMinimumScore(MM_Node* node){
 	int minMove = INT_MAX;
-		for(int i=0;i<Node_Childs_Num;i++){
-				if(!childs[i].valid){break;}
-				int score = spEvalnode(childs[i]);
-				if(score<minMove){minMove = score;}
-			}
-		return minMove;
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if(!node->children[i]->valid) {
+			continue;
+		}
+		int score = spEvaluateMinimaxNode(node->children[i]);
+		if (score<minMove) {
+			minMove = score;
+		}
+	}
+	return minMove;
 }
-
-
-
 
 int scoreBoard(SPFiarGame* src) {
 	int spans[SP_FIAR_GAME_SPAN * 2 + 1];

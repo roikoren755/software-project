@@ -36,7 +36,8 @@ int spMinimaxSuggestMove(SPFiarGame* currentGame,
  * On success the function returns a node representing the root of the tree.
  *
  */
-MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth);
+MM_Node* spMinimaxCreateTree(SPFiarGame* currentGame,unsigned int maxDepth);
+
 /**
  * Given a node in the minimax tree, this function recursively creates childs for this node.
  * the number of childs is according to the constant Node_Childs_Num defined in the minimaxnode header.
@@ -54,12 +55,13 @@ MM_Node* MMCreateTree(SPFiarGame* currentGame,unsigned int maxDepth);
  * On success the function returns 1.
  *
  */
-int createNodeChilds(MM_Node* parent);
+int spCreateMinimaxNodeChildren(MM_Node* parent);
+
 /**
  * Frees recursively all memory resources associated with the source tree. If the
  * source root is NULL, then the function does nothing.
  * @param src - the source root of the tree.
  */
-void TreeDesrtoy(MM_Node* root);
+void spDestroyMinimaxTree(MM_Node* root);
 
 #endif
