@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #define DELIMITERS " \t\r\n"
+#define MAXIMUM_COMMAND_LENGTH 1024
 #define UNDO_MOVE "undo_move"
 #define ADD_DISC "add_disc"
 #define SUGGEST_MOVE "suggest_move"
@@ -28,13 +29,11 @@ bool spParserIsInt(const char* str) {
 
 SPCommand spParserPraseLine(const char* str) {
 	SPCommand* cmd = malloc(sizeof(SPCommand));
-	if (!cmd) {
-		return *cmd;
-	}
 	int notMatched = 1;
-	char* line = malloc(1025 * sizeof(char));
+	char* line = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
 	strcpy(line, str);
-	char* command = strtok(line, DELIMITERS);
+	char* command = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
+	command = strtok(line, DELIMITERS);
 	while (!*command) {
 		command = strtok(NULL, DELIMITERS);
 	}
@@ -74,5 +73,8 @@ SPCommand spParserPraseLine(const char* str) {
 		cmd->cmd = SP_INVALID_LINE;
 		cmd->validArg = false;
 	}
-	return *cmd;
+	free(line);
+	SPCommand ret = *cmd;
+	free(cmd);
+	return ret;
 }

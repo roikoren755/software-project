@@ -159,4 +159,6 @@ char spFiarGameGetCurrentPlayer(SPFiarGame* src);
 */
 char spFiarCheckWinner(SPFiarGame* src);
 
+int spFiarGameGetLastMovePlayed(SPFiarGame* src);
+
 #endif

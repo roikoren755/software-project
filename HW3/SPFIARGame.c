@@ -109,8 +109,9 @@ SP_FIAR_GAME_MESSAGE spFiarGameUndoPrevMove(SPFiarGame* src) {
 	if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) {
 		return SP_FIAR_GAME_INVALID_ARGUMENT;
 	}
-	int row = src->tops[col]--;
-	src->gameBoard[row][col] = SP_FIAR_GAME_EMPTY_ENTRY;
+	int row = src->tops[col];
+	src->tops[col]--;
+	src->gameBoard[row - 1][col] = SP_FIAR_GAME_EMPTY_ENTRY;
 	src->currentPlayer = src->currentPlayer == SP_FIAR_GAME_PLAYER_1_SYMBOL ? SP_FIAR_GAME_PLAYER_2_SYMBOL : SP_FIAR_GAME_PLAYER_1_SYMBOL;
 	return SP_FIAR_GAME_SUCCESS;
 }
@@ -153,7 +154,8 @@ char spFiarCheckWinner(SPFiarGame* src) {
 		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS; j++) {
 			if (j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
 				symbol = src->gameBoard[i][j];
-				if (symbol == src->gameBoard[i][j + 1] &&
+				if (symbol != SP_FIAR_GAME_EMPTY_ENTRY &&
+						symbol == src->gameBoard[i][j + 1] &&
 						symbol == src->gameBoard[i][j + 2] &&
 						symbol == src->gameBoard[i][j + 3]) {
 					return symbol;
@@ -161,7 +163,8 @@ char spFiarCheckWinner(SPFiarGame* src) {
 			}
 			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1) {
 				symbol = src->gameBoard[i][j];
-				if (symbol == src->gameBoard[i + 1][j] &&
+				if (symbol != SP_FIAR_GAME_EMPTY_ENTRY &&
+						symbol == src->gameBoard[i + 1][j] &&
 						symbol == src->gameBoard[i + 2][j] &&
 						symbol == src->gameBoard[i + 3][j]) {
 					return symbol;
@@ -170,13 +173,15 @@ char spFiarCheckWinner(SPFiarGame* src) {
 			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1 &&
 					j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
 				symbol = src->gameBoard[i][j];
-				if (symbol == src->gameBoard[i + 1][j + 1] &&
+				if (symbol != SP_FIAR_GAME_EMPTY_ENTRY &&
+						symbol == src->gameBoard[i + 1][j + 1] &&
 						symbol == src->gameBoard[i + 2][j + 2] &&
 						symbol == src->gameBoard[i + 3][j + 3]) {
 					return symbol;
 				}
 				symbol = src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 1)][j];
-				if (symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 2)][j + 1] &&
+				if (symbol != SP_FIAR_GAME_EMPTY_ENTRY &&
+						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 2)][j + 1] &&
 						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 3)][j + 2] &&
 						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 4)][j + 3]) {
 					return src->gameBoard[SP_FIAR_GAME_N_ROWS - i][j];
@@ -190,4 +195,11 @@ char spFiarCheckWinner(SPFiarGame* src) {
 		}
 	}
 	return SP_FIAR_GAME_TIE_SYMBOL;
+}
+
+int spFiarGameGetLastMovePlayed(SPFiarGame* src) {
+	if (!src || spArrayListIsEmpty(src->history)) {
+		return -1;
+	}
+	return spArrayListGetFirst(src->history);
 }
