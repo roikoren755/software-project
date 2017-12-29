@@ -2,27 +2,30 @@
 // Created by Roi Koren on 28/12/2017.
 //
 #include <stdio.h>
+#include <stdlib.h>
 #include "SPFIARGame.h"
 #include "SPFIARParser.h"
 #include "SPMainAux.h"
 #include "SPMinimax.h"
+#include "SPBufferset.h"
 
 #define UNDO_MOVES_POSSIBLE 10
 #define MAXIMUM_COMMAND_LENGTH 1024
 
 int main() {
+	SP_BUFF_SET();
     int maxDepth = spGetDifficulty();
-    SPFiarGame game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
+    SPFiarGame* game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
     if (!game) {
         printf("Error: spFiarGameCreate has failed");
-        return;
+        return -1;
     }
     char winner;
     char* input = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
     if (!input) {
         printf("Error: main has failed");
         spFiarGameDestroy(game);
-        return;
+        return -1;
     }
     int ended = 0;
     while (1) {
@@ -34,20 +37,14 @@ int main() {
         else {
             ended = 1;
             if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
-                printf("Game over: it’s a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
+                printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
             }
             else {
                 printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
             }
         };
-        fgets(input, MAXIMUM_COMMAND_LENGTH + 1, stdin);
+        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
         SPCommand command = spParserPraseLine(input);
-        if (!command) {
-            printf("Error: spParserPraseLine has failed");
-            free(input);
-            spFiarGameDestroy(game);
-            return;
-        }
         if (command.cmd == SP_INVALID_LINE) {
             printf("Error: invalid command\n");
         }
@@ -55,15 +52,14 @@ int main() {
             int suggestedMove = spMinimaxSuggestMove(game, maxDepth);
             if (suggestedMove == -1) {
                 printf("Error: spMinimaxSuggestMove has failed");
-                free(&command);
                 free(input);
                 spFiarGameDestroy(game);
-                return;
+                return -1;
             }
             printf("Suggested move: drop a disc to column %d\n", suggestedMove + 1);
         }
         if (command.cmd == SP_UNDO_MOVE) {
-            if (spArrayListIsEmpty(game.history)) {
+            if (spArrayListIsEmpty(game->history)) {
                 printf("Error: cannot undo previous move!\n");
             }
             else {
@@ -86,9 +82,34 @@ int main() {
                 }
                 else {
                     spFiarGameSetMove(game, col);
-                    spFiarGameSetMove(game, spMinimaxSuggestMove(game, maxDepth));
+                    int col = spMinimaxSuggestMove(game, maxDepth);
+                    if (col == -1) {
+                    	printf("Error: <function name> has failed");
+                    	free(input);
+                    	spFiarGameDestroy(game);
+                    	return -1;
+                    }
+                    printf("Computer move: add disc to column %d\n", col + 1);
+                    spFiarGameSetMove(game, col);
                 }
             }
         }
+        if (command.cmd == SP_QUIT) {
+        	printf("Exiting...\n");
+        	free(input);
+        	spFiarGameDestroy(game);
+        	return 0;
+        }
+        if (command.cmd == SP_RESTART) {
+        	game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
+        	ended = 0;
+        }
+        if (command.cmd == SP_INVALID_LINE) {
+        	printf("Error: invalid command\n");
+        }
+        if (ended && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
+        	printf("Error: the game is over\n");
+        }
     }
+    return 0;
 }

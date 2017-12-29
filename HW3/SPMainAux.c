@@ -1,6 +1,7 @@
 //
 // Created by Roi Koren on 28/12/2017.
 //
+#include <stdio.h>
 
 int spGetDifficulty() {
     printf("Please enter the difficulty level between [1-7]:\n");
@@ -11,5 +12,6 @@ int spGetDifficulty() {
         printf("Please enter the difficulty level between [1-7]:\n");
         result = scanf("%d", &maxDepth);
     }
+    getc(stdin);
     return maxDepth;
 }

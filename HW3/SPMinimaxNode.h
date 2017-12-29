@@ -8,7 +8,7 @@
 
 typedef struct Minimax_Node_t {
 	SPFiarGame* game;
-	int depth;
+	unsigned int depth;
 	struct Minimax_Node_t* children[MAX_NODE_CHILDREN_NUM];
 } Minimax_Node;
 
@@ -23,7 +23,7 @@ typedef struct Minimax_Node_t {
  * NULL, if an allocation error occurred or game is NULL.
  * An instant of a Minimax Node otherwise.
  */
-Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, int depth);
+Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, unsigned int depth);
 
 /**
  * Frees all memory resources associated with the source node. If the

@@ -11,7 +11,7 @@
 #include "SPMinimaxNode.h"
 
 
-Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, int depth) {
+Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, unsigned int depth) {
 	if (!game) {
 		return NULL;
 	}
@@ -49,12 +49,12 @@ int spCreateMinimaxNodeChildren(Minimax_Node* node, unsigned int maxDepth) {
 	}
 	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
 		if (spFiarGameIsValidMove(node->game, i)) {
-			SPFiarGame childGame = spFiarGameCopy(node->game);
+			SPFiarGame* childGame = spFiarGameCopy(node->game);
 			if (!childGame) {
 				return 0;
 			}
 			spFiarGameSetMove(childGame, i);
-			Minimax_Node childNode = spCreateMinimaxNode(childGame, node->depth + 1);
+			Minimax_Node* childNode = spCreateMinimaxNode(childGame, node->depth + 1);
 			if (!childNode) {
 				return 0;
 			}
