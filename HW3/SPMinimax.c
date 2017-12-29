@@ -19,7 +19,7 @@ int spMinimaxSuggestMove(SPFiarGame* currentGame, unsigned int maxDepth){
 	if (!root) {
 		return -1;
 	}
-	int next_move = spGetMaximumScoreIndex(root);
+	int next_move = spGetBestScoreIndex(root);
 	spDestroyMinimaxNode(root);
 	return next_move;
 }

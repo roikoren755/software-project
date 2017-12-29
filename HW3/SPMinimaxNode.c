@@ -69,7 +69,40 @@ int spCreateMinimaxNodeChildren(Minimax_Node* node, unsigned int maxDepth) {
 	return 1;
 }
 
-int spGetMaximumScoreIndex(Minimax_Node* node) {
+int spGetBestScoreIndex(Minimax_Node* node) {
+	if (!node) {
+		return -1;
+	}
+	int rootPlayer = spFiarGameGetCurrentPlayer(node->game) == SP_FIAR_GAME_PLAYER_1_SYMBOL ? 1 : 0;
+	if (rootPlayer) {
+		return spGetMaximumScoreIndex(node, rootPlayer);
+	}
+	return spGetMinimumScoreIndex(node, rootPlayer);
+}
+
+int spGetMinimumScoreIndex(Minimax_Node* node, int rootPlayer) {
+	if (!node) {
+		return -1;
+	}
+	int minScore = INT_MAX;
+	int index = 0;
+	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
+		if (!node->children[i]) {
+			if (index == i) {
+				index++;
+			}
+		}
+		else {
+			int score = spEvaluateMinimaxNode(node->children[i], rootPlayer);
+			if (score < minScore) {
+				index = i;
+			}
+		}
+	}
+	return index;
+}
+
+int spGetMaximumScoreIndex(Minimax_Node* node, int rootPlayer) {
 	if (!node) {
 		return -1;
 	}
@@ -82,7 +115,7 @@ int spGetMaximumScoreIndex(Minimax_Node* node) {
 			}
 		}
 		else {
-			int score = spEvaluateMinimaxNode(node->children[i]);
+			int score = spEvaluateMinimaxNode(node->children[i], rootPlayer);
 			if (score > maxScore) {
 				index = i;
 			}
@@ -91,7 +124,7 @@ int spGetMaximumScoreIndex(Minimax_Node* node) {
 	return index;
 }
 
-int spEvaluateMinimaxNode(Minimax_Node* node){
+int spEvaluateMinimaxNode(Minimax_Node* node, int rootPlayer){
 	if (!node) {
 		return 0;
 	}
@@ -101,26 +134,26 @@ int spEvaluateMinimaxNode(Minimax_Node* node){
 			leaf = false;
 		}
 	}
-	if (!node->depth || leaf) {
+	if (leaf) {
 		return scoreBoard(node->game);
 	}
-	if (node->depth % 2) {
-		return spGetMaximumScore(node);
+	if ((node->depth % 2 && rootPlayer) || (node->depth % 2 == 1 && !rootPlayer)){
+		return spGetMaximumScore(node, rootPlayer);
 	}
 	else {
-		return spGetMinimumScore(node);
+		return spGetMinimumScore(node, rootPlayer);
 	}
 
 }
 
-int spGetMaximumScore(Minimax_Node* node){
+int spGetMaximumScore(Minimax_Node* node, int rootPlayer){
 	if (!node) {
 		return INT_MAX;
 	}
 	int maxScore = INT_MIN;
 	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
 		if (node->children[i]) {
-			int score = spEvaluateMinimaxNode(node->children[i]);
+			int score = spEvaluateMinimaxNode(node->children[i], rootPlayer);
 			if (score > maxScore) {
 				maxScore = score;
 			}
@@ -129,14 +162,14 @@ int spGetMaximumScore(Minimax_Node* node){
 	return maxScore;
 }
 
-int spGetMinimumScore(Minimax_Node* node){
+int spGetMinimumScore(Minimax_Node* node, int rootPlayer){
 	if (!node) {
 		return INT_MIN;
 	}
 	int minScore = INT_MAX;
 	for (int i = 0; i < MAX_NODE_CHILDREN_NUM; i++) {
 		if (node->children[i]) {
-			int score = spEvaluateMinimaxNode(node->children[i]);
+			int score = spEvaluateMinimaxNode(node->children[i], rootPlayer);
 			if (score < minScore) {
 				minScore = score;
 			}

@@ -42,7 +42,11 @@ int spCreateMinimaxNodeChildren(Minimax_Node* parent, unsigned int maxDepth);
  * @param Minimax_Node* root - The node (the user has to check this isn't null)
  * @return the index of the child with the highest score.
  */
-int spGetMaximumScoreIndex(Minimax_Node* root);
+int spGetMaximumScoreIndex(Minimax_Node* root, int rootPlayer);
+
+int spGetMinimumScoreIndex(Minimax_Node* root, int rootPlayer);
+
+int spGetBestScoreIndex(Minimax_Node* root);
 
 /**
  * Given a node, evaluates the score of the node according to his children.
@@ -52,7 +56,7 @@ int spGetMaximumScoreIndex(Minimax_Node* root);
  * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the node.
  */
-int spEvaluateMinimaxNode(Minimax_Node* node);
+int spEvaluateMinimaxNode(Minimax_Node* node, int rootPlayer);
 
 /**
  * Given a node, evaluates the score of each child node (by calling
@@ -61,7 +65,7 @@ int spEvaluateMinimaxNode(Minimax_Node* node);
  * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the max node.
  */
-int spGetMaximumScore(Minimax_Node* node);
+int spGetMaximumScore(Minimax_Node* node, int rootPlayer);
 
 /**
  * Given a node, evaluates the score of each child node (by calling
@@ -70,7 +74,7 @@ int spGetMaximumScore(Minimax_Node* node);
  * @param Minimax_Node* node - The node (the user has to check this isn't null)
  * @return the score of the min node.
  */
-int spGetMinimumScore(Minimax_Node* node);
+int spGetMinimumScore(Minimax_Node* node, int rootPlayer);
 
 /**
  * Given a game, evaluates the score of the game's board according to the scoring
