@@ -6,6 +6,7 @@
  */
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "SPFIARGame.h"
 #include "SPMinimaxNode.h"
 #include "SPMinimax.h"
@@ -31,6 +32,7 @@ Minimax_Node* spMinimaxCreateTree(SPFiarGame* currentGame, unsigned int maxDepth
 	}
 	Minimax_Node* root = spCreateMinimaxNode(currentGameCopy, 0);
 	if (!root) {
+		free(currentGameCopy);
 		return NULL;
 	}
 	if (!spCreateMinimaxNodeChildren(root, maxDepth)) {

@@ -15,6 +15,14 @@
 int main() {
 	SP_BUFF_SET();
     int maxDepth = spGetDifficulty();
+    if (!maxDepth) {
+    	printf("Error: spGetDifficulty has failed");
+    	return -1;
+    }
+    if (maxDepth == -1) {
+    	printf("Exiting...\n");
+    	return 0;
+    }
     SPFiarGame* game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
     if (!game) {
         printf("Error: spFiarGameCreate has failed");
@@ -73,7 +81,10 @@ int main() {
         }
         if (command.cmd == SP_ADD_DISC && !ended) {
             if (!command.validArg) {
-                printf("Error: column number must be in range 1-7\n");
+                printf("Error: invalid command\n");
+            }
+            if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) {
+            	printf("Error: column number must be in range 1-7\n");
             }
             else {
                 int col = command.arg - 1;
@@ -84,7 +95,7 @@ int main() {
                     spFiarGameSetMove(game, col);
                     int col = spMinimaxSuggestMove(game, maxDepth);
                     if (col == -1) {
-                    	printf("Error: <function name> has failed");
+                    	printf("Error: spMinimaxSuggestMove has failed");
                     	free(input);
                     	spFiarGameDestroy(game);
                     	return -1;
@@ -101,6 +112,7 @@ int main() {
         	return 0;
         }
         if (command.cmd == SP_RESTART) {
+        	spFiarGameDestroy(game);
         	game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
         	ended = 0;
         }
@@ -111,5 +123,7 @@ int main() {
         	printf("Error: the game is over\n");
         }
     }
+    free(input);
+    spFiarGameDestroy(game);
     return 0;
 }

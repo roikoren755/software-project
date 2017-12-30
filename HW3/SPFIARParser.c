@@ -9,6 +9,7 @@
 #define SUGGEST_MOVE "suggest_move"
 #define QUIT "quit"
 #define RESTART_GAME "restart_game"
+#define SP_FIAR_GAME_N_COLUMNS 7
 
 bool spParserIsInt(const char* str) {
 	char currentChar = *str;
@@ -28,53 +29,68 @@ bool spParserIsInt(const char* str) {
 }
 
 SPCommand spParserPraseLine(const char* str) {
-	SPCommand* cmd = malloc(sizeof(SPCommand));
+	SPCommand cmd;
 	int notMatched = 1;
 	char* line = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
+	if (!line) {
+		cmd.cmd = SP_INVALID_LINE;
+		cmd.validArg = false;
+		return cmd;
+	}
 	strcpy(line, str);
 	char* command = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
+	if (!command) {
+		free(line);
+		cmd.cmd = SP_INVALID_LINE;
+		cmd.validArg = false;
+		return cmd;
+	}
 	command = strtok(line, DELIMITERS);
-	while (!*command) {
+	while (command && !*command) {
 		command = strtok(NULL, DELIMITERS);
 	}
-	if (notMatched && !strcmp(command, UNDO_MOVE)) {
-		cmd->cmd = SP_UNDO_MOVE;
-		cmd->validArg = false;
+	if (!command) {
+		free(line);
+		cmd.cmd = SP_INVALID_LINE;
+		cmd.validArg = false;
+		return cmd;
+	}
+	char* integer = strtok(NULL, DELIMITERS);
+	if (notMatched && !strcmp(command, UNDO_MOVE) && !integer) {
+		cmd.cmd = SP_UNDO_MOVE;
+		cmd.validArg = false;
 		notMatched = 0;
 	}
 	if (notMatched && !strcmp(command, ADD_DISC)) {
-		cmd->cmd = SP_ADD_DISC;
-		const char* integer = strtok(NULL, DELIMITERS);
+		cmd.cmd = SP_ADD_DISC;
 		if (!spParserIsInt(integer)) {
-			cmd->validArg = false;
+			cmd.validArg = false;
 		}
 		else {
-			cmd->validArg = true;
-			cmd->arg = atoi(integer);
+			cmd.validArg = true;
+			cmd.arg = atoi(integer);
 		}
 		notMatched = 0;
 	}
-	if (notMatched && !strcmp(command, SUGGEST_MOVE)) {
-		cmd->cmd = SP_SUGGEST_MOVE;
-		cmd->validArg = false;
+	if (notMatched && !strcmp(command, SUGGEST_MOVE) && !integer) {
+		cmd.cmd = SP_SUGGEST_MOVE;
+		cmd.validArg = false;
 		notMatched = 0;
 	}
-	if (notMatched && !strcmp(command, QUIT)) {
-		cmd->cmd = SP_QUIT;
-		cmd->validArg = false;
+	if (notMatched && !strcmp(command, QUIT) && !integer) {
+		cmd.cmd = SP_QUIT;
+		cmd.validArg = false;
 		notMatched = 0;
 	}
-	if (notMatched && !strcmp(command, RESTART_GAME)) {
-		cmd->cmd = SP_RESTART;
-		cmd->validArg = false;
+	if (notMatched && !strcmp(command, RESTART_GAME) && !integer) {
+		cmd.cmd = SP_RESTART;
+		cmd.validArg = false;
 		notMatched = 0;
 	}
 	if (notMatched) {
-		cmd->cmd = SP_INVALID_LINE;
-		cmd->validArg = false;
+		cmd.cmd = SP_INVALID_LINE;
+		cmd.validArg = false;
 	}
 	free(line);
-	SPCommand ret = *cmd;
-	free(cmd);
-	return ret;
+	return cmd;
 }

@@ -31,7 +31,7 @@ SPFiarGame* spFiarGameCreate(int historySize) {
 		game->tops[i] = 0;
 	}
 	game->history = spArrayListCreate(historySize);
-	if (game->history == 0) {
+	if (!game->history) {
 		free(game);
 		return 0;
 	}
