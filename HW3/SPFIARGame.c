@@ -134,7 +134,7 @@ SP_FIAR_GAME_MESSAGE spFiarGamePrintBoard(SPFiarGame* src) {
 	for (int i = 1; i <= SP_FIAR_GAME_N_COLUMNS; i++) {
 		printf(" %d", i);
 	}
-	printf("\n");
+	printf(" \n");
 	return SP_FIAR_GAME_SUCCESS;
 }
 
@@ -184,7 +184,7 @@ char spFiarCheckWinner(SPFiarGame* src) {
 						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 2)][j + 1] &&
 						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 3)][j + 2] &&
 						symbol == src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 4)][j + 3]) {
-					return src->gameBoard[SP_FIAR_GAME_N_ROWS - i][j];
+					return symbol;
 				}
 			}
 		}

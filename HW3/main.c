@@ -35,9 +35,9 @@ int main() {
         spFiarGameDestroy(game);
         return -1;
     }
+    spFiarGamePrintBoard(game);
     int ended = 0;
     while (1) {
-        spFiarGamePrintBoard(game);
         winner  = spFiarCheckWinner(game);
         if (!winner) {
             printf("Please make the next move:\n");
@@ -78,6 +78,7 @@ int main() {
                 printf("Remove disc: remove user's disc at column %d\n", spFiarGameGetLastMovePlayed(game) + 1);
                 spFiarGameUndoPrevMove(game);
             }
+            spFiarGamePrintBoard(game);
         }
         if (command.cmd == SP_ADD_DISC && !ended) {
             if (!command.validArg) {
@@ -93,16 +94,17 @@ int main() {
                 }
                 else {
                     spFiarGameSetMove(game, col);
-                    int col = spMinimaxSuggestMove(game, maxDepth);
-                    if (col == -1) {
+                    int computerCol = spMinimaxSuggestMove(game, maxDepth);
+                    if (computerCol == -1) {
                     	printf("Error: spMinimaxSuggestMove has failed");
                     	free(input);
                     	spFiarGameDestroy(game);
                     	return -1;
                     }
-                    printf("Computer move: add disc to column %d\n", col + 1);
-                    spFiarGameSetMove(game, col);
+                    printf("Computer move: add disc to column %d\n", computerCol + 1);
+                    spFiarGameSetMove(game, computerCol);
                 }
+                spFiarGamePrintBoard(game);
             }
         }
         if (command.cmd == SP_QUIT) {
