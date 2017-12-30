@@ -2,13 +2,9 @@
 // Created by Roi Koren on 28/12/2017.
 //
 #include <stdio.h>
-<<<<<<< HEAD
 #include "SPFIARGame.h"
-=======
-#include "SPFiarGame.h"
 #include "SPFIARParser.h"
 #include "SPMinimax.h"
->>>>>>> a60b663113bacc11dd9608100c508e30db50976c
 
 int spGetDifficulty() {
     printf("Please enter the difficulty level between [1-7]:\n");
