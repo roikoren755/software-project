@@ -76,8 +76,8 @@ int main() {
                 }
                 printf("Remove disc: remove user's disc at column %d\n", spFiarGameGetLastMovePlayed(game) + 1);
                 spFiarGameUndoPrevMove(game);
+                spFiarGamePrintBoard(game);
             }
-            spFiarGamePrintBoard(game);
         }
         if (command.cmd == SP_ADD_DISC && !ended) {
             if (!command.validArg) {

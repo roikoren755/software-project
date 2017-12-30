@@ -32,6 +32,21 @@ Minimax_Node* spCreateMinimaxNode(SPFiarGame* game, unsigned int depth);
  */
 void spDestroyMinimaxNode(Minimax_Node* node);
 
+/**
+ * Given a game state, this function creates the minimax tree up to
+ * a specified length given by maxDepth.
+ * specified length given by maxDepth. The current game state doesn't change
+ * by this function including the history of previous moves.
+ *
+ * @param currentGame - The current game state (the user has to check this isn't null)
+ * @param maxDepth - The maximum depth of the miniMax algorithm
+ * @return
+ * NULL if any allocation error occurred.
+ * On success the function returns a node representing the root of the tree.
+ *
+ */
+Minimax_Node* spMinimaxCreateTree(SPFiarGame* currentGame, unsigned int maxDepth);
+
 int spCreateMinimaxNodeChildren(Minimax_Node* parent, unsigned int maxDepth);
 
 /**

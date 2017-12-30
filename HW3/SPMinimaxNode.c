@@ -40,6 +40,23 @@ void spDestroyMinimaxNode(Minimax_Node* node) {
 	free(node);
 }
 
+Minimax_Node* spMinimaxCreateTree(SPFiarGame* currentGame, unsigned int maxDepth){
+	SPFiarGame* currentGameCopy = spFiarGameCopy(currentGame);
+	if (!currentGameCopy) {
+		return NULL;
+	}
+	Minimax_Node* root = spCreateMinimaxNode(currentGameCopy, 0);
+	if (!root) {
+		free(currentGameCopy);
+		return NULL;
+	}
+	if (!spCreateMinimaxNodeChildren(root, maxDepth)) {
+		spDestroyMinimaxNode(root);
+		return NULL;
+	}
+	return root;
+}
+
 int spCreateMinimaxNodeChildren(Minimax_Node* node, unsigned int maxDepth) {
 	if (!node) {
 		return 0;
