@@ -89,9 +89,15 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
 }
 
 int spFiarGameRestart(SPFiarGame** game) {
+	printf("Game restarted!\n");
 	spFiarGameDestroy(*game);
 	*game = (spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE));
 	int maxDepth = spGetDifficulty();
+	if (!maxDepth) {
+		printf("Exiting...\n");
+		spFiarGameDestroy(*game);
+		return maxDepth;
+	}
 	spFiarGamePrintBoard(*game);
 	printf("Please make the next move:\n");
 	return maxDepth;

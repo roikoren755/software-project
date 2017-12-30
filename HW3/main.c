@@ -70,6 +70,9 @@ int main() {
         }
         if (command.cmd == SP_RESTART) {
         	maxDepth = spFiarGameRestart(&game);
+        	if (!maxDepth) {
+        		return 0;
+        	}
         }
         if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
         	printf("Error: the game is over\n");
