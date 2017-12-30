@@ -67,10 +67,7 @@ int main() {
         	return 0;
         }
         if (command.cmd == SP_RESTART) {
-        	spFiarGameDestroy(game);
-        	game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
-        	winner = spFiarCheckWinner(game);
-        	spFiarGamePrintBoard(game);
+        	maxDepth = spFiarGameRestart(&game);
         }
         if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
         	printf("Error: the game is over\n");

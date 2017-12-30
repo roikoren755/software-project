@@ -2,9 +2,11 @@
 // Created by Roi Koren on 28/12/2017.
 //
 #include <stdio.h>
-#include "SPFiarGame.h"
+#include "SPFIARGame.h"
 #include "SPFIARParser.h"
 #include "SPMinimax.h"
+
+#define UNDO_MOVES_POSSIBLE 10
 
 int spGetDifficulty() {
     printf("Please enter the difficulty level between [1-7]:\n");
@@ -78,5 +80,13 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
 	}
     printf("Computer move: add disc to column %d\n", computerCol + 1);
     spFiarGameSetMove(game, computerCol);
+    spFiarGamePrintBoard(game);
     return 1;
+}
+
+int spFiarGameRestart(SPFiarGame** game) {
+	spFiarGameDestroy(*game);
+	*game = (spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE));
+	spFiarGamePrintBoard(*game);
+	return spGetDifficulty();
 }
