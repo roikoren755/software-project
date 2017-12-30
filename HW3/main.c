@@ -3,7 +3,6 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
-#include "SPFIARGame.h"
 #include "SPFIARParser.h"
 #include "SPMainAux.h"
 #include "SPMinimax.h"

@@ -2,6 +2,7 @@
 // Created by Roi Koren on 28/12/2017.
 //
 #include <stdio.h>
+#include "SPFiarGame.h"
 
 int spGetDifficulty() {
     printf("Please enter the difficulty level between [1-7]:\n");
@@ -16,4 +17,11 @@ int spGetDifficulty() {
     getc(stdin);
     int x = maxDepth[0] - '0';
     return x;
+}
+
+int spFiarGameGetLastMovePlayed(SPFiarGame* src) {
+	if (!src || spArrayListIsEmpty(src->history)) {
+		return -1;
+	}
+	return spArrayListGetFirst(src->history);
 }

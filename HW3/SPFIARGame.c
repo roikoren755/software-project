@@ -130,9 +130,9 @@ SP_FIAR_GAME_MESSAGE spFiarGamePrintBoard(SPFiarGame* src) {
 	for (int i = 0; i < SP_FIAR_GAME_N_COLUMNS * 2 + 3; i++) {
 		printf(PRINT_FORMAT_BOTTOM);
 	}
-	printf("\n ");
+	printf("\n  ");
 	for (int i = 1; i <= SP_FIAR_GAME_N_COLUMNS; i++) {
-		printf(" %d", i);
+		printf("%d ", i);
 	}
 	printf(" \n");
 	return SP_FIAR_GAME_SUCCESS;
@@ -195,11 +195,4 @@ char spFiarCheckWinner(SPFiarGame* src) {
 		}
 	}
 	return SP_FIAR_GAME_TIE_SYMBOL;
-}
-
-int spFiarGameGetLastMovePlayed(SPFiarGame* src) {
-	if (!src || spArrayListIsEmpty(src->history)) {
-		return -1;
-	}
-	return spArrayListGetFirst(src->history);
 }
