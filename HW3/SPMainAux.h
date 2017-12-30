@@ -1,12 +1,8 @@
 #ifndef SPMAINAUX_H_
 #define SPMAINAUX_H_
 
-<<<<<<< HEAD
 #include "SPFIARGame.h"
-=======
-#include "SPFiarGame.h"
 #include "SPFIARParser.h"
->>>>>>> a60b663113bacc11dd9608100c508e30db50976c
 
 //put auxiliary functions and constants used by the main function here.
 int spGetDifficulty();
