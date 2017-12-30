@@ -15,8 +15,8 @@ int main() {
 	SP_BUFF_SET();
     int maxDepth = spGetDifficulty();
     if (!maxDepth) {
-    	printf("Error: spGetDifficulty has failed");
-    	return -1;
+    	printf("Exiting...\n");
+    	return 0;
     }
     SPFiarGame* game = spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE);
     if (!game) {
@@ -49,15 +49,17 @@ int main() {
         		return -1;
         	}
         	winner = spFiarCheckWinner(game);
-        	if (!winner) {
-        		printf("Please make the next move:\n");
-        	}
-        	else {
-        		if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
-        			printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
+        	if (success != -1) {
+        		if (!winner) {
+        			printf("Please make the next move:\n");
         		}
         		else {
-        			printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
+        			if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
+        				printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
+        			}
+        			else {
+        				printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
+        			}
         		}
         	}
         }

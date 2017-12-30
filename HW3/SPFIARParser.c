@@ -31,29 +31,11 @@ bool spParserIsInt(const char* str) {
 SPCommand spParserPraseLine(const char* str) {
 	SPCommand cmd;
 	int notMatched = 1;
-	char* line = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
-	if (!line) {
-		cmd.cmd = SP_INVALID_LINE;
-		cmd.validArg = false;
-		return cmd;
-	}
+	char line[MAXIMUM_COMMAND_LENGTH + 1];
 	strcpy(line, str);
-	char* command = malloc((MAXIMUM_COMMAND_LENGTH + 1) * sizeof(char));
-	if (!command) {
-		free(line);
-		cmd.cmd = SP_INVALID_LINE;
-		cmd.validArg = false;
-		return cmd;
-	}
-	command = strtok(line, DELIMITERS);
+	char* command = strtok(line, DELIMITERS);
 	while (command && !*command) {
 		command = strtok(NULL, DELIMITERS);
-	}
-	if (!command) {
-		free(line);
-		cmd.cmd = SP_INVALID_LINE;
-		cmd.validArg = false;
-		return cmd;
 	}
 	char* integer = strtok(NULL, DELIMITERS);
 	if (notMatched && !strcmp(command, UNDO_MOVE) && !integer) {
@@ -91,6 +73,5 @@ SPCommand spParserPraseLine(const char* str) {
 		cmd.cmd = SP_INVALID_LINE;
 		cmd.validArg = false;
 	}
-	free(line);
 	return cmd;
 }
