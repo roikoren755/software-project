@@ -155,7 +155,7 @@ int spEvaluateMinimaxNode(Minimax_Node* node, int rootPlayer){
 	if (leaf) {
 		return scoreBoard(node->game);
 	}
-	if ((node->depth % 2 && rootPlayer) || (node->depth % 2 == 1 && !rootPlayer)){
+	if ((node->depth % 2 == 0 && rootPlayer) || (node->depth % 2 == 1 && !rootPlayer)){
 		return spGetMaximumScore(node, rootPlayer);
 	}
 	else {
