@@ -76,6 +76,10 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
 		return -1;
 	}
 	spFiarGameSetMove(game, col);
+	char winner = spFiarCheckWinner(game);
+	if (winner) {
+		return 1;
+	}
 	int computerCol = spMinimaxSuggestMove(game, maxDepth);
 	if (computerCol == -1) {
     	printf("Error: spMinimaxSuggestMove has failed");

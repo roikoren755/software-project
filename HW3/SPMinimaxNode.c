@@ -203,12 +203,14 @@ int scoreBoard(SPFiarGame* src) {
 	}
 	int weights[] = {0, -5, -2, -1, 0, 1, 2, 5, 0};
 	int score = 0;
-	int player1, player2;
+	int player1;
+	int player2;
 	char symbol;
 	for (int i = 0; i < SP_FIAR_GAME_N_ROWS; i++) {
 		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS; j++) {
 			if (j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
-				player1 = player2 = 0;
+				player1 = 0;
+				player2 = 0;
 				for (int k = 0; k < SP_FIAR_GAME_SPAN; k++) {
 					symbol = src->gameBoard[i][j + k];
 					if (symbol == SP_FIAR_GAME_PLAYER_1_SYMBOL) {
@@ -221,7 +223,8 @@ int scoreBoard(SPFiarGame* src) {
 				spans[player1 - player2 + SP_FIAR_GAME_SPAN]++;
 			}
 			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1) {
-				player1 = player2 = 0;
+				player1 = 0;
+				player2 = 0;
 				for (int k = 0; k < SP_FIAR_GAME_SPAN; k++) {
 					symbol = src->gameBoard[i + k][j];
 					if (symbol == SP_FIAR_GAME_PLAYER_1_SYMBOL) {
@@ -235,7 +238,8 @@ int scoreBoard(SPFiarGame* src) {
 			}
 			if (i < SP_FIAR_GAME_N_ROWS - SP_FIAR_GAME_SPAN + 1 &&
 					j < SP_FIAR_GAME_N_COLUMNS - SP_FIAR_GAME_SPAN + 1) {
-				player1 = player2 = 0;
+				player1 = 0;
+				player2 = 0;
 				for (int k = 0; k < SP_FIAR_GAME_SPAN; k++) {
 					symbol = src->gameBoard[i + k][j + k];
 					if (symbol == SP_FIAR_GAME_PLAYER_1_SYMBOL) {
@@ -246,6 +250,8 @@ int scoreBoard(SPFiarGame* src) {
 					}
 				}
 				spans[player1 - player2 + SP_FIAR_GAME_SPAN]++;
+				player1 = 0;
+				player2 = 0;
 				for (int k = 0; k < SP_FIAR_GAME_SPAN; k++) {
 					symbol = src->gameBoard[SP_FIAR_GAME_N_ROWS - (i + 1 + k)][j + k];
 					if (symbol == SP_FIAR_GAME_PLAYER_1_SYMBOL) {

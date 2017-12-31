@@ -25,12 +25,15 @@ int main() {
     }
     char input[MAXIMUM_COMMAND_LENGTH + 1];
     spFiarGamePrintBoard(game);
-    char winner  = spFiarCheckWinner(game);;
+    char winner = 0;
     int success;
     printf("Please make the next move:\n");
     while (1) {
         fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
         SPCommand command = spParserPraseLine(input);
+        if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
+        	printf("Error: the game is over\n");
+        }
         if (command.cmd == SP_INVALID_LINE) {
             printf("Error: invalid command\n");
         }
@@ -48,8 +51,8 @@ int main() {
         	if (!success) {
         		return -1;
         	}
-        	winner = spFiarCheckWinner(game);
         	if (success == 1) {
+            	winner = spFiarCheckWinner(game);
         		if (!winner) {
         			printf("Please make the next move:\n");
         		}
@@ -73,9 +76,7 @@ int main() {
         	if (!maxDepth) {
         		return 0;
         	}
-        }
-        if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
-        	printf("Error: the game is over\n");
+        	winner = 0;
         }
     }
 }
