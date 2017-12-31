@@ -25,10 +25,10 @@ SPFiarGame* spFiarGameCreate(int historySize) {
 	for (int i = 0; i < SP_FIAR_GAME_N_ROWS; i++) {
 		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS; j++) {
 			game->gameBoard[i][j] = SP_FIAR_GAME_EMPTY_ENTRY;
+			if (!i) {
+				game->tops[j] = 0;
+			}
 		}
-	}
-	for (int i = 0; i < SP_FIAR_GAME_N_COLUMNS; i++) {
-		game->tops[i] = 0;
 	}
 	game->history = spArrayListCreate(historySize);
 	if (!game->history) {
@@ -43,25 +43,25 @@ SPFiarGame* spFiarGameCopy(SPFiarGame* src) {
 		return 0;
 	}
 	int historySize = spArrayListMaxCapacity(src->history);
-	SPFiarGame* ret = spFiarGameCreate(historySize);
-	if (!ret) {
+	SPFiarGame* game = malloc(sizeof(SPFiarGame));
+	if (!game) {
 		return 0;
 	}
-	ret->currentPlayer = src->currentPlayer;
+	game->currentPlayer = src->currentPlayer;
 	for (int i = 0; i < SP_FIAR_GAME_N_ROWS; i++) {
 		for (int j = 0; j < SP_FIAR_GAME_N_COLUMNS; j++) {
-			ret->gameBoard[i][j] = src->gameBoard[i][j];
+			game->gameBoard[i][j] = src->gameBoard[i][j];
+			if (!i) {
+				game->tops[j] = src->tops[j];
+			}
 		}
 	}
-	for (int i = 0; i < SP_FIAR_GAME_N_COLUMNS; i++) {
-		ret->tops[i] = src->tops[i];
-	}
-	ret->history = spArrayListCopy(src->history);
-	if (!ret->history) {
-		free(ret);
+	game->history = spArrayListCopy(src->history);
+	if (!game->history) {
+		free(game);
 		return 0;
 	}
-	return ret;
+	return game;
 }
 
 void spFiarGameDestroy(SPFiarGame* src) {
@@ -69,7 +69,6 @@ void spFiarGameDestroy(SPFiarGame* src) {
 		return;
 	}
 	spArrayListDestroy(src->history);
-
 	free(src);
 	return;
 }
