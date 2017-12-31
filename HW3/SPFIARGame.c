@@ -42,7 +42,6 @@ SPFiarGame* spFiarGameCopy(SPFiarGame* src) {
 	if (!src) {
 		return 0;
 	}
-	int historySize = spArrayListMaxCapacity(src->history);
 	SPFiarGame* game = malloc(sizeof(SPFiarGame));
 	if (!game) {
 		return 0;
