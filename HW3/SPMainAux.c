@@ -64,7 +64,7 @@ void spFiarGameUndoMove(SPFiarGame* game, char winner) {
 int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth) {
 	if (!command.validArg) {
         printf("Error: invalid command\n");
-        return 1;
+        return -1;
 	}
 	if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) {
     	printf("Error: column number must be in range 1-7\n");
@@ -73,7 +73,7 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
 	int col = command.arg - 1;
 	if (!spFiarGameIsValidMove(game, col)) {
 		printf("Error: column %d is full\n", command.arg);
-		return 1;
+		return -1;
 	}
 	spFiarGameSetMove(game, col);
 	int computerCol = spMinimaxSuggestMove(game, maxDepth);

@@ -49,7 +49,7 @@ int main() {
         		return -1;
         	}
         	winner = spFiarCheckWinner(game);
-        	if (success != -1) {
+        	if (success == 1) {
         		if (!winner) {
         			printf("Please make the next move:\n");
         		}
@@ -78,6 +78,4 @@ int main() {
         	printf("Error: the game is over\n");
         }
     }
-    spFiarGameDestroy(game);
-    return 0;
 }
