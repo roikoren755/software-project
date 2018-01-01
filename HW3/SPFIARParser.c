@@ -45,7 +45,7 @@ SPCommand spParserPraseLine(const char* str) {
 	}
 	if (notMatched && !strcmp(command, ADD_DISC)) {
 		cmd.cmd = SP_ADD_DISC;
-		if (!spParserIsInt(integer)) {
+		if (!integer || !spParserIsInt(integer)) {
 			cmd.validArg = false;
 		}
 		else {
