@@ -21,9 +21,9 @@ int spGetDifficulty() {
     	}
         printf("Error: invalid level (should be between 1 to 7)\n");
         printf("Please enter the difficulty level between [1-7]:\n");
+        fgets(maxDepth,MAXIMUM_COMMAND_LENGTH ,stdin);
         result = scanf("%9s", maxDepth);
     }
-    getc(stdin);
     int x = maxDepth[0] - '0';
     return x;
 }
@@ -131,6 +131,7 @@ int spRunGame(SPFiarGame* game, int maxDepth) {
 		}
 		if (command.cmd == SP_UNDO_MOVE) {
 			spFiarGameUndoMove(game, winner);
+			winner = 0;
 		}
 		if (command.cmd == SP_ADD_DISC && !winner) {
 			success = spFiarGameAddDisc(game, command, maxDepth);
