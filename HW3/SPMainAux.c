@@ -110,58 +110,61 @@ int spFiarGameRestart(SPFiarGame** game) {
 	return maxDepth;
 }
 
-int spRunGame(char * input,SPFiarGame* game,char winner,
-						int success,int maxDepth){
-	 while (1) {
-	        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
-	        SPCommand command = spParserPraseLine(input);
-	        if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
-	        	printf("Error: the game is over\n");
-	        }
-	        if (command.cmd == SP_INVALID_LINE) {
-	            printf("Error: invalid command\n");
-	        }
-	        if (command.cmd == SP_SUGGEST_MOVE && !winner) {
-	        	success = spFiarGameSuggestMove(game, maxDepth);
-	            if (!success) {
-	            	return -1;
-	            }
-	        }
-	        if (command.cmd == SP_UNDO_MOVE) {
-	            spFiarGameUndoMove(game, winner);
-	        }
-	        if (command.cmd == SP_ADD_DISC && !winner) {
-	        	success = spFiarGameAddDisc(game, command, maxDepth);
-	        	if (!success) {
-	        		return -1;
-	        	}
-	        	if (success == 1) {
-	            	winner = spFiarCheckWinner(game);
-	        		if (!winner) {
-	        			printf("Please make the next move:\n");
-	        		}
-	        		else {
-	        			if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
-	        				printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
-	        			}
-	        			else {
-	        				printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
-	        			}
-	        		}
-	        	}
-	        }
-	        if (command.cmd == SP_QUIT) {
-	        	printf("Exiting...\n");
-	        	spFiarGameDestroy(game);
-	        	return 0;
-	        }
-	        if (command.cmd == SP_RESTART) {
-	        	maxDepth = spFiarGameRestart(&game);
-	        	if (!maxDepth) {
-	        		return 0;
-	        	}
-	        	winner = 0;
-	        }
-	    }
+int spRunGame(SPFiarGame* game, int maxDepth) {
+	int success;
+	char winner = 0;
+	char input[MAXIMUM_COMMAND_LENGTH + 1];
+	while (1) {
+		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
+		SPCommand command = spParserPraseLine(input);
+		if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
+			printf("Error: the game is over\n");
+		}
+		if (command.cmd == SP_INVALID_LINE) {
+			printf("Error: invalid command\n");
+		}
+		if (command.cmd == SP_SUGGEST_MOVE && !winner) {
+			success = spFiarGameSuggestMove(game, maxDepth);
+			if (!success) {
+				return -1;
+			}
+		}
+		if (command.cmd == SP_UNDO_MOVE) {
+			spFiarGameUndoMove(game, winner);
+		}
+		if (command.cmd == SP_ADD_DISC && !winner) {
+			success = spFiarGameAddDisc(game, command, maxDepth);
+			if (!success) {
+				return -1;
+			}
+			if (success == 1) {
+				winner = spFiarCheckWinner(game);
+				if (!winner) {
+					printf("Please make the next move:\n");
+				}
+				else {
+					if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
+						printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
+					}
+					else {
+						printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
+					}
+				}
+			}
+		}
+		if (command.cmd == SP_QUIT) {
+			printf("Exiting...\n");
+			spFiarGameDestroy(game);
+			return 0;
+		}
+		if (command.cmd == SP_RESTART) {
+			maxDepth = spFiarGameRestart(&game);
+			if (!maxDepth) {
+				return 0;
+			}
+			winner = 0;
+		}
+	}
+	spFiarGameDestroy(game);
+	return 1;
 }
-

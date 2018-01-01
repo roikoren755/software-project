@@ -20,4 +20,6 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
 
 int spFiarGameRestart(SPFiarGame** game);
 
+int spRunGame(SPFiarGame* game, int maxDepth);
+
 #endif
