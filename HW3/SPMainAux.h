@@ -4,6 +4,9 @@
 #include "SPFIARGame.h"
 #include "SPFIARParser.h"
 
+#define UNDO_MOVES_POSSIBLE 10
+#define MAXIMUM_COMMAND_LENGTH 1024
+
 //put auxiliary functions and constants used by the main function here.
 int spGetDifficulty();
 

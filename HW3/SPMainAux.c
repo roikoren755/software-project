@@ -6,6 +6,7 @@
 #include "SPFIARGame.h"
 #include "SPFIARParser.h"
 #include "SPMinimax.h"
+#include "SPMainAux.h"
 
 #define UNDO_MOVES_POSSIBLE 10
 #define QUIT  "quit"
@@ -66,6 +67,8 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth
         printf("Error: invalid command\n");
         return -1;
 	}
+	//char* str_command[10];
+	//itoa(command.arg,str_command,10);
 	if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) {
     	printf("Error: column number must be in range 1-7\n");
     	return -1;
@@ -106,3 +109,59 @@ int spFiarGameRestart(SPFiarGame** game) {
 	printf("Please make the next move:\n");
 	return maxDepth;
 }
+
+int spRunGame(char * input,SPFiarGame* game,char winner,
+						int success,int maxDepth){
+	 while (1) {
+	        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
+	        SPCommand command = spParserPraseLine(input);
+	        if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
+	        	printf("Error: the game is over\n");
+	        }
+	        if (command.cmd == SP_INVALID_LINE) {
+	            printf("Error: invalid command\n");
+	        }
+	        if (command.cmd == SP_SUGGEST_MOVE && !winner) {
+	        	success = spFiarGameSuggestMove(game, maxDepth);
+	            if (!success) {
+	            	return -1;
+	            }
+	        }
+	        if (command.cmd == SP_UNDO_MOVE) {
+	            spFiarGameUndoMove(game, winner);
+	        }
+	        if (command.cmd == SP_ADD_DISC && !winner) {
+	        	success = spFiarGameAddDisc(game, command, maxDepth);
+	        	if (!success) {
+	        		return -1;
+	        	}
+	        	if (success == 1) {
+	            	winner = spFiarCheckWinner(game);
+	        		if (!winner) {
+	        			printf("Please make the next move:\n");
+	        		}
+	        		else {
+	        			if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
+	        				printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
+	        			}
+	        			else {
+	        				printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
+	        			}
+	        		}
+	        	}
+	        }
+	        if (command.cmd == SP_QUIT) {
+	        	printf("Exiting...\n");
+	        	spFiarGameDestroy(game);
+	        	return 0;
+	        }
+	        if (command.cmd == SP_RESTART) {
+	        	maxDepth = spFiarGameRestart(&game);
+	        	if (!maxDepth) {
+	        		return 0;
+	        	}
+	        	winner = 0;
+	        }
+	    }
+}
+
