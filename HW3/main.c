@@ -25,5 +25,4 @@ int main() {
     spFiarGamePrintBoard(game);
     printf("Please make the next move:\n");
     return spRunGame(game, maxDepth);
-
 }
