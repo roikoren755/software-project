@@ -110,9 +110,12 @@ int spFiarGameRestart(SPFiarGame** game) {
 	return maxDepth;
 }
 
-int spRunGame(char * input,SPFiarGame* game,char winner,
-						int success,int maxDepth){
-	 while (1) {
+int spRunGame(SPFiarGame* game,int maxDepth){
+	char input[MAXIMUM_COMMAND_LENGTH + 1];
+	char winner = 0;
+	int success;
+	while (1) {
+
 	        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
 	        SPCommand command = spParserPraseLine(input);
 	        if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
@@ -163,5 +166,6 @@ int spRunGame(char * input,SPFiarGame* game,char winner,
 	        	winner = 0;
 	        }
 	    }
+	 return 1;
 }
 

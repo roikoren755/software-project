@@ -22,11 +22,9 @@ int main() {
         printf("Error: spFiarGameCreate has failed");
         return -1;
     }
-    char input[MAXIMUM_COMMAND_LENGTH + 1];
     spFiarGamePrintBoard(game);
-    char winner = 0;
-    int success;
+
     printf("Please make the next move:\n");
-    return spRunGame(input,game,winner,success,maxDepth);
+    return spRunGame(game);
 
 }
