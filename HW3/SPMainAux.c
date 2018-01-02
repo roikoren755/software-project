@@ -9,7 +9,7 @@
 #include "SPMainAux.h"
 
 #define UNDO_MOVES_POSSIBLE 10
-#define QUIT  "quit"
+#define QUIT "quit\n"
 
 int spGetDifficulty() {
 	printf("Please enter the difficulty level between [1-7]:\n");
