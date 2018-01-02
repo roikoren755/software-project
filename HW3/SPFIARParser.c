@@ -32,9 +32,6 @@ SPCommand spParserPraseLine(const char* str) {
 	char line[MAXIMUM_COMMAND_LENGTH + 1]; // prepare space for line
 	strcpy(line, str);
 	char* command = strtok(line, DELIMITERS); // first token separated by whitespace
-	while (command && !*command) { // find first token to actually contain data, if one exists
-		command = strtok(NULL, DELIMITERS);
-	}
 	if (!command) {
 		cmd.cmd = SP_INVALID_LINE;
 		cmd.validArg = false;
@@ -51,9 +48,9 @@ SPCommand spParserPraseLine(const char* str) {
 	}
 	if (notMatched && // no match yet
 			!strcmp(command, ADD_DISC) && // command is add_disc
-			!remainder) { // only two non-empty tokens in command
+			integer && !remainder) { // only two non-empty tokens in command
 		cmd.cmd = SP_ADD_DISC;
-		if (!integer || !spParserIsInt(integer)) { // if next token isn't valid integer
+		if (!spParserIsInt(integer)) { // if next token isn't valid integer
 			cmd.validArg = false;
 		}
 		else {
