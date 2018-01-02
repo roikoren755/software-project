@@ -41,6 +41,7 @@ SPCommand spParserPraseLine(const char* str) {
 		notMatched = 0;
 	}
 	char* integer = strtok(NULL, DELIMITERS); // next token should be integer for add_disc
+	char* remainder = strtok(NULL, DELIMITERS);
 	if (notMatched && // haven't matched yet
 			!strcmp(command, UNDO_MOVE) && // command is "undo_move"
 			!integer) { // nothing after command
@@ -49,7 +50,8 @@ SPCommand spParserPraseLine(const char* str) {
 		notMatched = 0; // we matched!
 	}
 	if (notMatched && // no match yet
-			!strcmp(command, ADD_DISC)) { // command is "add_disc"
+			!strcmp(command, ADD_DISC) && // command is add_disc
+			!remainder) { // only two non-empty tokens in command
 		cmd.cmd = SP_ADD_DISC;
 		if (!integer || !spParserIsInt(integer)) { // if next token isn't valid integer
 			cmd.validArg = false;

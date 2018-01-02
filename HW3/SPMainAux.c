@@ -64,11 +64,8 @@ void spFiarGameUndoMove(SPFiarGame* game, char winner) {
 
 int spFiarGameAddDisc(SPFiarGame* game, SPCommand command,
 		unsigned int maxDepth) {
-	if (!command.validArg) { // invalid argument for "add_disc" command
-		printf("Error: invalid command\n");
-		return -1;
-	}
-	if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) { // check arg is valid for game
+	if (!command.validArg || // // invalid argument for add_disc command
+			command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) { // check arg is valid for game
 		printf("Error: column number must be in range 1-7\n");
 		return -1;
 	}
