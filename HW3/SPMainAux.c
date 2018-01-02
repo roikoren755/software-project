@@ -12,101 +12,100 @@
 #define QUIT  "quit"
 
 int spGetDifficulty() {
-    printf("Please enter the difficulty level between [1-7]:\n");
-    char maxDepth[10];
-    char garbage[MAXIMUM_COMMAND_LENGTH + 1];
-    int result = scanf("%9s", maxDepth);
-    while (result == EOF || result == 0 || maxDepth[0] < '1' || maxDepth[0] > '7' || maxDepth[1]!='\0') {
-    	if (!strcmp(maxDepth, QUIT)) {
-    		return 0;
-    	}
-        printf("Error: invalid level (should be between 1 to 7)\n");
-        printf("Please enter the difficulty level between [1-7]:\n");
-        fgets(garbage,MAXIMUM_COMMAND_LENGTH ,stdin);
-        result = scanf("%9s", maxDepth);
-    }
-    int x = maxDepth[0] - '0';
-    return x;
+	printf("Please enter the difficulty level between [1-7]:\n");
+	char input[MAXIMUM_COMMAND_LENGTH + 1];
+	fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // get level from user
+	while (input[0] < '1' || input[0] > '7' || // first char isn't digit in range
+			input[1] != '\n') { // or next char isn't new-line
+		if (!strcmp(input, QUIT)) { // user entered "quit"
+			return 0;
+		}
+		printf("Error: invalid level (should be between 1 to 7)\n");
+		printf("Please enter the difficulty level between [1-7]:\n");
+		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // try again
+			}
+	return input[0] - '0'; // return first char as int
 }
 
-int spFiarGameGetLastMovePlayed(SPFiarGame* src) {
-	if (!src || spArrayListIsEmpty(src->history)) {
+int spFiarGameGetLastMovePlayed(SPFiarGame* game) {
+	if (!game || spArrayListIsEmpty(game->history)) { // invalid arguments
 		return -1;
 	}
-	return spArrayListGetFirst(src->history);
+	return spArrayListGetFirst(game->history); // get last move added to history
 }
 
 int spFiarGameSuggestMove(SPFiarGame* game, unsigned int maxDepth) {
-	int suggestedMove = spMinimaxSuggestMove(game, maxDepth);
-	if (suggestedMove == -1) {
+	int suggestedMove = spMinimaxSuggestMove(game, maxDepth); // suggest move
+	if (suggestedMove == -1) { // suggest move failed!
 		printf("Error: spMinimaxSuggestMove has failed");
 		spFiarGameDestroy(game);
 		return 0;
 	}
-	printf("Suggested move: drop a disc to column %d\n", suggestedMove + 1);
+	printf("Suggested move: drop a disc to column %d\n", suggestedMove + 1); // change to 1-base
 	return 1;
 }
 
 void spFiarGameUndoMove(SPFiarGame* game, char winner) {
-	if (spArrayListIsEmpty(game->history)) {
+	if (spArrayListIsEmpty(game->history)) { // nothing to undo
 		printf("Error: cannot undo previous move!\n");
-	}
-	else {
-		if (winner != SP_FIAR_GAME_PLAYER_1_SYMBOL) {
-            printf("Remove disc: remove computer's disc at column %d\n", spFiarGameGetLastMovePlayed(game) + 1);
-            spFiarGameUndoPrevMove(game);
+	} else {
+		if (winner != SP_FIAR_GAME_PLAYER_1_SYMBOL) { // computer played last
+			printf("Remove disc: remove computer's disc at column %d\n",
+					spFiarGameGetLastMovePlayed(game) + 1);
+			spFiarGameUndoPrevMove(game); // undo computer's move
 		}
-        printf("Remove disc: remove user's disc at column %d\n", spFiarGameGetLastMovePlayed(game) + 1);
-        spFiarGameUndoPrevMove(game);
-        spFiarGamePrintBoard(game);
-        printf("Please make the next move:\n");
+		printf("Remove disc: remove user's disc at column %d\n",
+				spFiarGameGetLastMovePlayed(game) + 1);
+		spFiarGameUndoPrevMove(game); // undo player's move
+		spFiarGamePrintBoard(game);
+		printf("Please make the next move:\n");
 	}
 }
 
-int spFiarGameAddDisc(SPFiarGame* game, SPCommand command, unsigned int maxDepth) {
-	if (!command.validArg) {
-        printf("Error: invalid command\n");
-        return -1;
+int spFiarGameAddDisc(SPFiarGame* game, SPCommand command,
+		unsigned int maxDepth) {
+	if (!command.validArg) { // invalid argument for "add_disc" command
+		printf("Error: invalid command\n");
+		return -1;
 	}
-	//char* str_command[10];
-	//itoa(command.arg,str_command,10);
-	if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) {
-    	printf("Error: column number must be in range 1-7\n");
-    	return -1;
+	if (command.arg < 1 || command.arg > SP_FIAR_GAME_N_COLUMNS) { // check arg is valid for game
+		printf("Error: column number must be in range 1-7\n");
+		return -1;
 	}
-	int col = command.arg - 1;
-	if (!spFiarGameIsValidMove(game, col)) {
+	int col = command.arg - 1; // switch to 0-based
+	if (!spFiarGameIsValidMove(game, col)) { // make sure move is valid
 		printf("Error: column %d is full\n", command.arg);
 		return -1;
 	}
-	spFiarGameSetMove(game, col);
-	char winner = spFiarCheckWinner(game);
+	spFiarGameSetMove(game, col); // make move
+	char winner = spFiarCheckWinner(game); // check for winner
 	if (winner) {
-		return 1;
+		spFiarGamePrintBoard(game);
+		return 1; // skip computer's turn
 	}
-	int computerCol = spMinimaxSuggestMove(game, maxDepth);
-	if (computerCol == -1) {
-    	printf("Error: spMinimaxSuggestMove has failed");
-    	spFiarGameDestroy(game);
-    	return 0;
+	int computerCol = spMinimaxSuggestMove(game, maxDepth); // get computer move
+	if (computerCol == -1) { // failed!
+		printf("Error: spMinimaxSuggestMove has failed");
+		spFiarGameDestroy(game);
+		return 0;
 	}
-    printf("Computer move: add disc to column %d\n", computerCol + 1);
-    spFiarGameSetMove(game, computerCol);
-    spFiarGamePrintBoard(game);
-    return 1;
+	printf("Computer move: add disc to column %d\n", computerCol + 1);
+	spFiarGameSetMove(game, computerCol);
+	spFiarGamePrintBoard(game);
+	return 1;
 }
 
-int spFiarGameRestart(SPFiarGame** game) {
+int spFiarGameRestart(SPFiarGame** gamePointer) {
 	printf("Game restarted!\n");
-	spFiarGameDestroy(*game);
-	*game = (spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE));
+	spFiarGameDestroy(*gamePointer); // clear game
+	*gamePointer = (spFiarGameCreate(2 * UNDO_MOVES_POSSIBLE)); // new game!
 	int maxDepth = spGetDifficulty();
-	if (!maxDepth) {
+	if (!maxDepth) { // user entered "quit"
 		printf("Exiting...\n");
-		spFiarGameDestroy(*game);
+		spFiarGameDestroy(*gamePointer);
 		return maxDepth;
 	}
-	spFiarGamePrintBoard(*game);
+	spFiarGamePrintBoard(*gamePointer);
 	printf("Please make the next move:\n");
 	return maxDepth;
 }
@@ -115,58 +114,61 @@ int spRunGame(SPFiarGame* game, int maxDepth) {
 	int success;
 	char winner = 0;
 	char input[MAXIMUM_COMMAND_LENGTH + 1];
-	while (1) {
-		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
-		SPCommand command = spParserPraseLine(input);
-		if (winner && (command.cmd == SP_ADD_DISC || command.cmd == SP_SUGGEST_MOVE)) {
+	while (1) { // until user entered "quit"
+		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // get command
+		SPCommand command = spParserPraseLine(input); // parse it
+		if (winner && // game ended, and illegal command entered
+				(command.cmd == SP_ADD_DISC || command.cmd ==SP_SUGGEST_MOVE)) {
 			printf("Error: the game is over\n");
 		}
-		if (command.cmd == SP_INVALID_LINE) {
+		if (command.cmd == SP_INVALID_LINE) { // invalid command
 			printf("Error: invalid command\n");
 		}
-		if (command.cmd == SP_SUGGEST_MOVE && !winner) {
-			success = spFiarGameSuggestMove(game, maxDepth);
-			if (!success) {
+		if (command.cmd == SP_SUGGEST_MOVE && !winner) { // can suggest move
+			success = spFiarGameSuggestMove(game, maxDepth); // do it
+			if (!success) { // suggest move failed, all memory freed
 				return -1;
 			}
 		}
-		if (command.cmd == SP_UNDO_MOVE) {
+		if (command.cmd == SP_UNDO_MOVE) { // can always undo (mostly)
 			spFiarGameUndoMove(game, winner);
 			winner = 0;
 		}
-		if (command.cmd == SP_ADD_DISC && !winner) {
+		if (command.cmd == SP_ADD_DISC && !winner) { // can add disc
 			success = spFiarGameAddDisc(game, command, maxDepth);
-			if (!success) {
+			if (!success) { // add disc failed, all memory freed
 				return -1;
 			}
 			if (success == 1) {
 				winner = spFiarCheckWinner(game);
-				if (!winner) {
+				if (!winner) { // game continues
 					printf("Please make the next move:\n");
 				}
 				else {
-					if (winner == SP_FIAR_GAME_TIE_SYMBOL) {
+					if (winner == SP_FIAR_GAME_TIE_SYMBOL) { // it's a tie!
 						printf("Game over: it's a tie\nPlease enter 'quit' to exit or 'restart' to start a new game!\n");
 					}
-					else {
+					else { // print correct winning message
 						printf("Game over: %s\nPlease enter 'quit' to exit or 'restart' to start a new game!\n", winner == SP_FIAR_GAME_PLAYER_1_SYMBOL ? "you win" : "computer wins");
 					}
 				}
 			}
 		}
-		if (command.cmd == SP_QUIT) {
+		if (command.cmd == SP_QUIT) { // bye bye
 			printf("Exiting...\n");
 			spFiarGameDestroy(game);
 			return 0;
 		}
 		if (command.cmd == SP_RESTART) {
 			maxDepth = spFiarGameRestart(&game);
-			if (!maxDepth) {
+			if (!maxDepth) { // user entered "quit" during restart
 				return 0;
 			}
 			winner = 0;
 		}
 	}
-	spFiarGameDestroy(game);
+	if (game) {
+		spFiarGameDestroy(game); // shouldn't get here, but just in case...
+	}
 	return 1;
 }

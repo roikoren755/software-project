@@ -160,10 +160,10 @@ int spEvaluateMinimaxNode(Minimax_Node* node, int rootPlayer){
 	}
 	if ((node->depth % 2 == 0 && rootPlayer) // we're at an even level and player 1 started
 			|| (node->depth % 2 == 1 && !rootPlayer)){ // or an odd level and player 2 started
-		return spGetMaximumScore(node, rootPlayer); // then current player wants to maximize score
+		return spGetMaximumScore(node, rootPlayer); // then mode is max-node
 	}
 	else { // odd level and player 1 started, or even level and player 2 started
-		return spGetMinimumScore(node, rootPlayer); // then current player wants to minimize score
+		return spGetMinimumScore(node, rootPlayer); // then node is min-node
 	}
 
 }
