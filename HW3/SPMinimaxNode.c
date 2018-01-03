@@ -47,7 +47,7 @@ Minimax_Node* spMinimaxCreateTree(SPFiarGame* currentGame, unsigned int maxDepth
 	}
 	Minimax_Node* root = spCreateMinimaxNode(currentGameCopy, 0); // create root node
 	if (!root) { // creation failed
-		free(currentGameCopy);
+		spFiarGameDestroy(currentGameCopy);
 		return NULL;
 	}
 	if (!spCreateMinimaxNodeChildren(root, maxDepth)) { // create and check success of creating node children
@@ -74,7 +74,7 @@ int spCreateMinimaxNodeChildren(Minimax_Node* node, unsigned int maxDepth) {
 			spFiarGameSetMove(childGame, i); // set correct move
 			Minimax_Node* childNode = spCreateMinimaxNode(childGame, node->depth + 1);
 			if (!childNode) { // node creation failed
-				free(childGame);
+				spFiarGameDestroy(childGame);
 				return 0;
 			}
 			node->children[i] = childNode;
