@@ -201,6 +201,12 @@ int spGetMinimumScore(Minimax_Node* node, int rootPlayer){
 }
 
 int scoreBoard(SPFiarGame* src) {
+	bool tie = true;
+	for (int i = 0; i < SP_FIAR_GAME_N_COLUMNS; i++) {
+		if (src->tops[i] != SP_FIAR_GAME_N_ROWS) {
+			tie = false;
+		}
+	}
 	int spans[SP_FIAR_GAME_SPAN * 2 + 1];
 	for (int i = 0; i < SP_FIAR_GAME_SPAN * 2 + 1; i++) {
 		spans[i] = 0; // reset spans count
@@ -274,6 +280,9 @@ int scoreBoard(SPFiarGame* src) {
 	}
 	if (spans[SP_FIAR_GAME_SPAN * 2]) { // spans with 4 player 1 discs
 		return INT_MAX;
+	}
+	if (tie) {
+		return 0;
 	}
 	for (int i = 0; i < SP_FIAR_GAME_SPAN * 2 + 1; i++) {
 		score += weights[i] * spans[i]; // multiply numbers of spans by weights
