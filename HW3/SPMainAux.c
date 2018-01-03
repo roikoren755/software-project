@@ -9,21 +9,23 @@
 #include "SPMainAux.h"
 
 #define UNDO_MOVES_POSSIBLE 10
-#define QUIT "quit\n"
+#define QUIT "quit"
+#define DELIMITERS " \t\r\n"
 
 int spGetDifficulty() {
 	printf("Please enter the difficulty level between [1-7]:\n");
 	char input[MAXIMUM_COMMAND_LENGTH + 1];
 	fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // get level from user
-	while (input[0] < '1' || input[0] > '7' || // first char isn't digit in range
-			input[1] != '\n') { // or next char isn't new-line
-		if (!strcmp(input, QUIT)) { // user entered "quit"
+	char* level = strtok(input, DELIMITERS);
+	while (!level || (level[0] < '1' || level[0] > '7')) { // first char isn't digit in range
+		if (!strcmp(level, QUIT)) { // user entered "quit"
 			return 0;
 		}
 		printf("Error: invalid level (should be between 1 to 7)\n");
 		printf("Please enter the difficulty level between [1-7]:\n");
 		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // try again
-			}
+		level = strtok(input, DELIMITERS);
+	}
 	return input[0] - '0'; // return first char as int
 }
 
