@@ -37,7 +37,7 @@ int spFiarGameGetLastMovePlayed(SPFiarGame* game) {
 int spFiarGameSuggestMove(SPFiarGame* game, unsigned int maxDepth) {
 	int suggestedMove = spMinimaxSuggestMove(game, maxDepth); // suggest move
 	if (suggestedMove == -1) { // suggest move failed!
-		printf("Error: spMinimaxSuggestMove has failed");
+		printf("Error: malloc has failed");
 		spFiarGameDestroy(game);
 		return 0;
 	}
@@ -82,7 +82,7 @@ int spFiarGameAddDisc(SPFiarGame* game, SPCommand command,
 	}
 	int computerCol = spMinimaxSuggestMove(game, maxDepth); // get computer move
 	if (computerCol == -1) { // failed!
-		printf("Error: spMinimaxSuggestMove has failed");
+		printf("Error: malloc has failed");
 		spFiarGameDestroy(game);
 		return 0;
 	}
