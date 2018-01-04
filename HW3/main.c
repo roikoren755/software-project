@@ -6,10 +6,8 @@
 #include "SPFIARParser.h"
 #include "SPMainAux.h"
 #include "SPMinimax.h"
-#include "SPBufferset.h"
 
 int main() {
-	SP_BUFF_SET();
     int maxDepth = spGetDifficulty(); // get initial difficulty
     if (!maxDepth) { // user entered "quit"
     	printf("Exiting...\n");

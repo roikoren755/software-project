@@ -17,7 +17,8 @@ int spGetDifficulty() {
 	char input[MAXIMUM_COMMAND_LENGTH + 1];
 	fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // get level from user
 	char* level = strtok(input, DELIMITERS);
-	while (!level || level[0] < '1' || level[0] > '7' || level[1]) { // first char isn't digit in range
+	char* remainder = strtok(NULL, DELIMITERS);
+	while (!level || level[0] < '1' || level[0] > '7' || level[1] || remainder) { // first char isn't digit in range
 		if (!strcmp(level, QUIT)) { // user entered "quit"
 			return 0;
 		}
@@ -26,7 +27,7 @@ int spGetDifficulty() {
 		fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // try again
 		level = strtok(input, DELIMITERS);
 	}
-	return input[0] - '0'; // return first char as int
+	return level[0] - '0'; // return first char as int
 }
 
 int spFiarGameGetLastMovePlayed(SPFiarGame* game) {
