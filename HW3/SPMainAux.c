@@ -17,7 +17,7 @@ int spGetDifficulty() {
 	char input[MAXIMUM_COMMAND_LENGTH + 1];
 	fgets(input, MAXIMUM_COMMAND_LENGTH, stdin); // get level from user
 	char* level = strtok(input, DELIMITERS);
-	while (!level || (level[0] < '1' || level[0] > '7')) { // first char isn't digit in range
+	while (!level || level[0] < '1' || level[0] > '7' || level[1]) { // first char isn't digit in range
 		if (!strcmp(level, QUIT)) { // user entered "quit"
 			return 0;
 		}
