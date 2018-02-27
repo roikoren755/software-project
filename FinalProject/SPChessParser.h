@@ -32,11 +32,39 @@ typedef struct command_t {
     char arguments[2000];
 } SPCommand;
 
+/***
+ * Checks if the given string starts with a legal command,
+ * and has enough argument in the correct places,
+ * and parses it into a SPCommand.
+ * @param str - the string to parse
+ * @return A parsed command, such that -
+ *          * cmd is the correct command entered
+ *          * arguments contains the minimum arguments needed, with a '\0' separating arguments
+ */
 SPCommand spParserParseLine(const char* str);
 
+/***
+ * Given a command, parses its first argument into a positive integer.
+ * @param command - has argument to parse
+ * @return -1 if first argument in cmd->arguments isn't a positive int
+ *         The argument as an int, otherwise
+ */
 int spParserGetPositiveInt(const SPCommand* command);
 
+/***
+ * Given a SPCommand* command, tries converting its first argument to coordinates on the board.
+ * @param command - contains the argument to convert
+ * @return [x, y] if arguments' first argument is of the form "<x,y>"
+ *         [-1, -1], otherwise
+ */
 int* spParserGetLocationForGetMoves(const SPCommand* command);
 
+/***
+ * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move.
+ * @param command - contains the arguments to parse
+ * @return array with two elements, each the result of trying to parse the appropriate arguments, as per the previous
+ *         function
+ */
 int** spParserGetMove(const SPCommand* command);
+
 #endif //SOFTWARE_PROJECT_SPCHESSPARSER_H
