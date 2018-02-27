@@ -23,117 +23,163 @@
 #define RESET "reset"
 
 SPCommand spParserParseLine(const char* str) {
-    SPCommand cmd; // no malloc! woot!
+    if (!str) {
+        return NULL;
+    }
+    SPCommand cmd;
     int notMatched = 1;
-    char line[SP_MAX_LINE_LENGTH + 1]; // prepare space for line
+    char line[SP_MAX_LINE_LENGTH + 1];
     strcpy(line, str);
-    char* command = strtok(line, DELIMITERS); // first token separated by whitespace
+    char* command = strtok(line, DELIMITERS);
     if (!command) {
         cmd.cmd = SP_INVALID_LINE;
         cmd.arguments[0] = '\0';
     }
     char* nextToken = strtok(NULL, DELIMITERS);
-    if (notMatched && // haven't matched yet
-        !strcmp(command, GAME_MODE) && // command is "game_mode"
-        nextToken) { // and has an argument
+    if (notMatched &&
+            !strcmp(command, GAME_MODE) &&
+            nextToken) {
         cmd.cmd = SP_GAME_MODE;
         strcpy(cmd.arguments, nextToken);
-        notMatched = 0; // we matched!
+        notMatched = 0;
     }
-    if (notMatched && // no match yet
-        !strcmp(command, DIFFICULTY) && // command is "difficulty"
-        nextToken) { // and has an argument
+    if (notMatched &&
+            !strcmp(command, DIFFICULTY) &&
+            nextToken) {
         cmd.cmd = SP_DIFFICULTY;
         strcpy(cmd.arguments, nextToken);
-        notMatched = 0; // matched!
+        notMatched = 0;
     }
-    if (notMatched && // still no match
-        !strcmp(command, USER_COLOR) && // command is "user_color"
-        nextToken) { // there's an argument
+    if (notMatched &&
+            !strcmp(command, USER_COLOR) &&
+            nextToken) {
         cmd.cmd = SP_USER_COLOR;
         strcpy(cmd.arguments, nextToken);
-        notMatched = 0; // matched
+        notMatched = 0;
     }
-    if (notMatched && // no match
-        !strcmp(command, LOAD) && // command is "laod"
-        nextToken) { // argumenttttt
+    if (notMatched &&
+            !strcmp(command, LOAD) &&
+            nextToken) {
         cmd.cmd = SP_LOAD;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched && // no match yet
-        !strcmp(command, DEFAULT)) { // command is "restart_game"
+    if (notMatched &&
+            !strcmp(command, DEFAULT)) {
         cmd.cmd = SP_RESTART;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, PRINT_SETTINGS)) {
+            !strcmp(command, PRINT_SETTINGS)) {
         cmd.cmd = SP_PRINT_SETTINGS;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, QUIT)) {
+            !strcmp(command, QUIT)) {
         cmd.cmd = SP_QUIT;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, START)) {
+            !strcmp(command, START)) {
         cmd.cmd = SP_START;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, PRINT_SETTINGS)) {
+            !strcmp(command, PRINT_SETTINGS)) {
         cmd.cmd = SP_PRINT_SETTINGS;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, MOVE) &&
-        nextToken) {
+            !strcmp(command, MOVE) &&
+            nextToken) {
         strcpy(cmd.arguments, nextToken);
         int offset = strlen(nextToken) + 1;
         nextToken = strtok(NULL, DELIMITERS);
         if (nextToken &&
-            strcmp(nextToken, TO) &&
-            nextToken = strtok(NULL, DELIMITERS)) {
+                    strcmp(nextToken, TO) &&
+                    nextToken = strtok(NULL, DELIMITERS)) {
             cmd.cmd = SP_MOVE;
             strcpy(cmd.arguments + offset, nextToken);
             notMatched = 0;
         }
     }
     if (notMatched &&
-        !strcmp(command, GET_MOVES) &&
-        nextToken) {
+            !strcmp(command, GET_MOVES) &&
+            nextToken) {
         cmd.cmd = SP_GET_MOVES;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, SAVE) &&
-        nextToken) {
+            !strcmp(command, SAVE) &&
+            nextToken) {
         cmd.cmd = SP_SAVE;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, UNDO)) {
+            !strcmp(command, UNDO)) {
         cmd.cmd = SP_GET_MOVES;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
     if (notMatched &&
-        !strcmp(command, RESET)) {
+            !strcmp(command, RESET)) {
         cmd.cmd = SP_RESET;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched) { // got here and no match => invalid line
+    if (notMatched) {
         cmd.cmd = SP_INVALID_LINE;
         cmd.validArg = false;
     }
     return cmd;
+}
+
+int spParserGetPositiveInt(const SPCommand* command) {
+    if (!command) {
+        return -1;
+    }
+    int result = 0;
+    int i = 0;
+    while (command->arguments[i]) {
+        if (command->arguments[i] >= '0' && command->arguments <= '9') {
+            result *= 10;
+            result += command->arguments[i] - '0';
+            i++;
+        }
+        else {
+            return -1;
+        }
+    }
+}
+
+int* spParserGetBoardLocationFromString(const char* str) {
+    int location[2];
+    if (str[0] == '<' && str[2] == ',' && str[4] == '>' &&
+            str[1] >= 'A' && str[1] <= 'H' &&
+            str[3] >= '1' && str[3] <= '8') {
+        location[0] = str[1] - 'A';
+        location[1] = str[3] - '1';
+    }
+    else {
+        location[0] = location[1] = -1;
+    }
+    return location;
+}
+
+int* spParserGetLocationForGetMoves(const SPCommand* command) {
+    return spParserGetBoardLocationFromString(command->arguments);
+}
+
+int** spParserGetMove(const SPCommand* command) {
+    int* locations[2];
+    locations[0] = spParserGetBoardLocationFromString(command->arguments);
+    locations[1] = spParserGetBoardLocationFromString(command->arguments[6]);
+    return locations;
 }

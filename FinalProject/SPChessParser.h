@@ -33,4 +33,10 @@ typedef struct command_t {
 } SPCommand;
 
 SPCommand spParserParseLine(const char* str);
+
+int spParserGetPositiveInt(const SPCommand* command);
+
+int* spParserGetLocationForGetMoves(const SPCommand* command);
+
+int** spParserGetMove(const SPCommand* command);
 #endif //SOFTWARE_PROJECT_SPCHESSPARSER_H
