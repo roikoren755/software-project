@@ -5,19 +5,21 @@
 #ifndef SOFTWARE_PROJECT_SPCHESSGAME_H
 #define SOFTWARE_PROJECT_SPCHESSGAME_H
 
-// #include "SPArrayList.h"
+#include "SPArrayList.h"
 
-typedef struct sp_chess_settings_t {
-    int game_mode;
-    int difficulty;
-    int user_color;
-} SPChessSettings;
+#define WHITE 1
+#define BLACK 0
+#define N_ROWS 8
+#define N_COLUMNS 8
+
 
 typedef struct sp_chess_game_t {
-    SPChessSettings settings;
+	int game_mode;
+	int difficulty;
+	int user_color;
     char gameBoard[8][8];
     int currentPlayer;
-    // SPArrayList* history;
+    SPArrayList* history;
 } SPChessGame;
 
 typedef enum sp_chess_game_message_t {
@@ -35,6 +37,15 @@ SPChessGame* spChessGameCreate(int historySize);
 
 SPChessGame* spChessGameCopy(SPChessGame* src);
 
+SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move);
+
+SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src);
+
+SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
+
+SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src);
+
 void spChessGameDestroy(SPChessGame* src);
+
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
