@@ -5,7 +5,7 @@
 #ifndef SOFTWARE_PROJECT_SPCHESSGAME_H
 #define SOFTWARE_PROJECT_SPCHESSGAME_H
 
-#include "SPArrayList.h"
+// #include "SPArrayList.h"
 
 typedef struct sp_chess_settings_t {
     int game_mode;
@@ -17,7 +17,7 @@ typedef struct sp_chess_game_t {
     SPChessSettings settings;
     char gameBoard[8][8];
     int currentPlayer;
-    SPArrayList* history;
+    // SPArrayList* history;
 } SPChessGame;
 
 typedef enum sp_chess_game_message_t {
@@ -28,8 +28,8 @@ typedef enum sp_chess_game_message_t {
     SP_CHESS_GAME_NO_PIECE_IN_POSITION,
     SP_CHESS_GAME_ILLEGAL_MOVE,
     SP_CHESS_GAME_ILLEGAL_MOVE_WILL_THREATEN,
-    SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED
-};
+    SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED,
+} SP_CHESS_GAME_MESSAGE;
 
 SPChessGame* spChessGameCreate(int historySize);
 

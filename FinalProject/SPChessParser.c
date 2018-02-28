@@ -23,9 +23,6 @@
 #define RESET "reset"
 
 SPCommand spParserParseLine(const char* str) {
-    if (!str) {
-        return NULL;
-    }
     SPCommand cmd;
     int notMatched = 1;
     char line[SP_MAX_LINE_LENGTH + 1];
@@ -66,7 +63,7 @@ SPCommand spParserParseLine(const char* str) {
     }
     if (notMatched &&
             !strcmp(command, DEFAULT)) {
-        cmd.cmd = SP_RESTART;
+        cmd.cmd = SP_DEFAULT;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
@@ -100,11 +97,12 @@ SPCommand spParserParseLine(const char* str) {
         strcpy(cmd.arguments, nextToken);
         int offset = strlen(nextToken) + 1;
         nextToken = strtok(NULL, DELIMITERS);
+        char* nextNextToken = strtok(NULL, DELIMITERS);
         if (nextToken &&
                     strcmp(nextToken, TO) &&
-                    nextToken = strtok(NULL, DELIMITERS)) {
+                    nextNextToken) {
             cmd.cmd = SP_MOVE;
-            strcpy(cmd.arguments + offset, nextToken);
+            strcpy(cmd.arguments + offset, nextNextToken);
             notMatched = 0;
         }
     }
@@ -136,7 +134,7 @@ SPCommand spParserParseLine(const char* str) {
     }
     if (notMatched) {
         cmd.cmd = SP_INVALID_LINE;
-        cmd.validArg = false;
+        cmd.arguments[0] = '\0';
     }
     return cmd;
 }
@@ -148,7 +146,7 @@ int spParserGetPositiveInt(const SPCommand* command) {
     int result = 0;
     int i = 0;
     while (command->arguments[i]) {
-        if (command->arguments[i] >= '0' && command->arguments <= '9') {
+        if (command->arguments[i] >= '0' && command->arguments[i] <= '9') {
             result *= 10;
             result += command->arguments[i] - '0';
             i++;
@@ -157,10 +155,10 @@ int spParserGetPositiveInt(const SPCommand* command) {
             return -1;
         }
     }
+    return result;
 }
 
-int* spParserGetBoardLocationFromString(const char* str) {
-    int location[2];
+void spParserGetBoardLocationFromString(char* str, int* location) {
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' &&
             str[1] >= 'A' && str[1] <= 'H' &&
             str[3] >= '1' && str[3] <= '8') {
@@ -170,16 +168,13 @@ int* spParserGetBoardLocationFromString(const char* str) {
     else {
         location[0] = location[1] = -1;
     }
-    return location;
 }
 
-int* spParserGetLocationForGetMoves(const SPCommand* command) {
-    return spParserGetBoardLocationFromString(command->arguments);
+void spParserGetLocationForGetMoves(SPCommand* command, int* location) {
+    spParserGetBoardLocationFromString(command->arguments, location);
 }
 
-int** spParserGetMove(const SPCommand* command) {
-    int* locations[2];
-    locations[0] = spParserGetBoardLocationFromString(command->arguments);
-    locations[1] = spParserGetBoardLocationFromString(command->arguments[6]);
-    return locations;
+void spParserGetMove(SPCommand* command, int** locations) {
+    spParserGetBoardLocationFromString(command->arguments, locations[0]);
+    spParserGetBoardLocationFromString(&command->arguments[6], locations[1]);
 }

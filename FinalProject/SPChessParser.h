@@ -23,7 +23,7 @@ typedef enum {
     SP_SAVE,
     SP_UNDO,
     SP_RESET,
-    SP_INVALID_LINE
+    SP_INVALID_LINE,
 } SP_COMMAND;
 
 // TODO - better way to save arguments? we have file paths, board positions and integers...
@@ -52,19 +52,19 @@ SPCommand spParserParseLine(const char* str);
 int spParserGetPositiveInt(const SPCommand* command);
 
 /***
- * Given a SPCommand* command, tries converting its first argument to coordinates on the board.
+ * Given a SPCommand* command, tries converting its first argument to coordinates on the board,
+ * and fills those coordinates into the first two elements of location.
  * @param command - contains the argument to convert
- * @return [x, y] if arguments' first argument is of the form "<x,y>"
- *         [-1, -1], otherwise
+ * 		  location - an array of integers, of length at least two, to be filled with coordinates
  */
-int* spParserGetLocationForGetMoves(const SPCommand* command);
+void spParserGetLocationForGetMoves(SPCommand* command, int* location);
 
 /***
- * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move.
+ * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move,
+ * and fills locations' first two elements with those coordinates.
  * @param command - contains the arguments to parse
- * @return array with two elements, each the result of trying to parse the appropriate arguments, as per the previous
- *         function
+ * 		  locations - an array of arrays of integers, all of whom are of length at least two.
  */
-int** spParserGetMove(const SPCommand* command);
+void spParserGetMove(SPCommand* command, int** locations);
 
 #endif //SOFTWARE_PROJECT_SPCHESSPARSER_H
