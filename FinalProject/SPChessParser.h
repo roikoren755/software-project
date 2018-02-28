@@ -53,18 +53,21 @@ int spParserGetPositiveInt(const SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries converting its first argument to coordinates on the board,
- * and fills those coordinates into the first two elements of location.
+ * and returns a char representing those coordinates.
  * @param command - contains the argument to convert
- * 		  location - an array of integers, of length at least two, to be filled with coordinates
+ * @return A char with all bits 1's, if command->arguments doesn't start with valid coordinates.
+ * 		   a char, whose 4 MSB are the bit representation of the row coordinate,
+ * 		   and 4 LSB are the bit representation of the column coordinate, otherwise.
  */
-void spParserGetLocationForGetMoves(SPCommand* command, int* location);
+char spParserGetLocationForGetMoves(SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move,
- * and fills locations' first two elements with those coordinates.
+ * and returns an int representing those two sets of coordinates.
  * @param command - contains the arguments to parse
- * 		  locations - an array of arrays of integers, all of whom are of length at least two.
+ * @return An integer whose two least significant BYTES would be the result of calling
+ * 		   the function above with the appropriate arguments.
  */
-void spParserGetMove(SPCommand* command, int** locations);
+int spParserGetMove(SPCommand* command);
 
 #endif //SOFTWARE_PROJECT_SPCHESSPARSER_H

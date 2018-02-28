@@ -158,23 +158,29 @@ int spParserGetPositiveInt(const SPCommand* command) {
     return result;
 }
 
-void spParserGetBoardLocationFromString(char* str, int* location) {
+char spParserGetBoardLocationFromString(char* str) {
+	char location = 0;
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' &&
             str[1] >= 'A' && str[1] <= 'H' &&
             str[3] >= '1' && str[3] <= '8') {
-        location[0] = str[1] - 'A';
-        location[1] = str[3] - '1';
+        location = str[1] - 'A';
+        location <<= 4;
+        location |= str[3] - '1';
     }
     else {
-        location[0] = location[1] = -1;
+    	location = ~location;
     }
+    return location;
 }
 
-void spParserGetLocationForGetMoves(SPCommand* command, int* location) {
-    spParserGetBoardLocationFromString(command->arguments, location);
+char spParserGetLocationForGetMoves(SPCommand* command) {
+    return spParserGetBoardLocationFromString(command->arguments);
 }
 
-void spParserGetMove(SPCommand* command, int** locations) {
-    spParserGetBoardLocationFromString(command->arguments, locations[0]);
-    spParserGetBoardLocationFromString(&command->arguments[6], locations[1]);
+int spParserGetMove(SPCommand* command) {
+	int locations = 0;
+    locations |= spParserGetBoardLocationFromString(command->arguments);
+    locations <<= 8;
+    locations |= spParserGetBoardLocationFromString(command->arguments + 6);
+    return locations;
 }
