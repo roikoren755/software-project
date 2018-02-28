@@ -158,6 +158,24 @@ int spParserGetPositiveInt(const SPCommand* command) {
     return result;
 }
 
+int spParserDestroyLocationIfNeeded(int location) {
+	int result = ~0;
+	int mask = 1;
+	for (int i = 0; i < 2; i++) {
+		int destroy = 1;
+		for (int j = 0; j < 8; j++) {
+			if (!(location & mask)) {
+				destroy = 0;
+			}
+			mask <<= 1;
+		}
+		if (destroy) {
+			return result;
+		}
+	}
+	return location;
+}
+
 char spParserGetBoardLocationFromString(char* str) {
 	char location = 0;
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' &&
@@ -182,5 +200,5 @@ int spParserGetMove(SPCommand* command) {
     locations |= spParserGetBoardLocationFromString(command->arguments);
     locations <<= 8;
     locations |= spParserGetBoardLocationFromString(command->arguments + 6);
-    return locations;
+    return spParserDestroyLocationIfNeeded(locations);
 }
