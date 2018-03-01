@@ -4,6 +4,8 @@
 
 #include "SPChessGame.h"
 
+#define STARTING_ROW "RNBQKBNR"
+#define CAPITAL_TO_LOW(c) c+'a'-'A'
 #define BOTTOM_PRINT_FORMAT_SEPERATOR "  -----------------"
 #define BOTTOM_PRINT_FORMAT_LINE "   A B C D E F G H"
 
