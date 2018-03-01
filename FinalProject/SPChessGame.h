@@ -6,6 +6,7 @@
 #define SOFTWARE_PROJECT_SPCHESSGAME_H
 
 #include "SPArrayList.h"
+#include <stdbool.h>
 
 #define WHITE 1
 #define BLACK 0
@@ -17,7 +18,8 @@ typedef struct sp_chess_game_t {
 	int game_mode;
 	int difficulty;
 	int user_color;
-    char gameBoard[8][8];
+    char gameBoard[N_ROWS][N_COLUMNS];
+	char locations[N_COLUMNS * 2];
     int currentPlayer;
     SPArrayList* history;
 } SPChessGame;
@@ -31,6 +33,7 @@ typedef enum sp_chess_game_message_t {
     SP_CHESS_GAME_ILLEGAL_MOVE,
     SP_CHESS_GAME_ILLEGAL_MOVE_WILL_THREATEN,
     SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED,
+	SP_CHESS_GAME_NO_HISTORY,
 } SP_CHESS_GAME_MESSAGE;
 
 SPChessGame* spChessGameCreate(int historySize);
@@ -55,8 +58,6 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move);
 SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src);
 
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
-
-SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src);
 
 void spChessGameDestroy(SPChessGame* src);
 

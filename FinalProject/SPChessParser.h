@@ -66,7 +66,7 @@ char spParserGetLocationForGetMoves(SPCommand* command);
  * and returns an int representing those two sets of coordinates.
  * @param command - contains the arguments to parse
  * @return An integer whose two least significant BYTES would be the result of calling
- * 		   the function above with the appropriate arguments.
+ * 		   the func8tion above with the appropriate arguments.
  */
 int spParserGetMove(SPCommand* command);
 

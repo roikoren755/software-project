@@ -11,13 +11,13 @@ SPArrayList* spArrayListCreate(int maxSize) {
 	if (maxSize <= 0) {
 		return NULL;
 	}
-	SPArrayList* list = malloc(sizeof(SPArrayList));
+	SPArrayList* list = (SPArrayList*) malloc(sizeof(SPArrayList));
 	if (!list){
 		return NULL;
 	}
 	list->actualSize = 0;
 	list->maxSize = maxSize;
-	list->elements = malloc(maxSize * sizeof(int));
+	list->elements = (int*) malloc(maxSize * sizeof(int));
 	if (!list->elements) {
 		free(list);
 		return NULL;
@@ -29,13 +29,13 @@ SPArrayList* spArrayListCopy(SPArrayList* src) {
 	if (!src) {
 		return NULL;
 	}
-	SPArrayList* list = malloc(sizeof(SPArrayList));
+	SPArrayList* list = (SPArrayList*) malloc(sizeof(SPArrayList));
 	if (!list) {
 		return NULL;
 	}
 	list->maxSize = src->maxSize;
 	list->actualSize = src->actualSize;
-	list->elements = malloc(list->maxSize * sizeof(int));
+	list->elements = (int*) malloc(list->maxSize * sizeof(int));
 	if (!list->elements) {
 		free(list);
 		return NULL;
