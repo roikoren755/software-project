@@ -4,6 +4,9 @@
 
 #include "SPChessGame.h"
 
+#define BOTTOM_PRINT_FORMAT_SEPERATOR "  -----------------"
+#define BOTTOM_PRINT_FORMAT_LINE "   A B C D E F G H"
+
 SPChessGame* spChessGameCreate(int historySize){
 	if (historySize <= 0) { // historySize is illegal
 		return 0;
@@ -24,29 +27,52 @@ SPChessGame* spChessGameCreate(int historySize){
 	return game;
 }
 
+
+
+SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* game){
+	if (!game) { // source is NULL
+			return SP_CHESS_GAME_INVALID_ARGUMENT;
+		}
+	int i,j;
+	for(i=0 ; i<N_COLUMNS ; i++){
+		printf("%d|",i);
+		for(j=0 ; j<N_COLUMNS ; j++){
+			printf(" %c",game->gameBoard[i][j]);
+		}
+		printf(" |\n",i);
+	}
+	printf("s\n",BOTTOM_PRINT_FORMAT_SEPERATOR);
+	printf("s\n",BOTTOM_PRINT_FORMAT_LINE);
+
+	return SP_CHESS_GAME_SUCCESS;
+}
+
 SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src){
 	if (!src) { // src is NULL
 			return SP_CHESS_GAME_INVALID_ARGUMENT;
 		}
 
-	int i;
-	for(i=0;i<N_COLUMNS;i++){
+	int i,j;
+	char* starting_row = STARTING_ROW;
+
+	for(i=0 ; i<N_COLUMNS ; i++){
 		src->gameBoard[1][i] = 'M';
 	}
-	for(i=0;i<N_COLUMNS;i++){
+	for(i=0 ; i<N_COLUMNS ; i++){
 		src->gameBoard[6][i] = 'm';
 	}
-	src->gameBoard[0][0] = src->gameBoard[0][7] = 'R';
-	src->gameBoard[0][1] = src->gameBoard[0][6] = 'N';
-	src->gameBoard[0][2] = src->gameBoard[0][5] = 'B';
-	src->gameBoard[0][3] = 'Q';
-	src->gameBoard[0][4] = 'K';
 
-	src->gameBoard[7][0] = src->gameBoard[7][7] = 'r';
-	src->gameBoard[7][1] = src->gameBoard[7][6] = 'n';
-	src->gameBoard[7][2] = src->gameBoard[7][5] = 'b';
-	src->gameBoard[7][3] = 'q';
-	src->gameBoard[7][4] = 'k';
+	for(i=0 ; i<N_COLUMNS ; i++){
+		src->gameBoard[0][i] = starting_row[i];
+		src->gameBoard[7][i] = LOW_TO_CAPITAL(starting_row[i]);
+	}
+
+	for(i=2 ; i<N_COLUMNS-2 ; i++){
+		for(j=0 ; j<N_COLUMNS ; j++){
+			src->gameBoard[i][j] = '_';
+		}
+	}
+
 
 	return SP_CHESS_GAME_SUCCESS;
 }
