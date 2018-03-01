@@ -6,6 +6,7 @@
 
 #define STARTING_ROW "RNBQKBNR"
 #define CAPITAL_TO_LOW(c) c+'a'-'A'
+#define BLANK '_'
 #define BOTTOM_PRINT_FORMAT_SEPERATOR "  -----------------"
 #define BOTTOM_PRINT_FORMAT_LINE "   A B C D E F G H"
 
@@ -29,17 +30,25 @@ SPChessGame* spChessGameCreate(int historySize){
 	return game;
 }
 
+SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move){
 
+}
 
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* game){
 	if (!game) { // source is NULL
 			return SP_CHESS_GAME_INVALID_ARGUMENT;
 		}
+	char curChar;
 	int i,j;
 	for(i=0 ; i<N_COLUMNS ; i++){
 		printf("%d|",i);
 		for(j=0 ; j<N_COLUMNS ; j++){
-			printf(" %c",game->gameBoard[i][j]);
+			curChar = game->gameBoard[i][j];
+			if(!curChar){
+				printf(" %c",BLANK);
+			}
+			else
+				printf(" %c",game->gameBoard[i][j]);
 		}
 		printf(" |\n",i);
 	}
@@ -71,7 +80,7 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src){
 
 	for(i=2 ; i<N_COLUMNS-2 ; i++){
 		for(j=0 ; j<N_COLUMNS ; j++){
-			src->gameBoard[i][j] = '_';
+			src->gameBoard[i][j] = 0;
 		}
 	}
 
