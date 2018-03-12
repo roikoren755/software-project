@@ -120,9 +120,12 @@ int spChessGameGetColumnFromPosition(char position);
 
 int spChessGameGetRowFromPosition(char position);
 
+<<<<<<< HEAD
 int setMoveCoordinatesToInt(int curRow,int curCol, int destRow, int destCol);
 
 int setStepCoordinatesToInt(int destRow,int destCol, int capture, int threaten);
 
 
+=======
+>>>>>>> 975194953dad0156def63248e1c17ca0e4307bc7
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H

@@ -1,7 +1,7 @@
 /*
  * SPChessArrayList.h
  *
- *  Created on: 28 αταψ 2018
+ *  Created on: 28 March 2018
  *      Author: user
  */
 

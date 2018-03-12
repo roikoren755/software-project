@@ -66,11 +66,11 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src) {
 		}
 	}
 
-	for (int i = 0; i < 2*N_COLUMNS; i++) {
+	for (int i = 0; i < 2 * N_COLUMNS; i++) {
 		int loc = (i < N_COLUMNS)?(FIRST_ROW):(LAST_ROW);
 		//if(i>=N_COLUMNS){int loc = LAST_ROW;}
 		loc <<= 4;
-		loc |= (i%N_COLUMNS);
+		loc |= (i % N_COLUMNS);
 		src->locations[i] = loc;
 	}
 
@@ -553,7 +553,7 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
 	if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // shouldn't happen
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
-	for (int i = 0; i < N_COLUMNS * 2; i++) {
+	for (int i = 0; i < N_COLUMNS * 4; i++) {
 		if (src->locations[i] == currPosition) {
 			src->locations[i] = destPosition;
 		}
