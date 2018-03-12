@@ -1,7 +1,7 @@
 /*
  * SPMinimaxNode.h
  *
- *  Created on: 8 במרס 2018
+ *  Created on: 8 March 2018
  *      Author: user
  */
 

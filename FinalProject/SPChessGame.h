@@ -19,7 +19,7 @@ typedef struct sp_chess_game_t {
 	int difficulty;
 	int user_color;
     char gameBoard[N_ROWS][N_COLUMNS];
-	char locations[N_COLUMNS * 2];
+	char locations[N_COLUMNS * 4];
     int currentPlayer;
     bool whiteKingThreaten;
     bool blackKingThreaten;
@@ -114,7 +114,5 @@ char spChessGameGetCurrPositionFromMove(int move);
 int spChessGameGetColumnFromPosition(char position);
 
 int spChessGameGetRowFromPosition(char position);
-
-
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
