@@ -19,7 +19,7 @@ typedef struct sp_chess_game_t {
 	int difficulty;
 	int user_color;
     char gameBoard[N_ROWS][N_COLUMNS];
-	char locations[N_COLUMNS * 2];
+	char locations[N_COLUMNS * 4];
     int currentPlayer;
     bool whiteKingThreaten;
     bool blackKingThreaten;
@@ -77,7 +77,7 @@ SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-bool spChessGameIsPieceThreaten(SPChessGame* src, int color);
+bool spChessGameIsPieceThreaten(SPChessGame* src, char pieceLocation);
 
 bool spChessGameCheckDiagonalMove(SPChessGame* src , char targetLoc , char threatLoc);
 
@@ -97,7 +97,11 @@ bool spChessGameCheckKingThreat(SPChessGame* src , char targetLoc , char threatL
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-SP_CHESS_GAME_MESSAGE spChessGameGetMoves(SPChessGame* src, int position);
+SPArrayList* spChessGameGetMoves(SPChessGame* src, int position);
+
+SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* steps, char position, int verDir, int horDir,int color) ;
+
+SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color) ;
 
 SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move);
 
@@ -107,6 +111,7 @@ SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
 
 void spChessGameDestroy(SPChessGame* src);
 
+
 char spChessGameGetDestPositionFromMove(int move);
 
 char spChessGameGetCurrPositionFromMove(int move);
@@ -115,6 +120,9 @@ int spChessGameGetColumnFromPosition(char position);
 
 int spChessGameGetRowFromPosition(char position);
 
+int setMoveCoordinatesToInt(int curRow,int curCol, int destRow, int destCol);
+
+int setStepCoordinatesToInt(int destRow,int destCol, int capture, int threaten);
 
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
