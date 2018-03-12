@@ -11,7 +11,7 @@
 #include "SPMinimax.h"
 
 int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
-	if (!depth || spChessGameEnded(game)) {
+	if (!depth) { // Got to maximum depth
 		return spChessScoreBoard(game);
 	}
 	int v;
@@ -42,6 +42,9 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 				}
 			}
 		}
+        if (v == INT_MIN) { // i.e. no possible moves!
+            return spChessScoreBoard(game);
+        }
 	}
 
 	else {
@@ -71,6 +74,9 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 				}
 			}
 		}
+        if (v == INT_MAX) { // again, no possible moves!
+            return spChessScoreBoard(game);
+        }
 	}
 	return v;
 }
