@@ -10,21 +10,37 @@
 #include "SPChessGame.h"
 #include "SPMinimax.h"
 
+int spChessScoreBoard(SPChessGame* game) {
+    int gameOver = 1;
+    for (int i = 0; i < 2 * N_COLUMNS; i++) {
+        if (game->locations[i + game->currentPlayer * 2 * N_COLUMNS]) {
+            SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[i + game->currentPlayer * 2 * N_COLUMNS]);
+            if (!spArrayListIsEmpty(possibleMoves)) {
+                gameOver = 0;
+                break;
+            }
+        }
+    }
+
+	if (gameOver) {
+
+	}
+}
+
 int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 	if (!depth) { // Got to maximum depth
 		return spChessScoreBoard(game);
 	}
-	int v;
-	if (game->currentPlayer) {
-		v = INT_MIN;
-		for (int i = 0; i < 2 * N_COLUMNS; i++) {
-			if (game->locations[i + game->currentPlayer * 2 * N_COLUMNS]) {
+	int v = game->currentPlayer ? INT_MIN : INT_MAX;
+	if (game->currentPlayer) { // Current player is white
+		for (int i = 0; i < 2 * N_COLUMNS; i++) { // Go over all possible player pieces
+			if (game->locations[i + 2 * N_COLUMNS]) { // Piece is still in play, index is white pieces range
 				SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[i]);
 				while (spArrayListSize(possibleMoves)) {
 					int move = spArrayListGetFirst(possibleMoves);
 					SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves);
 					if (message != SP_ARRAY_LIST_SUCCESS) {
-						free(possibleMoves);
+						spArrayListDestroy(possibleMoves);
 						return 0;
 					}
 					SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(game, move);
@@ -36,7 +52,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 						break;
 					}
 				}
-				free(possibleMoves);
+				spArrayListDestroy(possibleMoves);
 				if (beta <= alpha) {
 					break;
 				}
@@ -48,7 +64,6 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 	}
 
 	else {
-		v = INT_MAX;
 		for (int i = 0; i < 2 * N_COLUMNS; i++) {
 			if (game->locations[i + game->currentPlayer * 2 * N_COLUMNS]) {
 				SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[i]);
@@ -56,7 +71,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 					int move = spArrayListGetFirst(possibleMoves);
 					SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves);
 					if (message != SP_ARRAY_LIST_SUCCESS) {
-						free(possibleMoves);
+						spArrayListDestroy(possibleMoves);
 						return 0;
 					}
 					SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(game, move);
@@ -68,7 +83,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 						break;
 					}
 				}
-				free(possibleMoves);
+				spArrayListDestroy(possibleMoves);
 				if (beta <= alpha) {
 					break;
 				}

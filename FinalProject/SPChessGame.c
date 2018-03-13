@@ -64,14 +64,18 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src) {
 		for (int j = 0; j < N_ROWS - 4; j++) {
 			src->gameBoard[j + 2][i] = '\0';
 		}
-	}
-
-	for (int i = 0; i < 2 * N_COLUMNS; i++) {
-		int loc = (i < N_COLUMNS)?(FIRST_ROW):(LAST_ROW);
-		//if(i>=N_COLUMNS){int loc = LAST_ROW;}
-		loc <<= 4;
-		loc |= (i % N_COLUMNS);
-		src->locations[i] = loc;
+        int location = FIRST_ROW << 4;
+        location |= i;
+        src->locations[i] = location;
+        location = (FIRST_ROW + 1) << 4;
+        location |= i;
+        src->locations[i + N_COLUMNS] = location;
+        location = LAST_ROW << 4;
+        location |= i;
+        src->locations[i + 3 * N_COLUMNS] = location;
+        location = (LAST_ROW - 1) << 4;
+        location |= i;
+        src->locations[i + 2 * N_COLUMNS] = location;
 	}
 
 	return SP_CHESS_GAME_SUCCESS;
@@ -235,18 +239,17 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move){
 	return SP_CHESS_GAME_ILLEGAL_MOVE; //shouldn't get here
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location){
+SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location) {
 	SPChessGame* copy = spChessGameCopy(src);
-	if(!copy){
+	if (!copy) {
 		return SP_CHESS_GAME_ALOCATION_ERROR;
 	}
 	spChessGameSetMove(copy,move);
-	if(spChessGameIsPieceThreaten(copy,location)){
+	if (spChessGameIsPieceThreaten(copy,location)) {
 		return SP_CHESS_GAME_MOVE_WILL_THREATEN;
 	}
-	free(copy);
+	spChessGameDestroy(copy);
 	return SP_CHESS_GAME_SUCCESS;
-
 }
 
 
@@ -531,24 +534,7 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
 	if (spArrayListIsFull(src->history)) {
 		spArrayListRemoveLast(src->history); // make room for new move in history, if needed
 	}
-	move <<= 8;
-	if (captured) {
-		if (captured == PAWN(WHITE) || captured == PAWN(BLACK)) {
-			move |= PAWN_FOR_MOVE;
-		}
-		if (captured == KNIGHT(WHITE) || captured == KNIGHT(BLACK)) {
-			move |= KNIGHT_FOR_MOVE;
-		}
-		if (captured == BISHOP(WHITE) || captured == BISHOP(BLACK)) {
-			move |= BISHOP_FOR_MOVE;
-		}
-		if (captured == QUEEN(WHITE) || captured == QUEEN(BLACK)) {
-			move |= QUEEN_FOR_MOVE;
-		}
-		if (captured == KING(WHITE) || captured == KING(BLACK)) {
-			move |= KING_FOR_MOVE;
-		}
-	}
+	move |= captured;
 	SP_ARRAY_LIST_MESSAGE message = spArrayListAddFirst(src->history, move); // add move to history
 	if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // shouldn't happen
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
