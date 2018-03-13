@@ -30,14 +30,14 @@
 #define ROOK_FOR_MOVE 4
 #define QUEEN_FOR_MOVE 5
 #define KING_FOR_MOVE 6
-#define KING_LOC(color) (4+color*N_COLUMNS)
-#define QUEEN_LOC(color) (3+color*N_COLUMNS)
-#define LEFT_ROOK_LOC(color) (0+color*N_COLUMNS)
-#define RIGHT_ROOK_LOC(color) (7+color*N_COLUMNS)
-#define LEFT_KNIGHT_LOC(color) (1+color*N_COLUMNS)
-#define RIGHT_KNIGHT_LOC(color) (6+color*N_COLUMNS)
-#define LEFT_BISHOP_LOC(color) (2+color*N_COLUMNS)
-#define RIGHT_BISHOP_LOC(color) (5+color*N_COLUMNS)
+#define KING_LOC(color) (4+color*3*N_COLUMNS)
+#define QUEEN_LOC(color) (3+color*3*N_COLUMNS)
+#define LEFT_ROOK_LOC(color) (0+color*3*N_COLUMNS)
+#define RIGHT_ROOK_LOC(color) (7+color*3*N_COLUMNS)
+#define LEFT_KNIGHT_LOC(color) (1+color*3*N_COLUMNS)
+#define RIGHT_KNIGHT_LOC(color) (6+color*3*N_COLUMNS)
+#define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
+#define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
 #define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
 #define LEFT -1
 #define RIGHT 1
@@ -111,7 +111,7 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
 	if (!src) {
 		return 0;
 	}
-	SPChessGame* ret = malloc(sizeof(SPChessGame));
+	SPChessGame* ret = (SPChessGame*) malloc(sizeof(SPChessGame));
 	if (!ret) {
 		return 0;
 	}
@@ -547,6 +547,8 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
 	src->gameBoard[destRow][destColumn] = src->gameBoard[currRow][currColumn];
 	src->gameBoard[currRow][currColumn] = '\0';
 
+	src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE;
+
 	return SP_CHESS_GAME_SUCCESS;
 }
 
@@ -554,28 +556,76 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src) {
 	if (!src) { // src is NULL
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
+
 	if (spArrayListSize(src->history) == 0) { // no move to undo
 		return SP_CHESS_GAME_NO_HISTORY;
 	}
+
 	int move = spArrayListGetFirst(src->history); // get last move made
 	SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(src->history); // remove move from history
+
 	if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // shouldn't happen
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
+
 	char captured = CLEAN_EXCESS_BYTES(move);
 	char destPosition = spChessGameGetDestPositionFromMove(move);
 	int destColumn = spChessGameGetColumnFromPosition(destPosition);
 	int destRow = spChessGameGetRowFromPosition(destPosition);
 	char currPosition = spChessGameGetCurrPositionFromMove(move);
-	//int currColumn = spChessGameGetColumnFromPosition(currPosition);
-	//int currRow = spChessGameGetRowFromPosition(currPosition);
+	int currColumn = spChessGameGetColumnFromPosition(currPosition);
+	int currRow = spChessGameGetRowFromPosition(currPosition);
+
+	src->gameBoard[currRow][currColumn] = src->gameBoard[destRow][destColumn];
+	src->gameBoard[destRow][destColumn] = captured;
+	int currentPlayer = src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE;
+
+	if (captured == PAWN(currentPlayer)) {
+		for (int i = 0; i < N_COLUMNS; i++) {
+			int startIndex = currentPlayer ? 2 * N_COLUMNS : N_COLUMNS;
+			if (!src->locations[i + startIndex]) {
+				src->locations[i + startIndex] = destPosition;
+			}
+		}
+	}
+
+	if (captured == KNIGHT(currentPlayer)) {
+		if (!src->locations[RIGHT_KNIGHT_LOC(currentPlayer)]) {
+			src->locations[RIGHT_KNIGHT_LOC(currentPlayer)] = destPosition;
+		}
+		else if (!src->locations[LEFT_KNIGHT_LOC(currentPlayer)]) {
+			src->locations[LEFT_KNIGHT_LOC(currentPlayer)] = destPosition;
+		}
+	}
+
+	if (captured == ROOK(currentPlayer)) {
+		if (!src->locations[RIGHT_ROOK_LOC(currentPlayer)]) {
+			src->locations[RIGHT_ROOK_LOC(currentPlayer)] = destPosition;
+		}
+		else if (!src->locations[LEFT_ROOK_LOC(currentPlayer)]) {
+			src->locations[LEFT_ROOK_LOC(currentPlayer)] = destPosition;
+		}
+	}
+
+	if (captured == BISHOP(currentPlayer)) {
+		if (!src->locations[RIGHT_BISHOP_LOC(currentPlayer)]) {
+			src->locations[RIGHT_BISHOP_LOC(currentPlayer)] = destPosition;
+		}
+		else if (!src->locations[LEFT_BISHOP_LOC(currentPlayer)]) {
+			src->locations[LEFT_BISHOP_LOC(currentPlayer)] = destPosition;
+		}
+	}
+
+	if (captured == QUEEN(currentPlayer)) {
+		src->locations[QUEEN_LOC(currentPlayer)] = destPosition;
+	}
+
 	for (int i = 0; i < N_COLUMNS * 2; i++) {
 		if (src->locations[i] == destPosition) {
 			src->locations[i] = currPosition;
 		}
 	}
-	src->gameBoard[destRow][destColumn] = captured;
-	src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE;
+
 	return SP_CHESS_GAME_SUCCESS;
 }
 
