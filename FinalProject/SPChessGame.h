@@ -15,9 +15,9 @@
 
 
 typedef struct sp_chess_game_t {
-	int game_mode;
+	int gameMode;
 	int difficulty;
-	int user_color;
+	int userColor;
     char gameBoard[N_ROWS][N_COLUMNS];
 	char locations[N_COLUMNS * 4];
     int currentPlayer;
@@ -41,12 +41,10 @@ typedef enum sp_chess_game_message_t {
 
 /***
  * Create a new game, with the board set to the starting set up
- * @param historySize - Size of history to keep
- * @return NULL if historySize is less than or equal to 0, or if an allocation
- *         error occurred.
+ * @return NULL if an allocation error occurred.
  *         a pointer to the created game, otherwise
  */
-SPChessGame* spChessGameCreate(int historySize);
+SPChessGame* spChessGameCreate();
 
 /***
  * Copies all of src's state to a new game
@@ -139,7 +137,7 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move);
  *         SP_CHESS_GAME_NO_HISTORY if there is no move to undo
  *         SP_CHESS_GAME_SUCCESS otherwise
  */
-SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src);
+SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src);
 
 /***
  * Prints src's game board, according to the format given
@@ -149,26 +147,6 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src);
  */
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
 
-<<<<<<< HEAD
 void spChessGameDestroy(SPChessGame* src);
 
-
-char spChessGameGetDestPositionFromMove(int move);
-
-char spChessGameGetCurrPositionFromMove(int move);
-
-int spChessGameGetColumnFromPosition(char position);
-
-int spChessGameGetRowFromPosition(char position);
-
-=======
->>>>>>> effc3af0f7af2a2989160fc1a8f37701eb8e4b40
-int setMoveCoordinatesToInt(int curRow,int curCol, int destRow, int destCol);
-
-int setStepCoordinatesToInt(int destRow,int destCol, int capture, int threaten);
-
-<<<<<<< HEAD
-
-=======
->>>>>>> effc3af0f7af2a2989160fc1a8f37701eb8e4b40
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H

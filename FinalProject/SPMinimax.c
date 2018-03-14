@@ -329,6 +329,13 @@ int spMinimaxSuggestMove(SPChessGame* currentGame) {
 		return -1;
 	}
 
+    spArrayListDestroy(minimaxGame->history);
+    minimaxGame->history = spArrayListCreate(currentGame->difficulty);
+    if (!minimaxGame->history) {
+        free(minimaxGame);
+        return -1;
+    }
+
 	for (int i = 0; i < N_ROWS; i++) { // Copy the board and locations
 		for (int j = 0; j < N_COLUMNS; j++) {
 			minimaxGame->gameBoard[i][j] = currentGame->gameBoard[i][j];
@@ -338,12 +345,11 @@ int spMinimaxSuggestMove(SPChessGame* currentGame) {
 		}
 	}
 
-	minimaxGame->user_color = currentGame->user_color; // And everything else quasi-important
-	minimaxGame->difficulty = currentGame->difficulty;
+	minimaxGame->userColor = currentGame->userColor; // And everything else quasi-important
 	minimaxGame->currentPlayer = currentGame->currentPlayer;
 	minimaxGame->blackKingThreaten = currentGame->blackKingThreaten;
 	minimaxGame->whiteKingThreaten = currentGame->whiteKingThreaten;
-	minimaxGame->game_mode = currentGame->game_mode;
+	minimaxGame->gameMode = currentGame->gameMode;
 
 	return spMinimaxGetBestMove(minimaxGame); // And gimme a move
 }

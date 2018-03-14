@@ -45,6 +45,7 @@
 #define STAY 0
 #define CAPTURED 1
 #define THREATENED 1
+#define HISTORY_SIZE 3
 
 /***
  * Get destination position from int representing a move
@@ -143,25 +144,22 @@ int setStepCoordinatesToInt(int destRow,int destCol, int threaten, int capture){
 	return posMove;
 }
 
-SPChessGame* spChessGameCreate(int historySize) {
-	if (historySize <= 0) { // historySize is illegal
-		return 0;
-	}
-
+SPChessGame* spChessGameCreate() {
 	SPChessGame* game = (SPChessGame*) malloc(sizeof(SPChessGame));
 	if (!game) { // malloc failed
 		return 0;
 	}
 
 	game->currentPlayer = WHITE; // Defaults
-	game->user_color = WHITE;
-	game->difficulty = 0;
+	game->userColor = WHITE;
+	game->difficulty = 2;
 	game->whiteKingThreaten = false;
 	game->blackKingThreaten = false;
+	game->gameMode = 1;
 
 	spChessGameResetBoard(game);
 
-	game->history = spArrayListCreate(historySize);
+	game->history = spArrayListCreate(HISTORY_SIZE);
 	if (!game->history) { // Failed creating spArrayList for history
 		free(game);
 		return 0;
@@ -182,10 +180,10 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
 
 	ret->currentPlayer = src->currentPlayer; // Copy what needs to be copied
 	ret->difficulty = src->difficulty;
-	ret->user_color = src->user_color;
+	ret->userColor = src->userColor;
 	ret->whiteKingThreaten = src->whiteKingThreaten;
 	ret->blackKingThreaten = src->blackKingThreaten;
-    ret->game_mode = src->game_mode;
+    ret->gameMode = src->gameMode;
 
 	for (int i = 0; i < N_ROWS; i++) {
 		for (int j = 0; j < N_COLUMNS; j++) {
@@ -679,7 +677,7 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
 	return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src) {
+SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 	if (!src) { // src is NULL
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
