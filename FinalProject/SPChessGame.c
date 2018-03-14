@@ -229,7 +229,11 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move){
 	int destRow = spChessGameGetRowFromPosition(destPosition);
 	char captured = src->gameBoard[destRow][destColumn];
 
-	if(destRow<0||destRow>=N_ROWS||destColumn<0||destColumn>=N_COLUMNS){
+	if(destRow==currRow && destColumn==currColumn){ // can't stay in place
+		return SP_CHESS_GAME_INVALID_POSITION;
+	}
+
+	if(destRow<0||destRow>=N_ROWS||destColumn<0||destColumn>=N_COLUMNS){ //not in range
 		return SP_CHESS_GAME_INVALID_POSITION;
 	}
 
@@ -496,34 +500,21 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position){
 
 	if(piece == QUEEN(color)||piece == BISHOP(color)){
 		spChessGameAddStepsToList(src,steps,position,DOWN,LEFT,color);
-	}
-	if(piece == QUEEN(color)||piece == ROOK(color)){
-		spChessGameAddStepsToList(src,steps,position,STAY,LEFT,color);
-	}
-	if(piece == QUEEN(color)||piece == BISHOP(color)){
 		spChessGameAddStepsToList(src,steps,position,UP,LEFT,color);
-	}
-	if(piece == QUEEN(color)||piece == ROOK(color)){
-		spChessGameAddStepsToList(src,steps,position,DOWN,STAY,color);
-	}
-	if(piece == QUEEN(color)||piece == ROOK(color)){
-		spChessGameAddStepsToList(src,steps,position,UP,STAY,color);
-	}
-	if(piece == QUEEN(color)||piece == BISHOP(color)){
 		spChessGameAddStepsToList(src,steps,position,DOWN,RIGHT,color);
-	}
-	if(piece == QUEEN(color)||piece == ROOK(color)){
-		spChessGameAddStepsToList(src,steps,position,STAY,RIGHT,color);
-	}
-	if(piece == QUEEN(color)||piece == BISHOP(color)){
 		spChessGameAddStepsToList(src,steps,position,UP,RIGHT,color);
 	}
 
-
+	if(piece == QUEEN(color)||piece == ROOK(color)){
+		spChessGameAddStepsToList(src,steps,position,STAY,LEFT,color);
+		spChessGameAddStepsToList(src,steps,position,DOWN,STAY,color);
+		spChessGameAddStepsToList(src,steps,position,UP,STAY,color);
+		spChessGameAddStepsToList(src,steps,position,STAY,RIGHT,color);
+	}
 
 
 	if(piece == PAWN(color)){
-		int dir = (color == WHITE)?(-1):(1);  //if pawn is white, can move up, if black otherwise
+		int dir = (color == WHITE)?(UP):(DOWN);  //if pawn is white, can move up, if black otherwise
 		int twoStepsRow = (color == WHITE)?(LAST_ROW-1):(FIRST_ROW+1);
 
 		if (curRow+dir < 0 || curRow+dir >= N_ROWS){ //we are at the last line, pawn can't move
