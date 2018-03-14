@@ -512,24 +512,16 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position){
 		spChessGameAddStepsToList(src,steps,position,STAY,RIGHT,color);
 	}
 
-
 	if(piece == PAWN(color)){
-		int dir = (color == WHITE)?(UP):(DOWN);  //if pawn is white, can move up, if black otherwise
-		int twoStepsRow = (color == WHITE)?(LAST_ROW-1):(FIRST_ROW+1);
+		spChessGameAddPawnStepsToList(src,steps,position,color);
+	}
 
-		if (curRow+dir < 0 || curRow+dir >= N_ROWS){ //we are at the last line, pawn can't move
-			return moves; //empty list
-		}
+	if(piece == KNIGHT(color)){
+		spChessGameAddKnightStepsToList(src,steps,position,color);
+	}
 
-		int move = setMoveCoordinatesToInt(curRow,curCol,curRow+dir,curCol);
-		if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
-			spArrayListAddLast(setStepCoordinatesToInt(curRow+dir,curCol,0,
-					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN)));
-		}
-		move = setMoveCoordinatesToInt(curRow,curCol,curRow+2*dir,curCol);
-		if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
-				spArrayListAddLast(setStepCoordinatesToInt(curRow+dir,curCol,0,!CAPTURED));
-		}
+	if(piece == KING(color)){
+		spChessGameAddKingStepsToList(src,steps,position,color);
 	}
 
 
@@ -555,7 +547,6 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* st
 		int threaten = (spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move))==SP_CHESS_GAME_SUCCESS)?(!THREATENED):(THREATENED);
 
 		if(spChessGameCheckPotentialThreat(src,move,src->locations[KING_LOC(color)])==SP_CHESS_GAME_SUCCESS){ //king won't be threaten
-			//check allocation error???
 			if(!piece){
 				spArrayListAddLast(steps,setStepCoordinatesToInt(curRow+i*verDir,curCol+i*horDir,threaten,!CAPTURED));
 				continue;
@@ -572,9 +563,74 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* st
 SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color){
 	int curCol = spChessGameGetColumnFromPosition(position);
 	int curRow = spChessGameGetRowFromPosition(position);
+	int move;
+	for(int i = -1; i<=1;i+=2){
+		for(int i = -1; i<=1;i+=2){
+			move = setMoveCoordinatesToInt(curRow,curCol,curRow+2*i,curCol+3*i);
+			if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
+				spArrayListAddLast(setStepCoordinatesToInt(curRow+2*i,curCol+3*i,
+					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
+					,src->gameBoard[curRow+2*i][curCol+3*i]);
+			}
+		}
+	}
+	for(int i = -1; i<=1;i+=2){
+		for(int i = -1; i<=1;i+=2){
+			move = setMoveCoordinatesToInt(curRow,curCol,curRow+3*i,curCol+2*i);
+			if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
+				spArrayListAddLast(setStepCoordinatesToInt(curRow+3*i,curCol+2*i,
+					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
+					,src->gameBoard[curRow+3*i][curCol+2*i]);
+			}
+		}
+	}
+
 
 
 }
+
+SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color){
+	int curCol = spChessGameGetColumnFromPosition(position);
+	int curRow = spChessGameGetRowFromPosition(position);
+	int move;
+	for(int i = -1; i<=1;i++){
+		for(int i = -1; i<=1;i++){
+			move = setMoveCoordinatesToInt(curRow,curCol,curRow+i,curCol+i);
+			if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
+				spArrayListAddLast(setStepCoordinatesToInt(curRow+i,curCol+i,
+					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
+					,src->gameBoard[curRow+i][curCol+i]);
+			}
+		}
+	}
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color){
+	int curRow = spChessGameGetRowFromPosition(position);
+	int curCol = spChessGameGetColumnFromPosition(position);
+	int dir = (color == WHITE)?(UP):(DOWN);  //if pawn is white, can move up, if black otherwise
+
+	int move = setMoveCoordinatesToInt(curRow,curCol,curRow+dir,curCol);
+	for(int i = 1; i<=2;i++){
+		move = setMoveCoordinatesToInt(curRow,curCol,curRow+i*dir,curCol);
+		if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
+			spArrayListAddLast(setStepCoordinatesToInt(curRow+i*dir,curCol,
+					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
+					,!CAPTURED);
+		}
+		else{break;} //if 1 step isn't valid, 2 steps also aren't
+	}
+	for(int i = -1; i<=1;i+=2){
+	move = setMoveCoordinatesToInt(curRow,curCol,curRow+dir,curCol+i);
+	if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
+			spArrayListAddLast(setStepCoordinatesToInt(curRow+dir,curCol+i,
+				spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
+				,CAPTURED);
+	}
+}
+
+}
+
 
 
 SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
