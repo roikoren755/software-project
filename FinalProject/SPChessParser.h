@@ -59,7 +59,7 @@ int spParserGetPositiveInt(const SPCommand* command);
  * 		   a char, whose 4 MSB are the bit representation of the row coordinate,
  * 		   and 4 LSB are the bit representation of the column coordinate, otherwise.
  */
-char spParserGetLocationForGetMoves(SPCommand* command);
+char spParserGetLocation(SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move,

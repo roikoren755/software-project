@@ -227,7 +227,7 @@ int spParserGetPositiveInt(const SPCommand* command) {
     return result;
 }
 
-char spParserGetLocationForGetMoves(SPCommand* command) {
+char spParserGetLocation(SPCommand* command) {
     return spParserGetBoardLocationFromString(command->arguments); // Just need that string
 }
 

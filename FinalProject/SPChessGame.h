@@ -39,9 +39,28 @@ typedef enum sp_chess_game_message_t {
 	SP_CHESS_GAME_ALOCATION_ERROR,
 } SP_CHESS_GAME_MESSAGE;
 
+/***
+ * Create a new game, with the board set to the starting set up
+ * @param historySize - Size of history to keep
+ * @return NULL if historySize is less than or equal to 0, or if an allocation
+ *         error occurred.
+ *         a pointer to the created game, otherwise
+ */
 SPChessGame* spChessGameCreate(int historySize);
 
+/***
+ * Copies all of src's state to a new game
+ * @param src - Pointer to game to copy
+ * @return NULL if src is NULL or an allocation error occurred.
+ *         A pointer to the new copy, otherwise
+ */
 SPChessGame* spChessGameCopy(SPChessGame* src);
+
+/***
+ * Destroy's src, freeing all used memory
+ * @param src - Pointer to game to destroy
+ */
+void spChessGameDestroy(SPChessGame* src);
 
 /**
  * given an in range move, checks if the move is valid regarding the piece at the
@@ -54,6 +73,7 @@ SPChessGame* spChessGameCopy(SPChessGame* src);
  * false - otherwise.
  */
 SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move);
+
 /**
  * given a move, Checks if a the piece that after the move will be
  * at the given location will be threaten (after that move).
@@ -77,7 +97,7 @@ SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-bool spChessGameIsPieceThreaten(SPChessGame* src, char pieceLocation);
+bool spChessGameIsPieceThreatened(SPChessGame* src, char pieceLocation);
 
 bool spChessGameCheckDiagonalMove(SPChessGame* src , char targetLoc , char threatLoc);
 
@@ -99,25 +119,35 @@ bool spChessGameCheckKingThreat(SPChessGame* src , char targetLoc , char threatL
  */
 SPArrayList* spChessGameGetMoves(SPChessGame* src, int position);
 
-SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* steps, char position, int verDir, int horDir,int color) ;
+SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* steps, char position, int verDir, int horDir,int color);
 
-SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color) ;
+SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color);
 
+/***
+ * Makes the move passed to it in src's game.
+ * @param src - Game to make move in
+ * @param move - A legal move to play
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL, or an error happened while accessing src->history
+ *         SP_CHESS_GAME_SUCCESS otherwise
+ */
 SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move);
 
+/***
+ * Tries undo-ing the last move played
+ * @param src - Game to undo move in
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL, or an error occurred while accessing src->history
+ *         SP_CHESS_GAME_NO_HISTORY if there is no move to undo
+ *         SP_CHESS_GAME_SUCCESS otherwise
+ */
 SP_CHESS_GAME_MESSAGE spChessGameUndoPrevMove(SPChessGame* src);
 
+/***
+ * Prints src's game board, according to the format given
+ * @param src - Game whose board you want to print
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL
+ *         SP_CHESS_GAME_SUCCESS otherwise
+ */
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
-
-void spChessGameDestroy(SPChessGame* src);
-
-char spChessGameGetDestPositionFromMove(int move);
-
-char spChessGameGetCurrPositionFromMove(int move);
-
-int spChessGameGetColumnFromPosition(char position);
-
-int spChessGameGetRowFromPosition(char position);
 
 int setMoveCoordinatesToInt(int curRow,int curCol, int destRow, int destCol);
 

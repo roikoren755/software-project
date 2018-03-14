@@ -10,23 +10,91 @@
 #include "SPChessGame.h"
 #include "SPMinimax.h"
 
+#define KING 'K'
+#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
+#define PAWN_SCORE 1
+#define KNIGHT_SCORE 3
+#define BISHOP_SCORE KNIGHT_SCORE
+#define ROOK_SCORE 5
+#define QUEEN_SCORE 9
+
+/***
+ * Converts a piece's index (0-7) in the starting row to score
+ * @param index - index of piece
+ * @return The corresponding piece's score
+ */
+int indexToPieceScore(int index) {
+	if (index == 0 || index == 7) {
+		return ROOK_SCORE;
+	}
+
+	if (index == 1 || index == 6) {
+		return KNIGHT_SCORE;
+	}
+
+	if (index == 2 || index == 5) {
+		return BISHOP_SCORE;
+	}
+
+	if (index == 3) {
+		return QUEEN_SCORE;
+	}
+
+	return 0; // Like there would be only one king in a game. Like, ever
+}
+
+/***
+ * Scores the board, according to the scoring function provided
+ * @param game
+ * @return -1 if game is NULL
+ * 		   game's board's score, otherwise
+ */
 int spChessScoreBoard(SPChessGame* game) {
+	if (!game) {
+		return -1;
+	}
+
     int gameOver = 1;
 	int index;
     for (int i = 0; i < 2 * N_COLUMNS; i++) {
         index = i + game->currentPlayer * 2 * N_COLUMNS;
 		if (game->locations[index]) {
             SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[index]);
-            if (!spArrayListIsEmpty(possibleMoves)) {
-                gameOver = 0;
+            if (!spArrayListIsEmpty(possibleMoves)) { // There's a piece that can move
+                gameOver = 0; // Game isn't over
                 break;
             }
         }
     }
 
 	if (gameOver) {
-		// TODO - FIX THIS (and finish it...)
+		if (spChessGameIsPieceThreatened(game->currentPlayer ? CAPITAL_TO_LOW(KING) : KING)) { // Check-mate anyone?
+			return game->currentPlayer ? -1000 : 1000; // YOU LOSE/WIN
+		}
+		return 0; // Draw
 	}
+
+	int result = 0;
+	int pieceScore;
+	for (int i = 0; i < N_COLUMNS; i++) {
+		if (game->locations[i + N_COLUMNS]) { // Subtract for black pawn in play
+			result -= PAWN_SCORE;
+		}
+		if (game->locations[i + 2 * N_COLUMNS]) { // Add for white one
+			result += PAWN_SCORE;
+		}
+
+		pieceScore = indexToPieceScore(i); // Get pieces score at index
+
+		if (game->locations[i]) { // Subtract for black
+			result -= pieceScore;
+		}
+		if (game->locations[i + 3 * N_COLUMNS]) { // Add for white
+			result += pieceScore;
+		}
+	}
+
+	return result; // And that's the score
 }
 
 int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
