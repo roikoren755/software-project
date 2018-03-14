@@ -206,7 +206,7 @@ SPCommand spParserParseLine(const char* str) {
     return cmd;
 }
 
-int spParserGetPositiveInt(const SPCommand* command) {
+int spParserGetNonNegativeInt(const SPCommand* command) {
     if (!command) { // Command is NULL
         return -1;
     }

@@ -49,7 +49,7 @@ SPCommand spParserParseLine(const char* str);
  * @return -1 if first argument in cmd->arguments isn't a positive int
  *         The argument as an int, otherwise
  */
-int spParserGetPositiveInt(const SPCommand* command);
+int spParserGetNonNegativeInt(const SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries converting its first argument to coordinates on the board,
