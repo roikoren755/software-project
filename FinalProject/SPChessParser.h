@@ -26,7 +26,7 @@ typedef enum {
     SP_INVALID_LINE,
 } SP_COMMAND;
 
-// TODO - better way to save arguments? we have file paths, board positions and integers...
+// And a struct, too!
 typedef struct command_t {
     SP_COMMAND cmd;
     char arguments[2000];
@@ -59,7 +59,7 @@ int spParserGetPositiveInt(const SPCommand* command);
  * 		   a char, whose 4 MSB are the bit representation of the row coordinate,
  * 		   and 4 LSB are the bit representation of the column coordinate, otherwise.
  */
-char spParserGetLocationForGetMoves(SPCommand* command);
+char spParserGetLocation(SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move,

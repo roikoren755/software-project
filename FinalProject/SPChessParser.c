@@ -22,132 +22,201 @@
 #define UNDO "undo"
 #define RESET "reset"
 
+/***
+ * Checks if any of the 2 rightmost bytes of an int correspond to a failed parsing attempt of a location
+ * @param location
+ * @return an integer with all bits as 1 if one of the 2 rightmost bytes aren't a legal location
+ *         location, otherwise
+ */
+int spParserDestroyLocationIfNeeded(int location) {
+    int result = ~0; // Preparations
+    int mask = 1;
+
+    for (int i = 0; i < 2; i++) { // 2 rightmost bytes
+        int destroy = 1;
+        for (int j = 0; j < 8; j++) { // For bits in byte
+            if (!(location & mask)) { // There's a 0 bit, so don't destroy
+                destroy = 0;
+            }
+
+            mask <<= 1; // Move to next bit
+        }
+
+        if (destroy) { // Destroy?
+            return result;
+        }
+    }
+
+    return location; // No
+}
+
+/***
+ * Tries parsing str as "<x,y>", a board location for the chess game
+ * @param str
+ * @return a char with all bits as 0 if str isn't a location argument
+ *         a char whose 4 leftmost bits represent x, and 4 rightmost bits represent y
+ */
+char spParserGetBoardLocationFromString(char* str) {
+    char location = 0;
+
+    if (str[0] == '<' && str[2] == ',' && str[4] == '>' && // str is "<x,y>", with x and y as legal row and column
+        str[1] >= 'A' && str[1] <= 'H' &&
+        str[3] >= '1' && str[3] <= '8') {
+        location = str[1] - 'A'; // Get row
+        location <<= 4;
+        location |= str[3] - '1'; // And column
+    }
+    else { // str isn't!
+        location = ~location; // Booo
+    }
+
+    return location;
+}
+
 SPCommand spParserParseLine(const char* str) {
-    SPCommand cmd;
-    int notMatched = 1;
-    char line[SP_MAX_LINE_LENGTH + 1];
-    strcpy(line, str);
-    char* command = strtok(line, DELIMITERS);
-    if (!command) {
+    SPCommand cmd; // Preparations
+    if (!str) { // But waaaaait....
         cmd.cmd = SP_INVALID_LINE;
         cmd.arguments[0] = '\0';
     }
-    char* nextToken = strtok(NULL, DELIMITERS);
-    if (notMatched &&
-            !strcmp(command, GAME_MODE) &&
-            nextToken) {
+    int notMatched = 1;
+    char line[SP_MAX_LINE_LENGTH + 1];
+    strcpy(line, str);
+
+    char* command = strtok(line, DELIMITERS); // First white-space-saparated word
+    if (!command) { // No such thing?
+        cmd.cmd = SP_INVALID_LINE; // INVALID
+        cmd.arguments[0] = '\0'; // No arguments
+    }
+
+    char* nextToken = strtok(NULL, DELIMITERS); // Next word
+
+    if (notMatched && // No match yet
+            !strcmp(command, GAME_MODE) && // First word matches GAME_MODE
+            nextToken) { // And there's something after it
         cmd.cmd = SP_GAME_MODE;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, DIFFICULTY) &&
-            nextToken) {
+
+    if (notMatched && // Still no match
+            !strcmp(command, DIFFICULTY) && // First word matches DIFFICULTY
+            nextToken) { // And something's after it
         cmd.cmd = SP_DIFFICULTY;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, USER_COLOR) &&
-            nextToken) {
+
+    if (notMatched && // Nothing yet
+            !strcmp(command, USER_COLOR) && // USER_COLOR
+            nextToken) { // And then some
         cmd.cmd = SP_USER_COLOR;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, LOAD) &&
-            nextToken) {
+
+    if (notMatched && // Nope
+            !strcmp(command, LOAD) && // LOAD
+            nextToken) { // And argument
         cmd.cmd = SP_LOAD;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, DEFAULT)) {
+
+    if (notMatched && // Nothing
+            !strcmp(command, DEFAULT)) { // DEFAULT
         cmd.cmd = SP_DEFAULT;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, PRINT_SETTINGS)) {
+
+    if (notMatched && // Not yet
+            !strcmp(command, PRINT_SETTINGS)) { // PRINT_SETTINGS
         cmd.cmd = SP_PRINT_SETTINGS;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, QUIT)) {
+
+    if (notMatched && // Wait for it
+            !strcmp(command, QUIT)) { // QUIT
         cmd.cmd = SP_QUIT;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, START)) {
+
+    if (notMatched && // Almost there!
+            !strcmp(command, START)) { // START
         cmd.cmd = SP_START;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, PRINT_SETTINGS)) {
-        cmd.cmd = SP_PRINT_SETTINGS;
-        cmd.arguments[0] = '\0';
-        notMatched = 0;
-    }
-    if (notMatched &&
-            !strcmp(command, MOVE) &&
-            nextToken) {
-        strcpy(cmd.arguments, nextToken);
-        int offset = strlen(nextToken) + 1;
-        nextToken = strtok(NULL, DELIMITERS);
-        char* nextNextToken = strtok(NULL, DELIMITERS);
-        if (nextToken &&
-                    strcmp(nextToken, TO) &&
-                    nextNextToken) {
+
+    if (notMatched && // Really close now
+            !strcmp(command, MOVE) && // MOVE
+            nextToken) { // With fries
+        strcpy(cmd.arguments, nextToken); // Get first argument
+        int offset = strlen(nextToken) + 1; // First string length
+        nextToken = strtok(NULL, DELIMITERS); // Get next word
+        char* nextNextToken = strtok(NULL, DELIMITERS); // And the argument after it
+
+        if (nextToken && // There is a word
+                    strcmp(nextToken, TO) && // And the word is TO
+                    nextNextToken) { // And yet another argument!
             cmd.cmd = SP_MOVE;
-            strcpy(cmd.arguments + offset, nextNextToken);
+            strcpy(cmd.arguments + offset, nextNextToken); // Copy second argument, right after the first one
             notMatched = 0;
         }
     }
-    if (notMatched &&
-            !strcmp(command, GET_MOVES) &&
-            nextToken) {
+
+    if (notMatched && // No
+            !strcmp(command, GET_MOVES) && // GET MOVES
+            nextToken) { // And from where, to boot!
         cmd.cmd = SP_GET_MOVES;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, SAVE) &&
+
+    if (notMatched && // Just no
+            !strcmp(command, SAVE) && // SAVE
             nextToken) {
         cmd.cmd = SP_SAVE;
         strcpy(cmd.arguments, nextToken);
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, UNDO)) {
+
+    if (notMatched && // Please stop asking
+            !strcmp(command, UNDO)) { // UNDO
         cmd.cmd = SP_GET_MOVES;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched &&
-            !strcmp(command, RESET)) {
+
+    if (notMatched && // I will file a lawsuit
+            !strcmp(command, RESET)) { // RESET
         cmd.cmd = SP_RESET;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
-    if (notMatched) {
+
+    if (notMatched) { // Hello? Are you still there?
         cmd.cmd = SP_INVALID_LINE;
         cmd.arguments[0] = '\0';
     }
+
     return cmd;
 }
 
 int spParserGetPositiveInt(const SPCommand* command) {
-    if (!command) {
+    if (!command) { // Command is NULL
         return -1;
     }
+
     int result = 0;
     int i = 0;
-    while (command->arguments[i]) {
-        if (command->arguments[i] >= '0' && command->arguments[i] <= '9') {
-            result *= 10;
+
+    while (command->arguments[i]) { // Still haven't reached '\0'
+        if (command->arguments[i] >= '0' && command->arguments[i] <= '9') { // Current char is a digit
+            result *= 10; // Fix number
             result += command->arguments[i] - '0';
             i++;
         }
@@ -158,47 +227,14 @@ int spParserGetPositiveInt(const SPCommand* command) {
     return result;
 }
 
-int spParserDestroyLocationIfNeeded(int location) {
-	int result = ~0;
-	int mask = 1;
-	for (int i = 0; i < 2; i++) {
-		int destroy = 1;
-		for (int j = 0; j < 8; j++) {
-			if (!(location & mask)) {
-				destroy = 0;
-			}
-			mask <<= 1;
-		}
-		if (destroy) {
-			return result;
-		}
-	}
-	return location;
-}
-
-char spParserGetBoardLocationFromString(char* str) {
-	char location = 0;
-    if (str[0] == '<' && str[2] == ',' && str[4] == '>' &&
-            str[1] >= 'A' && str[1] <= 'H' &&
-            str[3] >= '1' && str[3] <= '8') {
-        location = str[1] - 'A';
-        location <<= 4;
-        location |= str[3] - '1';
-    }
-    else {
-    	location = ~location;
-    }
-    return location;
-}
-
-char spParserGetLocationForGetMoves(SPCommand* command) {
-    return spParserGetBoardLocationFromString(command->arguments);
+char spParserGetLocation(SPCommand* command) {
+    return spParserGetBoardLocationFromString(command->arguments); // Just need that string
 }
 
 int spParserGetMove(SPCommand* command) {
-	int locations = 0;
-    locations |= spParserGetBoardLocationFromString(command->arguments);
-    locations <<= 8;
-    locations |= spParserGetBoardLocationFromString(command->arguments + 6);
-    return spParserDestroyLocationIfNeeded(locations);
+	int locations = 0; // Preparations
+    locations |= spParserGetBoardLocationFromString(command->arguments); // First coordinates
+    locations <<= 8; // Make room
+    locations |= spParserGetBoardLocationFromString(command->arguments + 6); // Second coordinates
+    return spParserDestroyLocationIfNeeded(locations); // Do they need destruction in their lives?
 }
