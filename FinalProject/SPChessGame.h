@@ -12,7 +12,13 @@
 #define BLACK 0
 #define N_ROWS 8
 #define N_COLUMNS 8
-
+#define PAWN 'M'
+#define ROOK 'R'
+#define BISHOP 'B'
+#define KNIGHT 'N'
+#define QUEEN 'Q'
+#define KING 'K'
+#define BLANK '_'
 
 typedef struct sp_chess_game_t {
 	int gameMode;
@@ -36,7 +42,7 @@ typedef enum sp_chess_game_message_t {
     SP_CHESS_GAME_MOVE_WILL_THREATEN,
     SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED,
 	SP_CHESS_GAME_NO_HISTORY,
-	SP_CHESS_GAME_ALOCATION_ERROR,
+	SP_CHESS_GAME_ALOCATION_ERROR
 } SP_CHESS_GAME_MESSAGE;
 
 /***
@@ -84,7 +90,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move);
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location){
+SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location);
 
 /**
  * Checks if a piece is threatened by an opponent.
@@ -147,6 +153,24 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src);
  */
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
 
-void spChessGameDestroy(SPChessGame* src);
+/***
+ * Checks whether the game pointed to by game has ended, by seeing if the current player has
+ * any legal moves he can make.
+ * @param game - Game to check if ended
+ * @return -1 if game is NULL
+ *          0 if the game isn't over
+ *          1 if it is
+ */
+int spChessGameEnded(SPChessGame* game);
+
+/***
+ * Fprints game's board to the given file
+ * @param game - The game whose board you want to fprint
+ * @param file - The file to fprint to
+ * @return
+ * SP_CHESS_GAME_INVALID_ARGUMENT if game or file are NULL
+ * SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file);
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H

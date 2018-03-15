@@ -101,12 +101,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			else if (cmd.cmd == SP_PRINT_SETTINGS) {
-				printf("SETTINGS:\n");
-				printf("GAME_MODE: %d-player\n", game->gameMode);
-				if (game->gameMode == 1) {
-					printf("DIFFICULTY: %s", difficulties[game->difficulty]);
-					printf("USER_COLOR: %s", game->userColor ? "white" : "black");
-				}
+				spFprintSettings(game, stdout);
 			}
 
 			else if (cmd.cmd == SP_QUIT) {

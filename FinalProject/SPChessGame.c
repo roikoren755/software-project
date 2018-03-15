@@ -13,19 +13,12 @@
 #define LAST_ROW 7
 #define LEFT_MOST_COL 0
 #define RIGHT_MOST_COL 7
-#define PAWN 'M'
-#define KNIGHT 'N'
-#define ROOK 'R'
-#define BISHOP 'B'
-#define QUEEN 'Q'
 #define PAWN(color) ('M'+color*('a'-'A'))
 #define KNIGHT(color) ('N'+color*('a'-'A'))
 #define BISHOP(color) ('B'+color*('a'-'A'))
 #define ROOK(color) ('R'+color*('a'-'A'))
 #define QUEEN(color) ('Q'+color*('a'-'A'))
 #define KING(color) ('K'+color*('a'-'A'))
-#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
-#define BLANK '_'
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
@@ -46,42 +39,6 @@
 #define CAPTURED 1
 #define THREATENED 1
 #define HISTORY_SIZE 3
-
-/***
- * Get destination position from int representing a move
- * @param move
- * @return the destination position as a char
- */
-char spChessGameGetDestinationPositionFromMove(int move) {
-    return (char) CLEAN_EXCESS_BYTES((move >> 8)); // Get 2nd byte from the right
-}
-
-/***
- * Get current position from int representing a move
- * @param move
- * @return the current location as a char
- */
-char spChessGameGetCurrentPositionFromMove(int move) {
-    return (char) CLEAN_EXCESS_BYTES((move >> 16)); // Get 3rd Byte from the left
-}
-
-/***
- * Get column from char representing a location
- * @param position
- * @return the column number from the given position
- */
-int spChessGameGetColumnFromPosition(char position) {
-    return (int) (position << 4) >> 4; // Get 4 rightmost bits
-}
-
-/***
- * Get row from char representing a location
- * @param position
- * @return the row number of the given position
- */
-int spChessGameGetRowFromPosition(char position) {
-    return (int) position >> 4; // Get 4 leftmost bits
-}
 
 /***
  * Resets src's game board to the starting set-up
@@ -756,33 +713,65 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 	return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src) {
-	if (!src) { // src is NULL
+SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* src, FILE* file) {
+	if (!src || !file) { // src or file are NULL
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
 
 	for (int i = 0; i < N_ROWS; i++) {
-		printf("%d|", 8 - i); // Print row number
+		fprintf(file, "%d|", N_ROWS - i); // Print row number
 		for (int j = 0; j < N_COLUMNS; j++) {
 			char currChar = src->gameBoard[i][j];
-            printf(" %c", currChar ? currChar : BLANK); // Print piece if it's there
+            fprintf(file, " %c", currChar ? currChar : BLANK); // Print piece if it's there
 		}
-		printf(" |\n"); // End row
+		fprintf(file, " |\n"); // End row
 	}
 
-	printf("  "); // Some spaces
+	fprintf(file, "  "); // Some spaces
 
 	for (int i = 0; i < 2 * N_COLUMNS + 1; i++) {
-		printf("%c", SEPARATOR); // Close the board at the bottom
+		fprintf(file, "%c", SEPARATOR); // Close the board at the bottom
 	}
 
-	printf("\n  "); // WHITE SPACE
+	fprintf(file, "\n  "); // WHITE SPACE
 
 	for (int i = 0; i < N_COLUMNS; i++) {
-		printf(" %c", FIRST_COLUMN + i); // Column letters
+		fprintf(file, " %c", FIRST_COLUMN + i); // Column letters
 	}
 
-	printf("\n"); // Voila
+	fprintf(file, "\n"); // Voila
 
 	return SP_CHESS_GAME_SUCCESS;
+}
+
+SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src) {
+	return spChessGameFprintBoard(src, stdout);
+}
+
+int spChessGameEnded(SPChessGame* game) {
+	if (!game) {
+		return -1;
+	}
+
+	int gameEnded = 1;
+	int index;
+	for (int i = 0; i < 2 * N_COLUMNS; i++) {
+		index = i + game->currentPlayer * 2 * N_COLUMNS;
+		if (game->locations[index]) {
+			SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[index]);
+			if (!possibleMoves) {
+				return -1;
+			}
+
+			if (!spArrayListIsEmpty(possibleMoves)) { // There's a piece that can move
+				gameOver = 0; // Game isn't over
+				spArrayListDestroy(possibleMoves);
+				break;
+			}
+
+			spArrayListDestroy(possibleMoves);
+		}
+	}
+
+	return gameEnded;
 }
