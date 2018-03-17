@@ -228,8 +228,8 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 
 	int bestScore = INT_MAX; // Initializations
 	int bestMove = -1;
-	char bestStartingPosition;
-	char bestDestinationPosition;
+	char bestStartingPosition = -1;
+	char bestDestinationPosition = -1;
 	int bestStartingColumn;
 	int bestStartingRow;
 	int bestDestinationColumn;
@@ -297,9 +297,9 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-							startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
-							startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
-							destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow)))) { // 4. Destination Row
+							(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
+							(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
+							(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;
@@ -328,8 +328,8 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 
 	int bestScore = INT_MIN;
 	int bestMove = -1;
-	char bestStartingPosition;
-	char bestDestinationPosition;
+	char bestStartingPosition = -1;
+	char bestDestinationPosition = -1;
 	int bestStartingColumn;
 	int bestStartingRow;
 	int bestDestinationColumn;
@@ -397,9 +397,9 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-						startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
-																	startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
-																									   destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow)))) { // 4. Destination Row
+						(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
+						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
+						(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;

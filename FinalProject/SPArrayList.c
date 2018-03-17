@@ -5,6 +5,7 @@
  */
 #include "SPArrayList.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 SPArrayList* spArrayListCreate(int maxSize) {
 	if (maxSize <= 0) {

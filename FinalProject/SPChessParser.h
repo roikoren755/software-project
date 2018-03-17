@@ -9,7 +9,7 @@
 #define SP_MAX_LINE_LENGTH 2048
 
 // All the different commands
-typedef enum {
+typedef enum sp_command_t {
     SP_GAME_MODE,
     SP_DIFFICULTY,
     SP_USER_COLOR,

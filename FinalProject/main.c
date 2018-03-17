@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 			SPCommand cmd = spGetCommand();
 
 			if (cmd.cmd == SP_GAME_MODE) {
-				int gameMode = spParserGetNonNegativeInt(cmd.arguments);
+				int gameMode = spParserGetNonNegativeInt(&cmd);
 				if (gameMode == 1 || gameMode == 2) {
 					game->gameMode = gameMode;
 					printf("Game mode is set to %d-player\n", gameMode);
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			else if (cmd.cmd == SP_DIFFICULTY && game->gameMode == 1) {
-				int difficulty = spParserGetNonNegativeInt(cmd.arguments);
+				int difficulty = spParserGetNonNegativeInt(&cmd);
 				if (difficulty >= 1 && difficulty <= 5) {
 					game->difficulty = difficulty;
 					printf("Difficulty level is set to %s", difficulties[difficulty]);
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			else if (cmd.cmd == SP_USER_COLOR && game->gameMode == 1) {
-				int userColor = spParserGetNonNegativeInt(cmd.arguments);
+				int userColor = spParserGetNonNegativeInt(&cmd);
 				if (userColor == 0 || userColor == 1) {
 					game->userColor = userColor;
 					printf("User color is set to %s", userColor ? "white" : "black");
