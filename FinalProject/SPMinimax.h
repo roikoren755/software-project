@@ -1,7 +1,7 @@
 #ifndef SPMINIMAX_H_
 #define SPMINIMAX_H_
 
-#include "SPFIARGame.h"
+#include "SPChessGame.h"
 
 /**
  * Given a game state, this function evaluates the best move according to
@@ -15,6 +15,6 @@
  * -1 if either currentGame is NULL or an error occurred
  * On success the function returns an integer representing the suggested move.
  */
-int spMinimaxSuggestMove(SPFiarGame* currentGame);
+int spMinimaxSuggestMove(SPChessGame* currentGame);
 
 #endif

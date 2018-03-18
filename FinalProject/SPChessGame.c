@@ -5,7 +5,6 @@
 #include "SPChessGame.h"
 #include "SPArrayList.h"
 #include "SPMainAux.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 #define STARTING_ROW "RNBQKBNR"
@@ -19,6 +18,8 @@
 #define ROOK(color) ('R'+color*('a'-'A'))
 #define QUEEN(color) ('Q'+color*('a'-'A'))
 #define KING(color) ('K'+color*('a'-'A'))
+#define BLANK '_'
+#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
@@ -42,7 +43,6 @@
 #define COL_NUM_TO_LETTER(column) (column+'A')
 
 /***
-<<<<<<< HEAD
  * Get destination position from int representing a move
  * @param move
  * @return the destination position as a char
@@ -92,8 +92,6 @@ int spChessGameWillStepCapture(int step){
 }
 
 /***
-=======
->>>>>>> 30e9900b8619b88c8b653af3a00f3dfe1d6bbae2
  * Resets src's game board to the starting set-up
  * @param src
  * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL
@@ -107,8 +105,8 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src) {
 	char* starting_row = STARTING_ROW;
 
 	for (int i = 0; i < N_COLUMNS; i++) {
-		src->gameBoard[1][i] = PAWN; // Put black pawns on the board
-		src->gameBoard[6][i] = CAPITAL_TO_LOW(PAWN); // Put white pawns on the board
+		src->gameBoard[1][i] = PAWN(BLACK); // Put black pawns on the board
+		src->gameBoard[6][i] = PAWN(WHITE); // Put white pawns on the board
 		src->gameBoard[0][i] = starting_row[i]; // Put other pieces on the board
 		src->gameBoard[7][i] = CAPITAL_TO_LOW(starting_row[i]); // For whitey too
 
@@ -222,7 +220,7 @@ void spChessGameDestroy(SPChessGame* src) {
 }
 
 SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color){
-	int kingThreatenred = spChessGameIsPieceThreatened(src,src->locations[KING_LOC(color)])
+	int kingThreatenred = spChessGameIsPieceThreatened(src,src->locations[KING_LOC(color)]);
 	int gameOver = 1;
 	int index;
 	for (int i = 0; i < 2 * N_COLUMNS; i++) {
@@ -378,7 +376,7 @@ SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move
 		}
 	}
 
-	return SP_CHESS_GAME_SUCCESS;
+	return threatened ? SP_CHESS_GAME_MOVE_WILL_THREATEN : SP_CHESS_GAME_SUCCESS;
 }
 
 bool spChessGameIsPieceThreatened(SPChessGame* src, char pieceLocation){
@@ -588,14 +586,14 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position){
 	return steps;
 }
 
-SP_CHESS_GAME_MESSAGE* spChessPrintMoves(SPArrayList* list){
+SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list){
 	int elemNum = spArrayListSize(list);
 	int step, destRow, destCol;
 	for(int i = 0 ; i<elemNum; i++){
-		step = spArrayListGetAt(i);
+		step = spArrayListGetAt(list, i);
 		destRow = spChessGameGetRowFromStep(step);
 		destCol = spChessGameGetColFromStep(step);
-		printf("<%d,%c>",destRow+1,COL_NUM_TO_LETTER(destCol));
+		printf("<%d,%c>",8 - destRow,COL_NUM_TO_LETTER(destCol));
 
 		if(spChessGameWillStepThreaten(step)){
 			printf("*");
@@ -793,7 +791,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
-	if (captured == currentPlayer ? CAPITAL_TO_LOW(PAWN) : PAWN) { // Update location if pawn was captured
+	if (captured == PAWN(currentPlayer)) { // Update location if pawn was captured
         int startIndex = currentPlayer ? 2 * N_COLUMNS : N_COLUMNS; // Pawn locations by color
 		for (int i = 0; i < N_COLUMNS; i++) {
 			if (!src->locations[i + startIndex]) {
@@ -803,7 +801,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 	}
 
 	int index;
-	if (captured == currentPlayer ? CAPITAL_TO_LOW(KNIGHT) : KNIGHT) { // Update location if knight was captured
+	if (captured == KNIGHT(currentPlayer)) { // Update location if knight was captured
 		if (!src->locations[RIGHT_KNIGHT_LOC(currentPlayer)]) {
 			index = RIGHT_KNIGHT_LOC(currentPlayer);
 		}
@@ -812,7 +810,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 		}
 	}
 
-	if (captured == currentPlayer ? CAPITAL_TO_LOW(ROOK) : ROOK) { // Rook taken
+	if (captured == ROOK(currentPlayer)) { // Rook taken
 		if (!src->locations[RIGHT_ROOK_LOC(currentPlayer)]) {
 			index = RIGHT_ROOK_LOC(currentPlayer);
 		}
@@ -821,7 +819,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 		}
 	}
 
-	if (captured == currentPlayer ? CAPITAL_TO_LOW(BISHOP) : BISHOP) { // Bishop
+	if (captured == BISHOP(currentPlayer)) { // Bishop
 		if (!src->locations[RIGHT_BISHOP_LOC(currentPlayer)]) {
 			index = RIGHT_BISHOP_LOC(currentPlayer);
 		}
@@ -830,7 +828,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 		}
 	}
 
-	if (captured == currentPlayer ? CAPITAL_TO_LOW(QUEEN) : QUEEN) { // QUEEN???
+	if (captured == QUEEN(currentPlayer)) { // QUEEN???
 		index = QUEEN_LOC(currentPlayer);
 	}
 
@@ -890,7 +888,7 @@ int spChessGameEnded(SPChessGame* game) {
 			}
 
 			if (!spArrayListIsEmpty(possibleMoves)) { // There's a piece that can move
-				gameOver = 0; // Game isn't over
+				gameEnded = 0; // Game isn't over
 				spArrayListDestroy(possibleMoves);
 				break;
 			}
