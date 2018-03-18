@@ -25,6 +25,8 @@
 #define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
 #define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
+#define CONSOLE 0
+#define GUI 1
 
 int min(int a,int b){
 	if(a<b){return a;}
@@ -409,4 +411,13 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
 
     fclose(filePointer);
     return SP_CHESS_GAME_SUCCESS;
+}
+
+SPCommand spGetCommand(int mode) {
+    char input[MAXIMUM_COMMAND_LENGTH + 1];
+    if (mode == CONSOLE) {
+        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
+    }
+
+    return spParserParseLine(input);
 }
