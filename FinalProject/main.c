@@ -1,7 +1,7 @@
 /*
  * main.c
  *
- *  Created on: 6 במרס 2018
+ *  Created on: 6 March 2018
  *      Author: user
  */
 
@@ -10,16 +10,25 @@
 #include "SPArrayList.h"
 #include "SPMainAux.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-int main(){
-	SPChessGame *game = spChessGameCreate(3);
-	spChessGamePrintBoard(game);
+#define CONSOLE 0
+#define GUI 1
+#define CONSOLE_ARGUMENT "-c"
+#define GUI_ARGUMENT "-g"
 
-	spChessGameDestroy(game);
+int main(int argc, char* argv[]) {
+    int mode = CONSOLE;
+    if (argc == 2) {
+        if (!strcmp(argv[1], GUI_ARGUMENT)) {
+            mode = GUI;
+        }
+        else if (strcmp(argv[1], CONSOLE_ARGUMENT)) {
+            printf("Usage: ./chessprog [-c | -g]");
+            return 0;
+        }
+    }
 
-<<<<<<< HEAD
-=======
 	SPChessGame* game = spChessGameCreate();
 	if (!game) {
 		perror("ERROR: Could not create game! Exiting...\n");
@@ -108,7 +117,29 @@ int main(){
 			}
 		}
 
-
+        if (game->gameMode == 2) {
+            spChessGamePrintBoard(game);
+            printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
+            SPCommand cmd = spGetCommand();
+            if (cmd.cmd == SP_MOVE) {
+                int move = spParserGetMove(&cmd) << 8;
+            }
+			char currentPosition = spChessGameGetCurrentPositionFromMove(move);
+			char destinationPosition = spChessGameGetDestinationPositionFromMove(move);
+			int currentRow = spChessGameGetRowFromPosition(currentPosition);
+			int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
+			int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
+			int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
+			if (currentRow < 0 || currentRow > 7 ||
+					currentColumn < 0 || currentRow > 7 ||
+					destinationRow < 0 || destinationRow > 7 ||
+					destinationColumn < 0 || destinationColumn > 7) {
+				printf("Invalid position on the board\n");
+			}
+			else if (game->gameMode[currentRow][currentColumn] < (game->currentPlayer ? 'b' : 'B') ||
+					game->gameMode[currentRow][currentColumn] > (game->currentPlayer ? 'r' : 'R')) {
+				printf("The specified position does not contain your piece\n");
+			}
+        }
 	}
->>>>>>> 49d9a918b6cbdaca26b214af83140b7319aa6696
 }

@@ -60,11 +60,11 @@ char spParserGetBoardLocationFromString(char* str) {
     char location = 0;
 
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' && // str is "<x,y>", with x and y as legal row and column
-        str[1] >= 'A' && str[1] <= 'H' &&
-        str[3] >= '1' && str[3] <= '8') {
-        location = str[1] - 'A'; // Get row
+        str[1] >= '1' && str[1] <= '8' &&
+        str[3] >= 'A' && str[3] <= 'H') {
+        location = 7 - (str[1] - '1'); // Get row
         location <<= 4;
-        location |= str[3] - '1'; // And column
+        location |= str[3] - 'H'; // And column
     }
     else { // str isn't!
         location = ~location; // Booo
@@ -227,11 +227,11 @@ int spParserGetNonNegativeInt(const SPCommand* command) {
     return result;
 }
 
-char spParserGetLocation(SPCommand* command) {
+char spParserGetLocation(const SPCommand* command) {
     return spParserGetBoardLocationFromString(command->arguments); // Just need that string
 }
 
-int spParserGetMove(SPCommand* command) {
+int spParserGetMove(const SPCommand* command) {
 	int locations = 0; // Preparations
     locations |= spParserGetBoardLocationFromString(command->arguments); // First coordinates
     locations <<= 8; // Make room
