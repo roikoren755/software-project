@@ -512,14 +512,14 @@ bool spChessGameCheckKnightMove(SPChessGame* src , char targetLoc , char threatL
 	int threatCol = spChessGameGetColumnFromPosition(threatLoc);
 	int threatRow = spChessGameGetRowFromPosition(threatLoc);
 
-	if(abs(targetCol-threatCol)==2){
-		if(abs(targetRow-threatRow)==3){
+	if(abs(targetCol-threatCol)==1){
+		if(abs(targetRow-threatRow)==2){
 			return true;
 		}
 	}
 
-	if(abs(targetCol-threatCol)==3){
-		if(abs(targetRow-threatRow)==2){
+	if(abs(targetCol-threatCol)==2){
+		if(abs(targetRow-threatRow)==1){
 			return true;
 		}
 	}
@@ -645,21 +645,21 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayLi
 	int move;
 	for(int i = -1; i<=1;i+=2){
 		for(int i = -1; i<=1;i+=2){
-			move = setMoveCoordinatesToInt(curRow,curCol,curRow+2*i,curCol+3*i);
+			move = setMoveCoordinatesToInt(curRow,curCol,curRow+2*i,curCol+1*i);
 			if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
-				spArrayListAddLast(setStepCoordinatesToInt(curRow+2*i,curCol+3*i,
+				spArrayListAddLast(setStepCoordinatesToInt(curRow+2*i,curCol+1*i,
 					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
-					,src->gameBoard[curRow+2*i][curCol+3*i]);
+					,src->gameBoard[curRow+2*i][curCol+1*i]);
 			}
 		}
 	}
 	for(int i = -1; i<=1;i+=2){
 		for(int i = -1; i<=1;i+=2){
-			move = setMoveCoordinatesToInt(curRow,curCol,curRow+3*i,curCol+2*i);
+			move = setMoveCoordinatesToInt(curRow,curCol,curRow+1*i,curCol+2*i);
 			if(spChessGameIsValidMove(src,move)==SP_CHESS_GAME_SUCCESS){
-				spArrayListAddLast(setStepCoordinatesToInt(curRow+3*i,curCol+2*i,
+				spArrayListAddLast(setStepCoordinatesToInt(curRow+1*i,curCol+2*i,
 					spChessGameCheckPotentialThreat(src,move,spChessGameGetDestinationPositionFromMove(move)==SP_CHESS_GAME_MOVE_WILL_THREATEN))
-					,src->gameBoard[curRow+3*i][curCol+2*i]);
+					,src->gameBoard[curRow+1*i][curCol+2*i]);
 			}
 		}
 	}

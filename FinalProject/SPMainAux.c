@@ -6,8 +6,6 @@
 #include "SPMinimax.h"
 #include "SPMainAux.h"
 
-<<<<<<< HEAD
-=======
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
 #define PAWN 'M'
@@ -27,7 +25,6 @@
 #define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
 #define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
->>>>>>> 49d9a918b6cbdaca26b214af83140b7319aa6696
 
 int min(int a,int b){
 	if(a<b){return a;}
