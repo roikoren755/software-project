@@ -41,23 +41,6 @@ int max(int a,int b){
 //	else{return -a;}
 //}
 
-<<<<<<< HEAD
-
-SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location) {
-	SPChessGame* copy = spChessGameCopy(src);
-	if (!copy) {
-		return SP_CHESS_GAME_ALOCATION_ERROR;
-	}
-	spChessGameSetMove(copy,move);
-	if (spChessGameIsPieceThreatened(copy,location)) {
-		return SP_CHESS_GAME_MOVE_WILL_THREATEN;
-	}
-	spChessGameDestroy(copy);
-	return SP_CHESS_GAME_SUCCESS;
-}
-
-int spRunGame(SPChessGame* src) {
-=======
 char spChessGameGetDestinationPositionFromMove(int move) {
     return (char) CLEAN_EXCESS_BYTES((move >> 8)); // Get 2nd byte from the right
 }
@@ -111,11 +94,15 @@ int spGetColor(const char* argument) {
     if (!argument) {
         return -1;
     }
->>>>>>> 49d9a918b6cbdaca26b214af83140b7319aa6696
 
+    if (!strcmp(argument, "white")) {
+        return 1;
+    }
+    if (!strcmp(argument, "black")) {
+        return 0;
+    }
+    return -1;
 }
-<<<<<<< HEAD
-=======
 
 int spGetGameMode(const char* argument) {
     if (!argument) {
@@ -423,4 +410,3 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     fclose(filePointer);
     return SP_CHESS_GAME_SUCCESS;
 }
->>>>>>> 49d9a918b6cbdaca26b214af83140b7319aa6696
