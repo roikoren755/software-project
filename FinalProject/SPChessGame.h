@@ -7,18 +7,12 @@
 
 #include "SPArrayList.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 #define WHITE 1
 #define BLACK 0
 #define N_ROWS 8
 #define N_COLUMNS 8
-#define PAWN 'M'
-#define ROOK 'R'
-#define BISHOP 'B'
-#define KNIGHT 'N'
-#define QUEEN 'Q'
-#define KING 'K'
-#define BLANK '_'
 
 typedef struct sp_chess_game_t {
 	int gameMode;
@@ -45,8 +39,7 @@ typedef enum sp_chess_game_message_t {
 	SP_CHESS_GAME_ALOCATION_ERROR,
 	SP_CHESS_GAME_CHECK,
 	SP_CHESS_GAME_CHECKMATE,
-	SP_CHESS_GAME_DRAW,
-	SP_CHESS_GAME_ALOCATION_ERROR
+	SP_CHESS_GAME_DRAW
 } SP_CHESS_GAME_MESSAGE;
 
 /***
@@ -70,7 +63,7 @@ SPChessGame* spChessGameCopy(SPChessGame* src);
  */
 void spChessGameDestroy(SPChessGame* src);
 
-SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src);
+SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src, int color);
 
 /**
  * given an in range move, checks if the move is valid regarding the piece at the
@@ -127,7 +120,7 @@ bool spChessGameCheckKingThreat(SPChessGame* src , char targetLoc , char threatL
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-SPArrayList* spChessGameGetMoves(SPChessGame* src, int position);
+SPArrayList* spChessGameGetMoves(SPChessGame* src, char position);
 /**
  * given a list, prints all possible moves listed.
  *
@@ -136,7 +129,7 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, int position);
  * SP_CHESS_GAME_SUCCESS  - if the the moves were successfully printed
  * false - otherwise.
  */
-SP_CHESS_GAME_MESSAGE* spChessPrintMoves(SPArrayList* list){
+SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list);
 
 SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* steps, char position, int verDir, int horDir,int color);
 
