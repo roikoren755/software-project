@@ -78,20 +78,6 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src, int color);
 SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move);
 
 /**
- * given a move, Checks if a the piece that after the move will be
- * at the given location will be threaten (after that move).
- * this function does not check whether the move is valid regarding the movement abilities
- * of the pieces.
- *
- * @param src - The source game
- * @param col - The specified column
- * @return
- * true  - if the a disc can be put in the target column
- * false - otherwise.
- */
-SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move,char location);
-
-/**
  * Checks if a piece is threatened by an opponent.
  *
  * @param src - The source game
@@ -101,14 +87,6 @@ SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move
  * false - otherwise.
  */
 bool spChessGameIsPieceThreatened(SPChessGame* src, char pieceLocation);
-
-bool spChessGameCheckDiagonalMove(SPChessGame* src , char targetLoc , char threatLoc);
-
-bool spChessGameCheckStraightLineMove(SPChessGame* src , char targetLoc , char threatLoc);
-
-bool spChessGameCheckKnightMove(SPChessGame* src , char targetLoc , char threatLoc);
-
-bool spChessGameCheckKingThreat(SPChessGame* src , char targetLoc , char threatLoc);
 
 /**
  * returns all possible moves of the piece located at <x,y>.
@@ -130,10 +108,6 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position);
  * false - otherwise.
  */
 SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list);
-
-SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src,SPArrayList* steps, char position, int verDir, int horDir,int color);
-
-SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src,SPArrayList* steps, char position,int color);
 
 /***
  * Makes the move passed to it in src's game.
@@ -160,16 +134,6 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src);
  *         SP_CHESS_GAME_SUCCESS otherwise
  */
 SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
-
-/***
- * Checks whether the game pointed to by game has ended, by seeing if the current player has
- * any legal moves he can make.
- * @param game - Game to check if ended
- * @return -1 if game is NULL
- *          0 if the game isn't over
- *          1 if it is
- */
-int spChessGameEnded(SPChessGame* game);
 
 /***
  * Fprints game's board to the given file
