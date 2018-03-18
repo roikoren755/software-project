@@ -81,7 +81,7 @@ int main(){
 			}
 
 			else if (cmd.cmd == SP_LOAD) {
-				spLoadGame(game, cmd.arguments);
+				spChessLoadGame(game, cmd.arguments);
 			}
 
 			else if (cmd.cmd == SP_DEFAULT) {
