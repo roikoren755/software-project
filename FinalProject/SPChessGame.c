@@ -42,8 +42,19 @@
 #define HISTORY_SIZE 3
 #define COL_NUM_TO_LETTER(column) (column+'A')
 
+/***
+ * Check whether a piece at threatLocation can make a DIAGONAL move to targetLocation,
+ * without having to jump over a piece enroute.
+ * @param src - Game to check move on
+ * @param targetLocation - Location you want to get to
+ * @param threatLocation - Location you are at
+ * @return
+ * -1 if src is NULL, or one of the positions isn't on the board
+ *  0 if there isn't a legal DIAGONAL move
+ *  1 otherwise
+ */
 int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) {
+    if (!src) { // src is NULL
         return -1;
     }
 
@@ -54,30 +65,42 @@ int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char thr
 
     if (targetColumn < 0 || targetColumn > N_COLUMNS - 1 || targetRow < 0 || targetRow > N_ROWS - 1 ||
         threatColumn < 0 || threatColumn > N_COLUMNS - 1 || threatRow < 0 || threatRow > N_ROWS - 1) {
-        return -1;
+        return -1; // Out of bounds
     }
 
     char piece = src->gameBoard[threatRow][threatColumn];
     int distance = abs(threatRow - targetRow);
 
-    if (abs(threatColumn - targetColumn) == distance) {
-        int columnDirection = threatColumn > targetColumn ? RIGHT : LEFT;
-        int rowDirection = threatRow > targetRow ? DOWN : UP;
+    if (abs(threatColumn - targetColumn) == distance) { // Move is an actual diagonal move
+        int columnDirection = threatColumn > targetColumn ? RIGHT : LEFT; // Where are we going?
+        int rowDirection = threatRow > targetRow ? DOWN : UP; // And now?
         char temp;
         for (int i = 1; i < distance; i++) {
             temp = src->gameBoard[targetRow + i * rowDirection][targetColumn+i*dirCol];
-            if (temp) {
+            if (temp) { // There's something blocking the way!
                 return 0;
             }
         }
 
+        return 1; // Gotcha
     }
 
-    return 1;
+    return 0; // Or not?
 }
 
+/***
+ * Checks whether a piece at threatLocation can make a STRAIGHT LINE move to targetLocation,
+ * without having to jump over any piece on the way.
+ * @param src - Game to check move in
+ * @param targetLocation - Finishing location
+ * @param threatLocation - Starting location?
+ * @return
+ * -1 if src is NULL or one of the locations isn't on the board
+ *  0 if no legal move can be made
+ *  1 otherwise
+ */
 int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) {
+    if (!src) { // src is NULL
         return -1;
     }
 
@@ -88,18 +111,18 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
 
     if (targetColumn < 0 || targetColumn > N_COLUMNS - 1 || targetRow < 0 || targetRow > N_ROWS - 1 ||
         threatColumn < 0 || threatColumn > N_COLUMNS - 1 || threatRow < 0 || threatRow > N_ROWS - 1) {
-        return -1;
+        return -1; // Offside! He's bleeping OFFSIDE!!!
     }
 
     char piece = src->gameBoard[threatRow][threatColumn];
     char temp;
     int direction;
 
-    if (targetColumn == threatColumn && targetRow != threatRow) {
+    if (targetColumn == threatColumn && targetRow != threatRow) { // Horizontal move
         direction = threatColumn > targetColumn ? RIGHT : LEFT;
         for (int i = 1; i < abs(threatRow - targetRow); i++) {
             temp = src->gameBoard[targetRow][targetColumn + i * direction];
-            if (temp) {
+            if (temp) { // Blocked
                 return 0;
             }
         }
@@ -107,23 +130,33 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
         return 1;
     }
 
-    if (targetRow == threatRow && targetColumn != threatColumn) {
+    if (targetRow == threatRow && targetColumn != threatColumn) { // Vertical move
         direction = threatRow > targetRow ? DOWN : UP;
         for (int i = 1; i < abs(threatRow - targetRow); i++) {
             temp = src->gameBoard[targetRow + i * direction][targetColumn];
-            if (temp) {
+            if (temp) { // Blockage
                 return 0;
             }
         }
 
-        return 1;
+        return 1; // All good
     }
 
-    return 0;
+    return 0; // Not a STRAIGHT LINE move
 }
 
+/***
+ * Checks whether a move can be made from threatLocation to targetLocation by a knight.
+ * @param src - Game to check on
+ * @param targetLocation - Finish
+ * @param threatLocation - Start
+ * @return
+ * -1 if src is NULL or a position is out of bounds
+ *  0 if the move cannot be made, not by a Knight Who Says Ni
+ *  1 otherwise
+ */
 int spChessGameCheckKnightMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) {
+    if (!src) { // src is NULL
         return -1;
     }
 
@@ -134,21 +167,31 @@ int spChessGameCheckKnightMove(SPChessGame* src, char targetLocation, char threa
 
     if (targetColumn < 0 || targetColumn > N_COLUMNS - 1 || targetRow < 0 || targetRow > N_ROWS - 1 ||
         threatColumn < 0 || threatColumn > N_COLUMNS - 1 || threatRow < 0 || threatRow > N_ROWS - 1) {
-        return -1;
+        return -1; // Not in my back yard!
     }
 
     int columnDistance = abs(targetColumn - threatColumn);
     int rowDistance = abs(targetRow - threatRow);
     if ((columnDistance == 1 && rowDistance == 2) ||
         (columnDistance == 2 && rowDistance == 1)) {
-        return 1;
+        return 1; // Welp, he got me!
     }
 
-    return 0;
+    return 0; // And I raaaaaaan.....
 }
 
+/***
+ * Checks whether a king can make the move from threatLocation to targetLocation.
+ * @param src - Game to check on
+ * @param targetLocation - Finish line
+ * @param threatLocation - Start line
+ * @return
+ * -1 if src is NULL or one of the location's isn't on the board
+ *  0 if the move can't be made
+ *  1 otherwise
+ */
 int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) {
+    if (!src) { // src is NULL
         return -1;
     }
 
@@ -159,13 +202,14 @@ int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threa
 
     if (targetColumn < 0 || targetColumn > N_COLUMNS - 1 || targetRow < 0 || targetRow > N_ROWS - 1 ||
         threatColumn < 0 || threatColumn > N_COLUMNS - 1 || threatRow < 0 || threatRow > N_ROWS - 1) {
-        return -1;
+        return -1; // A position is off the board
     }
 
     if (abs(targetColumn - threatColumn) <= 1 && abs(targetRow - threatRow) <= 1) {
-        return 1;
+        return 1; // Yep
     }
-    return 0;
+
+    return 0; // Nope
 }
 
 /***
@@ -179,24 +223,24 @@ int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threa
  * SP_CHESS_GAME_SUCCESS otherwise
  */
 SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
-    if (!src) {
+    if (!src) { // src is NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     int lastMove = 0;
     int full = 0;
     int threatened = 0;
-    if (spArrayListIsFull(src->history)) {
-        lastMove = spArrayListGetLast(src->history);
+    if (spArrayListIsFull(src->history)) { // A move will be lost if we add another to the game's history
+        lastMove = spArrayListGetLast(src->history); // So save it for later
         full = 1;
     }
 
-    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(src, move);
-    if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
+    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(src, move); // Make the move
+    if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) { // Oops, can't guarantee what happened
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    if (spChessGameIsPieceThreatened(src, location)) {
+    if (spChessGameIsPieceThreatened(src, location)) { //
         threatened = 1;
     }
 
@@ -215,6 +259,15 @@ SP_CHESS_GAME_MESSAGE spChessGameCheckPotentialThreat(SPChessGame* src, int move
     return threatened ? SP_CHESS_GAME_MOVE_WILL_THREATEN : SP_CHESS_GAME_SUCCESS;
 }
 
+/***
+ * Prepares an int to represent a move, so as to be accepted by spChessGameSetMove(...)
+ * @param currentRow
+ * @param currentColumn
+ * @param destinationRow
+ * @param destinationColumn
+ * @return
+ * An int representing the move indicated by the arguments
+ */
 int setMoveCoordinatesToInt(int currentRow, int currentColumn, int destinationRow, int destinationColumn) {
     int move = 0; // format is 4 bits current row, 4 current column, 4 destination row, 4 destination column
     move = (currentRow | move) << 4;
@@ -224,6 +277,16 @@ int setMoveCoordinatesToInt(int currentRow, int currentColumn, int destinationRo
     return move;
 }
 
+/***
+ * Prepares an int to represent a step, such as the ones returned in the SPArrayList returned by
+ * spChessGameGetMoves(...)
+ * @param destinationRow
+ * @param destinationColumn
+ * @param threatened - Moved piece is threatened after move (0 or 1)
+ * @param captures - Move captures an opponent's piece (0 or 1)
+ * @return
+ * An int representing the step
+ */
 int setStepCoordinatesToInt(int destinationRow, int destinationColumn, int threatened, int captures) {
     int step = 0; // format is 4 bits destination row, 4 destination column, 4 if will be threatened, 4 if captures
     step = (destinationRow | step) << 4;
@@ -246,7 +309,7 @@ int setStepCoordinatesToInt(int destinationRow, int destinationColumn, int threa
  * SP_CHESS_GAME_SUCCESS otherwise
  */
 SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayList* steps, int move, int color) {
-    if (!src || !steps) {
+    if (!src || !steps) { // Something is NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -254,12 +317,12 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
     char piece = src->gameBoard[destinationRow][destinationColumn];
-    int threatened = spChessGameCheckPotentialThreat(src, move, destinationPosition) == SP_CHESS_GAME_MOVE_WILL_THREATEN;
-    int kingNotThreatened = spChessGameCheckPotentialThreat(src, move, src->locations[KING_LOC(color)]) == SP_CHESS_GAME_SUCCESS;
+    int threatened = spChessGameCheckPotentialThreat(src, move, destinationPosition) == SP_CHESS_GAME_MOVE_WILL_THREATEN; // Piece will be threatened?
+    int kingNotThreatened = spChessGameCheckPotentialThreat(src, move, src->locations[KING_LOC(color)]) == SP_CHESS_GAME_SUCCESS; // King won't?
     int step;
     int add = 0;
 
-    if (kingNotThreatened) { // king won't be threatened
+    if (kingNotThreatened) {
         if (!piece) {
             step = setStepCoordinatesToInt(destinationRow, destinationColumn, threatened, !CAPTURES);
             add = 1;
@@ -270,8 +333,8 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
         }
     }
 
-    if (add && spArrayListAddLast(steps, step) != SP_ARRAY_LIST_SUCCESS) {
-        return SP_CHESS_GAME_INVALID_ARGUMENT;
+    if (add && spArrayListAddLast(steps, step) != SP_ARRAY_LIST_SUCCESS) { // Add? at least try to
+        return SP_CHESS_GAME_INVALID_ARGUMENT; // OOPS
     }
 
     return SP_CHESS_GAME_SUCCESS;

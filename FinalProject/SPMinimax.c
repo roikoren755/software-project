@@ -55,13 +55,13 @@ int spChessScoreBoard(SPChessGame* game) {
 		return -1;
 	}
 
-	if (spChessGameEnded(game)) {
-		char kingLocation = game->locations[4 + game->currentPlayer * 3 * N_COLUMNS];
-		if (spChessGameIsPieceThreatened(game, kingLocation)) { // Check-mate anyone?
-			return game->currentPlayer ? -1000 : 1000; // YOU LOSE/WIN
-		}
-		return 0; // Draw
-	}
+    SP_CHESS_GAME_MESSAGE message = spChessCheckGameState(game, game->currentPlayer);
+    if (message == SP_CHESS_GAME_DRAW) { // Draw
+        return 0;
+    }
+    if (message == SP_CHESS_GAME_CHECKMATE) { // Check
+        return game->currentPlayer ? -1000 : 1000; // And mate
+    }
 
 	int result = 0;
 	int pieceScore;
