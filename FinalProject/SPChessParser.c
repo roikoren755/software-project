@@ -56,7 +56,7 @@ int spParserDestroyLocationIfNeeded(int location) {
  * @return a char with all bits as 0 if str isn't a location argument
  *         a char whose 4 leftmost bits represent x, and 4 rightmost bits represent y
  */
-char spParserGetBoardLocationFromString(char* str) {
+char spParserGetBoardLocationFromString(const char* str) {
     char location = 0;
 
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' && // str is "<x,y>", with x and y as legal row and column

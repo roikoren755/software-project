@@ -39,10 +39,19 @@ int spChessGameGetColumnFromPosition(char position);
  */
 int spChessGameGetRowFromPosition(char position);
 
+SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file);
+
 SPCommand spGetCommand();
 
 SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file);
 
 SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file);
 
+SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char position);
+
+void spPrintUndoneMove(int move, int color);
+
+void spPrintComputerMove(char piece, int move);
+
+char spChessGameGetPieceAtPosition(SPChessGame* game, char position);
 #endif

@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
 					printf("Illegal move: king will be threatened\n");
 				}
 				else {
-					message = spChessGameSetMove(src, move);
+					message = spChessGameSetMove(game, move);
 					if (message != SP_CHESS_GAME_SUCCESS) {
 						perror("ERROR: OOPS... something went wrong while setting up a move! Quitting...\n");
 						quit = 1;
@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
 								quit = 1;
 							}
 							else {
-								char piece = spChessGameGetPieceAtPosition(spChessGameGetDestinationPositionFromMove(move << 8));
+								char piece = spChessGameGetPieceAtPosition(game, spChessGameGetDestinationPositionFromMove(move << 8));
 								spPrintComputerMove(piece, move);
 								spChessGameSetMove(game, move);
 							}
@@ -248,7 +248,7 @@ int main(int argc, char* argv[]) {
 				}
 			}
 
-			else if (cmd.cmd = SP_RESET) {
+			else if (cmd.cmd == SP_RESET) {
 				settings = 1;
 				message = spChessGameResetGame(game);
 				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {

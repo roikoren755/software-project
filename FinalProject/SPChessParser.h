@@ -59,15 +59,15 @@ int spParserGetNonNegativeInt(const SPCommand* command);
  * 		   a char, whose 4 MSB are the bit representation of the row coordinate,
  * 		   and 4 LSB are the bit representation of the column coordinate, otherwise.
  */
-char spParserGetLocation(SPCommand* command);
+char spParserGetLocation(const SPCommand* command);
 
 /***
  * Given a SPCommand* command, tries parsing its first two arguments to a pair of coordinates of a move,
  * and returns an int representing those two sets of coordinates.
  * @param command - contains the arguments to parse
  * @return An integer whose two least significant BYTES would be the result of calling
- * 		   the func8tion above with the appropriate arguments.
+ * 		   the function above with the appropriate arguments.
  */
-int spParserGetMove(SPCommand* command);
+int spParserGetMove(const SPCommand* command);
 
 #endif //SOFTWARE_PROJECT_SPCHESSPARSER_H

@@ -4,12 +4,12 @@
  *  Created on: 26 Dec 2017
  *      Author: user
  */
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "SPChessGame.h"
 #include "SPMinimax.h"
 #include "SPMainAux.h"
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define KING 'K'
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
@@ -122,7 +122,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 					return 0;
 				}
 
-				while (spArrayListSize(possibleMoves)) { // As long as there are any we haven't checked
+				while (!spArrayListIsEmpty(possibleMoves)) { // As long as there are any we haven't checked
 					int move = (int) spChessGameGetDestinationPositionFromMove(spArrayListGetFirst(possibleMoves)); // Get destination position
 					move |= location;
 

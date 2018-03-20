@@ -3,7 +3,6 @@
 #include <string.h>
 #include "SPChessGame.h"
 #include "SPChessParser.h"
-#include "SPMinimax.h"
 #include "SPMainAux.h"
 
 #define MAX_FILE_LINE_LENGTH 100
@@ -27,6 +26,8 @@
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
 #define CONSOLE 0
 #define GUI 1
+#define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
+#define PIECE_NAME_LENGTH 6
 
 int min(int a,int b){
 	if(a<b){return a;}
@@ -73,7 +74,7 @@ SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, char* file) {
+SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file) {
     if (!game || !file) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
@@ -84,7 +85,11 @@ SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, char* file) {
     }
 
     fprintf(filePointer, "%s\n", game->currentPlayer ? "white" : "black");
-    spFprintSettings(game, filePointer);
+    SP_CHESS_GAME_MESSAGE message = spFprintSettings(game, filePointer);
+    if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        fclose(filePointer);
+        return message;
+    }
     spChessGameFprintBoard(game, filePointer);
 
     fclose(filePointer);
@@ -420,4 +425,81 @@ SPCommand spGetCommand(int mode) {
     }
 
     return spParserParseLine(input);
+}
+
+SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char position) {
+    if (!game) {
+        return SP_CHESS_GAME_INVALID_ARGUMENT;
+    }
+
+    int row = spChessGameGetRowFromPosition(position);
+    int column = spChessGameGetColumnFromPosition(position);
+    if (row >= 0 && row < N_ROWS && column >= 0 && column < N_COLUMNS) {
+        return SP_CHESS_GAME_INVALID_POSITION;
+    }
+
+    char piece = game->gameBoard[row][column];
+    return CHECK_COLOR(game->currentPlayer, piece) ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
+}
+
+void spPrintUndoneMove(int move, int color) {
+    move <<= 8;
+    char startingPosition = spChessGameGetCurrentPositionFromMove(move);
+    int startingRow = 8 - spChessGameGetRowFromPosition(startingPosition);
+    char startingColumn = 'A' + spChessGameGetColumnFromPosition(startingPosition);
+
+    char finishPosition = spChessGameGetDestinationPositionFromMove(move);
+    int finishRow = 8 - spChessGameGetRowFromPosition(finishPosition);
+    char finishColumn = 'A' + spChessGameGetColumnFromPosition(finishPosition);
+    printf("Undo move for %s player: <%d,%c> -> <%d,%c>\n", color ? "white" : "black", finishRow, finishColumn, startingRow, startingColumn);
+}
+
+void spPrintComputerMove(char piece, int move) {
+    move <<= 8;
+    char startingPosition = spChessGameGetCurrentPositionFromMove(move);
+    int startingRow = 8 - spChessGameGetRowFromPosition(startingPosition);
+    char startingColumn = 'A' + spChessGameGetColumnFromPosition(startingPosition);
+    char finishPosition = spChessGameGetDestinationPositionFromMove(move);
+    int finishRow = 8 - spChessGameGetRowFromPosition(finishPosition);
+    char finishColumn = 'A' + spChessGameGetColumnFromPosition(finishPosition);
+
+    printf("Computer: move ");
+
+    if (piece == PAWN || piece == CAPITAL_TO_LOW(PAWN)) {
+        printf("pawn");
+    }
+    else if (piece == BISHOP || piece == CAPITAL_TO_LOW(BISHOP)) {
+        printf("bishop");
+    }
+    else if (piece == KNIGHT || piece == CAPITAL_TO_LOW(KNIGHT)) {
+        printf("knight");
+    }
+    else if (piece == ROOK || piece == CAPITAL_TO_LOW(ROOK)) {
+        printf("rook");
+    }
+    else if (piece == QUEEN || piece == CAPITAL_TO_LOW(QUEEN)) {
+        printf("queen");
+    }
+    else if (piece == KING || piece == CAPITAL_TO_LOW(KING)) {
+        printf("king");
+    }
+    else {
+        printf("___");
+    }
+
+    printf(" at <%d,%c> to <%d,%c>\n", startingRow, startingColumn, finishRow, finishColumn);
+}
+
+char spChessGameGetPieceAtPosition(SPChessGame* game, char position) {
+    if (!game) {
+        return '\0';
+    }
+
+    int row = spChessGameGetRowFromPosition(position);
+    int column = spChessGameGetColumnFromPosition(position);
+    if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
+        return '\0';
+    }
+
+    return game->gameBoard[row][column];
 }

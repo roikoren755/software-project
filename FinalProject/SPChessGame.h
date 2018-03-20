@@ -35,6 +35,7 @@ typedef enum sp_chess_game_message_t {
     SP_CHESS_GAME_ILLEGAL_MOVE,
     SP_CHESS_GAME_MOVE_WILL_THREATEN,
     SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED,
+	SP_CHESS_GAME_KING_BECOMES_THREATENED,
 	SP_CHESS_GAME_NO_HISTORY,
 	SP_CHESS_GAME_ALLOCATION_ERROR,
 	SP_CHESS_GAME_CHECK,
@@ -86,7 +87,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move);
  * true  - if the a disc can be put in the target column
  * false - otherwise.
  */
-bool spChessGameIsPieceThreatened(SPChessGame* src, char pieceLocation);
+int spChessGameIsPieceThreatened(SPChessGame* src, char pieceLocation);
 
 /**
  * returns all possible moves of the piece located at <x,y>.
@@ -144,5 +145,9 @@ SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
  * SP_CHESS_GAME_SUCCESS otherwise.
  */
 SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file);
+
+int spChessGameGetLastMovePlayed(SPChessGame* game);
+
+SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game);
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
