@@ -423,7 +423,6 @@ SPCommand spGetCommand(int mode) {
     if (mode == CONSOLE) {
         fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
     }
-
     return spParserParseLine(input);
 }
 

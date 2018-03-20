@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 				printedWelcome = 1;
 			}
 			printf("GET COMMAND MESSAGE\n"); // TODO - fix me!
-			SPCommand cmd = spGetCommand();
+			SPCommand cmd = spGetCommand(mode);
 
 			if (cmd.cmd == SP_GAME_MODE) {
 				int gameMode = spParserGetNonNegativeInt(&cmd);
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
 				int difficulty = spParserGetNonNegativeInt(&cmd);
 				if (difficulty >= 1 && difficulty <= 5) {
 					game->difficulty = difficulty;
-					printf("Difficulty level is set to %s", difficulties[difficulty]);
+					printf("Difficulty level is set to %s\n", difficulties[difficulty]);
 				}
 				else {
 					printf("Wrong difficulty level. The value should be between 1 to 5\n");
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 				int userColor = spParserGetNonNegativeInt(&cmd);
 				if (userColor == 0 || userColor == 1) {
 					game->userColor = userColor;
-					printf("User color is set to %s", userColor ? "white" : "black");
+					printf("User color is set to %s\n", userColor ? "white" : "black");
 				}
 				else {
 					printf("Wrong user color. The value should be 0 or 1\n");
@@ -105,6 +105,7 @@ int main(int argc, char* argv[]) {
 				game->userColor = WHITE;
 				game->gameMode = 1;
 				game->difficulty = 2;
+                printf("All settings reset to default\n");
 			}
 
 			else if (cmd.cmd == SP_PRINT_SETTINGS) {
@@ -128,7 +129,7 @@ int main(int argc, char* argv[]) {
         else {
             spChessGamePrintBoard(game);
             printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
-            SPCommand cmd = spGetCommand();
+            SPCommand cmd = spGetCommand(mode);
 			SP_CHESS_GAME_MESSAGE message;
             if (cmd.cmd == SP_MOVE) {
                 int move = spParserGetMove(&cmd) << 8;
