@@ -9,6 +9,7 @@
 #include "SPChessGame.h"
 #include "SPArrayList.h"
 #include "SPMainAux.h"
+#include "SPMinimax.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -18,16 +19,23 @@
 #define GUI_ARGUMENT "-g"
 
 int main(int argc, char* argv[]) {
-    int mode = CONSOLE;
-    if (argc == 2) {
+    int mode;
+    if (argc == 1) {
+		mode = CONSOLE;
+	}
+	else if (argc == 2) {
         if (!strcmp(argv[1], GUI_ARGUMENT)) {
             mode = GUI;
         }
         else if (strcmp(argv[1], CONSOLE_ARGUMENT)) {
-            printf("Usage: ./chessprog [-c | -g]");
+            printf("Usage: ./chessprog [-c | -g]\n");
             return 0;
         }
     }
+	else {
+		printf("Usage: ./chessprog [-c | -g]\n");
+		return 0;
+	}
 
 	SPChessGame* game = spChessGameCreate();
 	if (!game) {
@@ -42,18 +50,18 @@ int main(int argc, char* argv[]) {
 		}
 		printf("\n");
 	}
-	char* difficulties[] = {"", "amateur", "easy", "moderate", "hard", "expert"};
 
+	char* difficulties[] = {"", "amateur", "easy", "moderate", "hard", "expert"};
 	int quit = 0;
 	int settings = 1;
 	int printedWelcome = 0;
 	while (!quit) {
-		while (settings) {
+		if (settings) {
 			if (!printedWelcome) {
 				printf("Specify game settings or type 'start' to begin a game with the current settings:\n");
 				printedWelcome = 1;
 			}
-			printf("GET COMMAND MESSAGE"); // TODO - fix me!
+			printf("GET COMMAND MESSAGE\n"); // TODO - fix me!
 			SPCommand cmd = spGetCommand();
 
 			if (cmd.cmd == SP_GAME_MODE) {
@@ -113,33 +121,150 @@ int main(int argc, char* argv[]) {
 			}
 
 			else {
-				perror("ERROR: Invalid command");
+				perror("ERROR: Invalid command\n");
 			}
 		}
 
-        if (game->gameMode == 2) {
+        else {
             spChessGamePrintBoard(game);
             printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
             SPCommand cmd = spGetCommand();
+			SP_CHESS_GAME_MESSAGE message;
             if (cmd.cmd == SP_MOVE) {
                 int move = spParserGetMove(&cmd) << 8;
+				message = spChessGameIsValidMove(game, move);
+				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+					perror("ERROR: Something went wrong! Quitting...\n");
+					quit = 1;
+				}
+				else if (message == SP_CHESS_GAME_INVALID_POSITION) {
+					printf("Invalid position on the board\n");
+				}
+				else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
+					printf("The specified position does not contain your piece\n");
+				}
+				else if (message == SP_CHESS_GAME_ILLEGAL_MOVE) {
+					printf("Illegal move\n");
+				}
+				else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED) {
+					printf("Illegal move: king is still threatened\n");
+				}
+				else if (message == SP_CHESS_GAME_KING_BECOMES_THREATENED) {
+					printf("Illegal move: king will be threatened\n");
+				}
+				else {
+					message = spChessGameSetMove(src, move);
+					if (message != SP_CHESS_GAME_SUCCESS) {
+						perror("ERROR: OOPS... something went wrong while setting up a move! Quitting...\n");
+						quit = 1;
+					}
+					else {
+						message = spChessCheckGameState(game, game->currentPlayer);
+						if (message != SP_CHESS_GAME_SUCCESS) {
+							if (message == SP_CHESS_GAME_CHECK) {
+								printf("Check: %s king is threatened\n", game->currentPlayer ? "white" : "black");
+							}
+							else {
+								quit = 1;
+								if (message == SP_CHESS_GAME_CHECKMATE) {
+									printf("Checkmate! %s player wins the game\n", game->currentPlayer ? "black" : "white");
+								}
+								else if (message == SP_CHESS_GAME_DRAW) {
+									printf("The game ends in a draw\n");
+								}
+								else {
+									perror("ERROR: Something went wrong while checking game state. Quitting...\n");
+								}
+							}
+						}
+
+						if (!quit && game->gameMode == 1) {
+							move = spMinimaxSuggestMove(game);
+							if (move == -1) {
+								perror("ERROR: Couldn't figure out computer move. Quitting...\n");
+								quit = 1;
+							}
+							else {
+								char piece = spChessGameGetPieceAtPosition(spChessGameGetDestinationPositionFromMove(move << 8));
+								spPrintComputerMove(piece, move);
+								spChessGameSetMove(game, move);
+							}
+						}
+					}
+				}
             }
-			char currentPosition = spChessGameGetCurrentPositionFromMove(move);
-			char destinationPosition = spChessGameGetDestinationPositionFromMove(move);
-			int currentRow = spChessGameGetRowFromPosition(currentPosition);
-			int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
-			int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
-			int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
-			if (currentRow < 0 || currentRow > 7 ||
-					currentColumn < 0 || currentRow > 7 ||
-					destinationRow < 0 || destinationRow > 7 ||
-					destinationColumn < 0 || destinationColumn > 7) {
-				printf("Invalid position on the board\n");
+
+			else if (cmd.cmd == SP_GET_MOVES) {
+				char location = spParserGetLocation(&cmd);
+				message = spChessVerifyPositionAndPiece(game, location);
+				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+					perror("ERROR: Couldn't verify position and piece. Quitting...\n");
+					quit = 1;
+				}
+				else if (message == SP_CHESS_GAME_INVALID_POSITION) {
+					printf("Invalid position on the board\n");
+				}
+				else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
+					printf("The specified position does not contain a player piece\n");
+				}
+				else {
+					SPArrayList* possibleMoves = spChessGameGetMoves(game, location);
+					message = spChessPrintMoves(possibleMoves);
+					spArrayListDestroy(possibleMoves);
+				}
 			}
-			else if (game->gameMode[currentRow][currentColumn] < (game->currentPlayer ? 'b' : 'B') ||
-					game->gameMode[currentRow][currentColumn] > (game->currentPlayer ? 'r' : 'R')) {
-				printf("The specified position does not contain your piece\n");
+
+			else if (cmd.cmd == SP_SAVE) {
+				message = spChessSaveGame(game, cmd.arguments);
+				if (message == SP_CHESS_GAME_SUCCESS) {
+					printf("Game saved to: %s\n", cmd.arguments);
+				}
+				else {
+					printf("File cannot be created or modified\n");
+				}
+			}
+
+			else if (cmd.cmd == SP_UNDO) {
+				int move = spChessGameGetLastMovePlayed(game);
+				message = spChessGameUndoMove(game);
+				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+					perror("ERROR: Something went wrong while trying to undo move. Quitting...\n");
+					quit = 1;
+				}
+				else if (message == SP_CHESS_GAME_NO_HISTORY) {
+					printf("Empty history, no move to undo\n");
+				}
+				else {
+					spPrintUndoneMove(move, game->currentPlayer);
+					move = spChessGameGetLastMovePlayed(game);
+					message = spChessGameUndoMove(game);
+					if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+						perror("ERROR: Couldn't undo second move! Quitting... \n");
+						quit = 1;
+					}
+					else if (message == SP_CHESS_GAME_SUCCESS) {
+						spPrintUndoneMove(move, game->currentPlayer);
+					}
+				}
+			}
+
+			else if (cmd.cmd = SP_RESET) {
+				settings = 1;
+				message = spChessGameResetGame(game);
+				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+					perror("ERROR: Something went awry while resetting game! Quitting... \n");
+					quit = 1;
+				}
+			}
+
+			else if (cmd.cmd == SP_QUIT) {
+				quit = 1;
 			}
         }
 	}
+
+	spChessGameDestroy(game);
+	printf("Exiting...\n");
+
+	return 0;
 }
