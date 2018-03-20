@@ -132,8 +132,8 @@ int main(int argc, char* argv[]) {
             SPCommand cmd = spGetCommand(mode);
 			SP_CHESS_GAME_MESSAGE message;
             if (cmd.cmd == SP_MOVE) {
-                int move = spParserGetMove(&cmd) << 8;
-				message = spChessGameIsValidMove(game, move);
+                int move = spParserGetMove(&cmd);
+                message = spChessGameIsValidMove(game, move);
 				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
 					perror("ERROR: Something went wrong! Quitting...\n");
 					quit = 1;
@@ -260,6 +260,10 @@ int main(int argc, char* argv[]) {
 
 			else if (cmd.cmd == SP_QUIT) {
 				quit = 1;
+			}
+
+			else {
+				printf("ERROR: Invalid command\n");
 			}
         }
 	}
