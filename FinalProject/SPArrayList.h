@@ -4,13 +4,6 @@
  *  Created on: 28 March 2018
  *      Author: user
  */
-
-#ifndef SPCHESSARRAYLIST_H_
-#define SPCHESSARRAYLIST_H_
-
-
-
-#endif /* SPCHESSARRAYLIST_H_ */
 #ifndef SPARRAYLIST_H_
 #define SPARRAYLIST_H_
 #include <stdbool.h>
