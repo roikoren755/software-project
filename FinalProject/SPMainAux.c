@@ -1,8 +1,6 @@
 //
 // Created by Roi Koren on 28/12/2017.
 #include <string.h>
-#include "SPChessGame.h"
-#include "SPChessParser.h"
 #include "SPMainAux.h"
 
 #define MAX_FILE_LINE_LENGTH 100
@@ -44,20 +42,29 @@ int max(int a,int b){
 //	else{return -a;}
 //}
 
-char spChessGameGetDestinationPositionFromMove(int move) {
-    return (char) CLEAN_EXCESS_BYTES((move >> 8)); // Get 2nd byte from the right
+char spChessGameGetDestinationPositionFromMove(unsigned int move) {
+    move >>= 8;
+    move <<= 24;
+    move >>= 24;
+    return (char) move; // Get 2nd byte from the right
 }
 
-char spChessGameGetCurrentPositionFromMove(int move) {
-    return (char) CLEAN_EXCESS_BYTES((move >> 16)); // Get 3rd Byte from the left
+char spChessGameGetCurrentPositionFromMove(unsigned int move) {
+    move >>= 16;
+    move <<= 24;
+    move >>= 24;
+    return (char) move; // Get 3rd Byte from the left
 }
 
-int spChessGameGetColumnFromPosition(char position) {
-    return (int) (position << 4) >> 4; // Get 4 rightmost bits
+unsigned int spChessGameGetColumnFromPosition(unsigned char position) {
+    position <<= 4;
+    position >>= 4;
+    return (unsigned int) position; // Get 4 rightmost bits
 }
 
-int spChessGameGetRowFromPosition(char position) {
-    return (int) position >> 4; // Get 4 leftmost bits
+unsigned int spChessGameGetRowFromPosition(unsigned char position) {
+    position >>= 4;
+    return (unsigned int) position; // Get 4 leftmost bits
 }
 
 SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file) {

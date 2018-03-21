@@ -6,7 +6,6 @@
 #define SOFTWARE_PROJECT_SPCHESSGAME_H
 
 #include "SPArrayList.h"
-#include <stdbool.h>
 #include <stdio.h>
 
 #define WHITE 1
@@ -21,8 +20,6 @@ typedef struct sp_chess_game_t {
     char gameBoard[N_ROWS][N_COLUMNS];
 	char locations[N_COLUMNS * 4];
     int currentPlayer;
-    bool whiteKingThreaten;
-    bool blackKingThreaten;
     SPArrayList* history;
 } SPChessGame;
 

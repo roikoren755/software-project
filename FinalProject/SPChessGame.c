@@ -566,8 +566,6 @@ SPChessGame* spChessGameCreate() {
     game->currentPlayer = WHITE; // Defaults
     game->userColor = WHITE;
     game->difficulty = 2;
-    game->whiteKingThreaten = false;
-    game->blackKingThreaten = false;
     game->gameMode = 1;
 
     spChessGameResetBoard(game);
@@ -594,8 +592,6 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
     ret->currentPlayer = src->currentPlayer; // Copy what needs to be copied
     ret->difficulty = src->difficulty;
     ret->userColor = src->userColor;
-    ret->whiteKingThreaten = src->whiteKingThreaten;
-    ret->blackKingThreaten = src->blackKingThreaten;
     ret->gameMode = src->gameMode;
 
     for (int i = 0; i < N_ROWS; i++) {
@@ -666,10 +662,11 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    char currentPosition = spChessGameGetCurrentPositionFromMove(move << 8);
+    move <<= 8;
+    char currentPosition = spChessGameGetCurrentPositionFromMove(move);
     int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int currentRow = spChessGameGetRowFromPosition(currentPosition);
-    char destinationPosition = spChessGameGetDestinationPositionFromMove(move << 8);
+    char destinationPosition = spChessGameGetDestinationPositionFromMove(move);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 
@@ -1068,8 +1065,6 @@ SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {
     game->currentPlayer = WHITE; // Defaults
     game->userColor = WHITE;
     game->difficulty = 2;
-    game->whiteKingThreaten = false;
-    game->blackKingThreaten = false;
     game->gameMode = 1;
 
     spChessGameResetBoard(game);

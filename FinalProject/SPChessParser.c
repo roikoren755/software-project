@@ -31,9 +31,9 @@
 int spParserDestroyLocationIfNeeded(int location) {
     int result = ~0; // Preparations
     int mask = 1;
+    int destroy = 1;
 
     for (int i = 0; i < 2; i++) { // 2 rightmost bytes
-        int destroy = 1;
         for (int j = 0; j < 8; j++) { // For bits in byte
             if (!(location & mask)) { // There's a 0 bit, so don't destroy
                 destroy = 0;
@@ -64,7 +64,7 @@ char spParserGetBoardLocationFromString(const char* str) {
         str[3] >= 'A' && str[3] <= 'H') {
         location = 7 - (str[1] - '1'); // Get row
         location <<= 4;
-        location |= str[3] - 'H'; // And column
+        location |= str[3] - 'A'; // And column
     }
     else { // str isn't!
         location = ~location; // Booo
@@ -155,12 +155,12 @@ SPCommand spParserParseLine(const char* str) {
             !strcmp(command, MOVE) && // MOVE
             nextToken) { // With fries
         strcpy(cmd.arguments, nextToken); // Get first argument
-        int offset = strlen(nextToken) + 1; // First string length
+        int offset = strlen(nextToken); // First string length
         nextToken = strtok(NULL, DELIMITERS); // Get next word
         char* nextNextToken = strtok(NULL, DELIMITERS); // And the argument after it
 
         if (nextToken && // There is a word
-                    strcmp(nextToken, TO) && // And the word is TO
+                    !strcmp(nextToken, TO) && // And the word is TO
                     nextNextToken) { // And yet another argument!
             cmd.cmd = SP_MOVE;
             strcpy(cmd.arguments + offset, nextNextToken); // Copy second argument, right after the first one
@@ -235,6 +235,6 @@ int spParserGetMove(const SPCommand* command) {
 	int locations = 0; // Preparations
     locations |= spParserGetBoardLocationFromString(command->arguments); // First coordinates
     locations <<= 8; // Make room
-    locations |= spParserGetBoardLocationFromString(command->arguments + 6); // Second coordinates
+    locations |= spParserGetBoardLocationFromString(&command->arguments[5]); // Second coordinates
     return spParserDestroyLocationIfNeeded(locations); // Do they need destruction in their lives?
 }

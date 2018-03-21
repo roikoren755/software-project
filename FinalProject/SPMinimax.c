@@ -4,7 +4,6 @@
  *  Created on: 26 Dec 2017
  *      Author: user
  */
-#include "SPChessGame.h"
 #include "SPMinimax.h"
 #include "SPMainAux.h"
 #include <limits.h>
@@ -461,8 +460,6 @@ int spMinimaxSuggestMove(SPChessGame* currentGame) {
 
 	minimaxGame->userColor = currentGame->userColor; // And everything else quasi-important
 	minimaxGame->currentPlayer = currentGame->currentPlayer;
-	minimaxGame->blackKingThreaten = currentGame->blackKingThreaten;
-	minimaxGame->whiteKingThreaten = currentGame->whiteKingThreaten;
 	minimaxGame->gameMode = currentGame->gameMode;
 
 	return spMinimaxGetBestMove(minimaxGame); // And gimme a move
