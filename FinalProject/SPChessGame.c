@@ -24,14 +24,14 @@
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
-#define KING_LOC(color) (4+color*3*N_COLUMNS)
-#define QUEEN_LOC(color) (3+color*3*N_COLUMNS)
-#define LEFT_ROOK_LOC(color) (0+color*3*N_COLUMNS)
-#define RIGHT_ROOK_LOC(color) (7+color*3*N_COLUMNS)
-#define LEFT_KNIGHT_LOC(color) (1+color*3*N_COLUMNS)
-#define RIGHT_KNIGHT_LOC(color) (6+color*3*N_COLUMNS)
-#define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
-#define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
+#define KING_LOC(color) (4+color*N_COLUMNS)
+#define QUEEN_LOC(color) (3+color*N_COLUMNS)
+#define LEFT_ROOK_LOC(color) (0+color*N_COLUMNS)
+#define RIGHT_ROOK_LOC(color) (7+color*N_COLUMNS)
+#define LEFT_KNIGHT_LOC(color) (1+color*N_COLUMNS)
+#define RIGHT_KNIGHT_LOC(color) (6+color*N_COLUMNS)
+#define LEFT_BISHOP_LOC(color) (2+color*N_COLUMNS)
+#define RIGHT_BISHOP_LOC(color) (5+color*N_COLUMNS)
 #define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
 #define LEFT -1
 #define RIGHT 1
