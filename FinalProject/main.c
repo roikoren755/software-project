@@ -17,9 +17,104 @@
 #define GUI 1
 #define CONSOLE_ARGUMENT "-c"
 #define GUI_ARGUMENT "-g"
+#define USAGE "Usage: ./chessprog [-c | -g]\n"
+#define GET_COLOR(color) color ? "white" : "black"
+
+void spChessPrintGameTitle(int mode) {
+	if (!mode) {
+		printf(" Chess\n");
+		for (int i = 0; i < 7; i++) {
+			printf("-");
+		}
+		printf("\n");
+	}
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameSetGameMode(SPChessGame* game, SPCommand* command, int mode) {
+	if (!game || !command) {
+		printf("ERROR: Could not set game mode, quitting...\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	int gameMode = spParserGetNonNegativeInt(command);
+	if (gameMode == 1 || gameMode == 2) {
+		game->gameMode = gameMode;
+		if (!mode) {
+			printf("Game mode is set to %d-player\n", gameMode);
+		}
+	}
+	else {
+		if (!mode) {
+			printf("Wrong game mode\n");
+		}
+	}
+
+	return SP_CHESS_GAME_SUCCESS;
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameSetDifficulty(SPChessGame* game, SPCommand* command, char** difficulties, int mode) {
+	if (!game || !command) {
+		printf("ERROR: Could not set difficulty. Quitting...\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	int difficulty = spParserGetNonNegativeInt(command);
+	if (difficulty >= 1 && difficulty <= 5) {
+		game->difficulty = difficulty;
+		if (!mode) {
+			printf("Difficulty level is set to %s\n", difficulties[difficulty]);
+		}
+	}
+	else {
+		if (!mode) {
+			printf("Wrong difficulty level. The value should be between 1 to 5\n");
+		}
+	}
+
+	return SP_CHESS_GAME_SUCCESS;
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameSetUserColor(SPChessGame* game, SPCommand* command, int mode) {
+	if (!game || !command) {
+		printf("ERROR: Couldn't set user color. Quitting...\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	int userColor = spParserGetNonNegativeInt(command);
+	if (userColor == 0 || userColor == 1) {
+		game->userColor = userColor;
+		if (!mode) {
+			printf("User color is set to %s\n", GET_COLOR(userColor));
+		}
+	}
+	else {
+		if (!mode) {
+			printf("Wrong user color. The value should be 0 or 1\n");
+		}
+	}
+
+	return SP_CHESS_GAME_SUCCESS;
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameLoadGame(SPChessGame* game, SPCommand* command, int mode) {
+	if (!game || !command) {
+		printf("Error: Could not find game to load to, or the command to do so! Quitting...\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	SP_CHESS_GAME_MESSAGE message = spChessLoadGame(game, command->arguments);
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+		if (!mode) {
+			printf("Error: File doesn’t exist or cannot be opened\n");
+			return SP_CHESS_GAME_INVALID_ARGUMENT;
+		}
+	}
+
+	return SP_CHESS_GAME_SUCCESS;
+}
 
 int main(int argc, char* argv[]) {
-    int mode;
+    int mode = CONSOLE;
     if (argc == 1) {
 		mode = CONSOLE;
 	}
@@ -28,33 +123,28 @@ int main(int argc, char* argv[]) {
             mode = GUI;
         }
         else if (strcmp(argv[1], CONSOLE_ARGUMENT)) {
-            printf("Usage: ./chessprog [-c | -g]\n");
+            printf(USAGE);
             return 0;
         }
     }
 	else {
-		printf("Usage: ./chessprog [-c | -g]\n");
+		printf(USAGE);
 		return 0;
 	}
 
 	SPChessGame* game = spChessGameCreate();
 	if (!game) {
-		perror("ERROR: Could not create game! Exiting...\n");
+		printf("ERROR: Could not create game! Exiting...\n");
 		return 1;
 	}
 
-	if (!mode) {
-		printf(" Chess\n");
-		for (int i = 0; i < 7; i++) {
-			printf("-");
-		}
-		printf("\n");
-	}
+	spChessPrintGameTitle(mode);
 
 	char* difficulties[] = {"", "amateur", "easy", "moderate", "hard", "expert"};
 	int quit = 0;
 	int settings = 1;
 	int printedWelcome = 0;
+	SP_CHESS_GAME_MESSAGE message;
 	while (!quit) {
 		if (settings) {
 			if (!printedWelcome) {
@@ -62,61 +152,43 @@ int main(int argc, char* argv[]) {
 				printedWelcome = 1;
 			}
 			printf("GET COMMAND MESSAGE\n"); // TODO - fix me!
-			SPCommand cmd = spGetCommand(mode);
+			SPCommand command = spGetCommand(mode);
 
-			if (cmd.cmd == SP_GAME_MODE) {
-				int gameMode = spParserGetNonNegativeInt(&cmd);
-				if (gameMode == 1 || gameMode == 2) {
-					game->gameMode = gameMode;
-					printf("Game mode is set to %d-player\n", gameMode);
-				}
-				else {
-					printf("Wrong game mode\n");
+			if (command.cmd == SP_GAME_MODE) {
+				message = spChessGameSetGameMode(game, &command, mode);
+				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+					quit = 1;
 				}
 			}
 
-			else if (cmd.cmd == SP_DIFFICULTY && game->gameMode == 1) {
-				int difficulty = spParserGetNonNegativeInt(&cmd);
-				if (difficulty >= 1 && difficulty <= 5) {
-					game->difficulty = difficulty;
-					printf("Difficulty level is set to %s\n", difficulties[difficulty]);
-				}
-				else {
-					printf("Wrong difficulty level. The value should be between 1 to 5\n");
-				}
+			else if (command.cmd == SP_DIFFICULTY && game->gameMode == 1) {
+				message = spChessGameSetDifficulty(game, &command, difficulties, mode);
 			}
 
-			else if (cmd.cmd == SP_USER_COLOR && game->gameMode == 1) {
-				int userColor = spParserGetNonNegativeInt(&cmd);
-				if (userColor == 0 || userColor == 1) {
-					game->userColor = userColor;
-					printf("User color is set to %s\n", userColor ? "white" : "black");
-				}
-				else {
-					printf("Wrong user color. The value should be 0 or 1\n");
-				}
+			else if (command.cmd == SP_USER_COLOR && game->gameMode == 1) {
+				message = spChessGameSetUserColor(game, &command, mode);
 			}
 
-			else if (cmd.cmd == SP_LOAD) {
-				spChessLoadGame(game, cmd.arguments);
+			else if (command.cmd == SP_LOAD) {
+				message = spChessGameLoadGame(game, &command, mode);
 			}
 
-			else if (cmd.cmd == SP_DEFAULT) {
+			else if (command.cmd == SP_DEFAULT) {
 				game->userColor = WHITE;
 				game->gameMode = 1;
 				game->difficulty = 2;
                 printf("All settings reset to default\n");
 			}
 
-			else if (cmd.cmd == SP_PRINT_SETTINGS) {
+			else if (command.cmd == SP_PRINT_SETTINGS) {
 				spFprintSettings(game, stdout);
 			}
 
-			else if (cmd.cmd == SP_QUIT) {
+			else if (command.cmd == SP_QUIT) {
 				quit = 1;
 			}
 
-			else if (cmd.cmd == SP_START) {
+			else if (command.cmd == SP_START) {
 				settings = 0;
 				printf("Starting game...\n");
 			}
@@ -130,7 +202,6 @@ int main(int argc, char* argv[]) {
             spChessGamePrintBoard(game);
             printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
             SPCommand cmd = spGetCommand(mode);
-			SP_CHESS_GAME_MESSAGE message;
             if (cmd.cmd == SP_MOVE) {
                 int move = spParserGetMove(&cmd);
                 message = spChessGameIsValidMove(game, move);

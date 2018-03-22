@@ -54,4 +54,5 @@ void spPrintUndoneMove(int move, int color);
 void spPrintComputerMove(char piece, int move);
 
 char spChessGameGetPieceAtPosition(SPChessGame* game, char position);
+
 #endif

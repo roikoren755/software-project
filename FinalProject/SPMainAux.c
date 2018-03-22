@@ -1,7 +1,7 @@
 //
 // Created by Roi Koren on 28/12/2017.
-#include <string.h>
 #include "SPMainAux.h"
+#include <string.h>
 
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
@@ -92,11 +92,7 @@ SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file) {
     }
 
     fprintf(filePointer, "%s\n", game->currentPlayer ? "white" : "black");
-    SP_CHESS_GAME_MESSAGE message = spFprintSettings(game, filePointer);
-    if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
-        fclose(filePointer);
-        return message;
-    }
+    spFprintSettings(game, filePointer);
     spChessGameFprintBoard(game, filePointer);
 
     fclose(filePointer);
@@ -180,175 +176,101 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     char buffer[MAX_FILE_LINE_LENGTH + 1];
     char* argument;
     int row = 0;
-    int tooManyPieces = 0;
     char location;
-    while (fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer)) {
+    int finishedLoading = 0;
+    while (!finishedLoading) {
+    	fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
         if (!row) {
             argument = strtok(buffer, DELIMITERS);
             game->currentPlayer = spGetColor(argument);
-            if (game->currentPlayer == -1 || strtok(buffer, DELIMITERS)) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
             clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
             fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
-            argument = strtok(buffer, DELIMITERS);
-            if (!argument || strcmp(argument, "SETTINGS:") || strtok(buffer, DELIMITERS)) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
         }
+
         else if (row == 1) {
             argument = strtok(buffer, DELIMITERS);
-            if (!argument || strcmp(argument, "GAME_MODE:")) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
             argument = strtok(NULL, DELIMITERS);
             game->gameMode = spGetGameMode(argument);
-            if (!game->gameMode || strtok(NULL, DELIMITERS)) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
             if (game->gameMode == 1) {
                 clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
                 fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
                 argument = strtok(buffer, DELIMITERS);
-                if (!argument || strcmp(argument, "DIFFICULTY:")) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
                 argument = strtok(NULL, DELIMITERS);
                 game->difficulty = spGetDifficulty(argument);
-                if (!game->difficulty) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
                 clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
                 fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
                 argument = strtok(buffer, DELIMITERS);
-                if (!argument || strcmp(argument, "USER_COLOR:")) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
                 argument = strtok(NULL, DELIMITERS);
                 game->userColor = spGetColor(argument);
-                if (game->userColor == -1) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
             }
         }
+
         else if (row == 2) {
             char piece;
             for (int i = 0; i < N_ROWS; i++) {
-                char line[MAX_FILE_LINE_LENGTH];
-                sprintf(line, "%d|", N_ROWS - i);
                 argument = strtok(buffer, DELIMITERS);
-                if (!argument || strcmp(argument, line)) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
                 for (int j = 0; j < N_COLUMNS; j++) {
                 	location = 0;
                 	location |= i;
                 	location <<= 4;
                 	location |= j;
                     argument = strtok(NULL, DELIMITERS);
-                    if (!argument) {
-                        fclose(filePointer);
-                        return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    }
                     piece = argument[0];
                     game->gameBoard[i][j] = piece;
                     if (piece == PAWN) {
-                    	tooManyPieces = 1;
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
                     			game->locations[i + N_COLUMNS] = location;
-                    			tooManyPieces = 0;
                     			break;
                     		}
-                    	}
-                    	if (tooManyPieces) {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
                     	}
                     }
                     else if (piece == CAPITAL_TO_LOW(PAWN)) {
-                    	tooManyPieces = 1;
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
                     			game->locations[i + N_COLUMNS] = location;
-                    			tooManyPieces = 0;
                     			break;
                     		}
                     	}
-                    	if (tooManyPieces) {
-                    		fclose(filePointer);
-                    	    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
                     }
+
                     else if (piece == KING) {
-                        if (game->locations[KING_LOC(BLACK)]) {
-                        	fclose(filePointer);
-                            return SP_CHESS_GAME_INVALID_ARGUMENT;
-                        }
                         game->locations[KING_LOC(BLACK)] = location;
                     }
                     else if (piece == CAPITAL_TO_LOW(KING)) {
-                        if (game->locations[KING_LOC(WHITE)]) {
-                        	fclose(filePointer);
-                            return SP_CHESS_GAME_INVALID_ARGUMENT;
-                        }
                         game->locations[KING_LOC(WHITE)] = location;
                     }
+
                     else if (piece == QUEEN) {
-                    	if (game->locations[QUEEN_LOC(BLACK)]) {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
+                    	game->locations[QUEEN_LOC(BLACK)] = location;
                     }
                     else if (piece == CAPITAL_TO_LOW(QUEEN)) {
-                    	if (game->locations[QUEEN_LOC(WHITE)]) {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
+                    	game->locations[QUEEN_LOC(WHITE)] = location;
                     }
+
                     else if (piece == ROOK) {
                     	if (!game->locations[LEFT_ROOK_LOC(BLACK)]) {
                     		game->locations[LEFT_ROOK_LOC(BLACK)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_ROOK_LOC(BLACK)]) {
-                    		game->locations[LEFT_ROOK_LOC(BLACK)] = location;
-                    	}
                     	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
+                    		game->locations[LEFT_ROOK_LOC(BLACK)] = location;
                     	}
                     }
                     else if (piece == CAPITAL_TO_LOW(ROOK)) {
                     	if (!game->locations[LEFT_ROOK_LOC(WHITE)]) {
                     		game->locations[LEFT_ROOK_LOC(WHITE)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_ROOK_LOC(WHITE)]) {
+                    	else {
                     		game->locations[LEFT_ROOK_LOC(WHITE)] = location;
                     	}
-                    	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
                     }
+
                     else if (piece == BISHOP) {
                     	if (!game->locations[LEFT_BISHOP_LOC(BLACK)]) {
                     		game->locations[LEFT_BISHOP_LOC(BLACK)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_BISHOP_LOC(BLACK)]) {
-                    		game->locations[LEFT_BISHOP_LOC(BLACK)] = location;
-                    	}
                     	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
+                    		game->locations[LEFT_BISHOP_LOC(BLACK)] = location;
                     	}
                     }
                     else if (piece == CAPITAL_TO_LOW(BISHOP)) {
@@ -358,21 +280,14 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     	else if (!game->locations[RIGHT_BISHOP_LOC(WHITE)]) {
                     		game->locations[LEFT_BISHOP_LOC(WHITE)] = location;
                     	}
-                    	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
                     }
+
                     else if (piece == KNIGHT) {
                     	if (!game->locations[LEFT_KNIGHT_LOC(BLACK)]) {
                     		game->locations[LEFT_KNIGHT_LOC(BLACK)] = location;
                     	}
                     	else if (!game->locations[RIGHT_KNIGHT_LOC(BLACK)]) {
                     		game->locations[LEFT_KNIGHT_LOC(BLACK)] = location;
-                    	}
-                    	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
                     	}
                     }
                     else if (piece == CAPITAL_TO_LOW(KNIGHT)) {
@@ -382,41 +297,13 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     	else if (!game->locations[RIGHT_KNIGHT_LOC(WHITE)]) {
                     		game->locations[LEFT_KNIGHT_LOC(WHITE)] = location;
                     	}
-                    	else {
-                    		fclose(filePointer);
-                    		return SP_CHESS_GAME_INVALID_ARGUMENT;
-                    	}
-                    }
-                    else if (piece != BLANK) {
-                    	fclose(filePointer);
-                    	return SP_CHESS_GAME_INVALID_ARGUMENT;
                     }
                 }
-                argument = strtok(NULL, DELIMITERS);
-                if (!argument || strcmp(argument, "|") || strtok(NULL, DELIMITERS)) {
-                    fclose(filePointer);
-                    return SP_CHESS_GAME_INVALID_ARGUMENT;
-                }
-                clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
-                fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
             }
 
-            if (strcmp(buffer, "  -----------------\n")) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
+            finishedLoading = 1;
+        }
 
-            clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
-            fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
-            if (strcmp(buffer, "   A B C D E F G H\n")) {
-                fclose(filePointer);
-                return SP_CHESS_GAME_INVALID_ARGUMENT;
-            }
-        }
-        else {
-            fclose(filePointer);
-            return SP_CHESS_GAME_INVALID_ARGUMENT;
-        }
         clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
         row++;
     }
