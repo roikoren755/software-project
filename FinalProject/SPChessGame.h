@@ -13,6 +13,40 @@
 #define N_ROWS 8
 #define N_COLUMNS 8
 
+#define STARTING_ROW "RNBQKBNR"
+#define FIRST_ROW 0
+#define LAST_ROW 7
+#define LEFT_MOST_COL 0
+#define RIGHT_MOST_COL 7
+#define PAWN(color) ('M'+color*('a'-'A'))
+#define KNIGHT(color) ('N'+color*('a'-'A'))
+#define BISHOP(color) ('B'+color*('a'-'A'))
+#define ROOK(color) ('R'+color*('a'-'A'))
+#define QUEEN(color) ('Q'+color*('a'-'A'))
+#define KING(color) ('K'+color*('a'-'A'))
+#define BLANK '_'
+#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
+#define SEPARATOR '-'
+#define FIRST_COLUMN 'A'
+#define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
+#define KING_LOC(color) (4+color*N_COLUMNS)
+#define QUEEN_LOC(color) (3+color*N_COLUMNS)
+#define LEFT_ROOK_LOC(color) (0+color*N_COLUMNS)
+#define RIGHT_ROOK_LOC(color) (7+color*N_COLUMNS)
+#define LEFT_KNIGHT_LOC(color) (1+color*N_COLUMNS)
+#define RIGHT_KNIGHT_LOC(color) (6+color*N_COLUMNS)
+#define LEFT_BISHOP_LOC(color) (2+color*N_COLUMNS)
+#define RIGHT_BISHOP_LOC(color) (5+color*N_COLUMNS)
+#define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
+#define LEFT -1
+#define RIGHT 1
+#define UP -1
+#define DOWN 1
+#define STAY 0
+#define CAPTURES 1
+#define HISTORY_SIZE 3
+#define COL_NUM_TO_LETTER(column) (column+'A')
+
 typedef struct sp_chess_game_t {
 	int gameMode;
 	int difficulty;
