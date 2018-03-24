@@ -29,8 +29,8 @@
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
-#define KING_LOC(color) (4+color*N_COLUMNS)
-#define QUEEN_LOC(color) (3+color*N_COLUMNS)
+#define KING_LOC(color) (4+color*3*N_COLUMNS)
+#define QUEEN_LOC(color) (3+color*3*N_COLUMNS)
 #define LEFT_ROOK_LOC(color) (0+color*3*N_COLUMNS)
 #define RIGHT_ROOK_LOC(color) (7+color*3*N_COLUMNS)
 #define LEFT_KNIGHT_LOC(color) (1+color*3*N_COLUMNS)
