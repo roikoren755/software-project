@@ -110,7 +110,7 @@ SP_CHESS_GAME_MESSAGE spChessGameLoadGame(SPChessGame* game, SPCommand* command,
 	SP_CHESS_GAME_MESSAGE message = spChessLoadGame(game, command->arguments);
 	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
 		if (!mode) {
-			printf("Error: File doesn’t exist or cannot be opened\n");
+			printf("Error: File doesn't exist or cannot be opened\n");
 			return SP_CHESS_GAME_INVALID_ARGUMENT;
 		}
 	}

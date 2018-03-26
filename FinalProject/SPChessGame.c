@@ -873,6 +873,10 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
+    if (!spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
+        return SP_CHESS_GAME_INVALID_ARGUMENT;
+    }
+
     move <<= 8; // Prepare move for history
     char destinationPosition = spChessGameGetDestinationPositionFromMove(move);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
