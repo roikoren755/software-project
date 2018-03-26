@@ -5,6 +5,7 @@
 #include "SPChessParser.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define DELIMITERS " \t\r\n"
 #define GAME_MODE "game_mode"
@@ -29,13 +30,13 @@
  *         location, otherwise
  */
 int spParserDestroyLocationIfNeeded(int location) {
-    int result = ~0; // Preparations
+    int result = 0; // Preparations
     int mask = 1;
     int destroy = 1;
 
     for (int i = 0; i < 2; i++) { // 2 rightmost bytes
         for (int j = 0; j < 8; j++) { // For bits in byte
-            if (!(location & mask)) { // There's a 0 bit, so don't destroy
+            if ((location & mask)) { // There's a 1 bit, so don't destroy
                 destroy = 0;
             }
 
@@ -57,17 +58,19 @@ int spParserDestroyLocationIfNeeded(int location) {
  *         a char whose 4 leftmost bits represent x, and 4 rightmost bits represent y
  */
 char spParserGetBoardLocationFromString(const char* str) {
+	if (!str) {
+		return 0;
+	}
     char location = 0;
 
     if (str[0] == '<' && str[2] == ',' && str[4] == '>' && // str is "<x,y>", with x and y as legal row and column
         str[1] >= '1' && str[1] <= '8' &&
         str[3] >= 'A' && str[3] <= 'H') {
-        location = 7 - (str[1] - '1'); // Get row
-        location <<= 4;
-        location |= str[3] - 'A'; // And column
-    }
-    else { // str isn't!
-        location = ~location; // Booo
+    	location = 1 << 3;
+    	//printf("%c = %d?\n", str[1], 7 + str[1] - '1')
+        location |= (7 - str[1] + '1'); // Get row
+        location <<= 3;
+        location |= (str[3] - 'A'); // And column
     }
 
     return location;
@@ -186,7 +189,7 @@ SPCommand spParserParseLine(const char* str) {
 
     if (notMatched && // Please stop asking
             !strcmp(command, UNDO)) { // UNDO
-        cmd.cmd = SP_GET_MOVES;
+        cmd.cmd = SP_UNDO;
         cmd.arguments[0] = '\0';
         notMatched = 0;
     }
@@ -228,12 +231,17 @@ int spParserGetNonNegativeInt(const SPCommand* command) {
 }
 
 char spParserGetLocation(const SPCommand* command) {
+	if (!command) {
+		return 0;
+	}
     return spParserGetBoardLocationFromString(command->arguments); // Just need that string
 }
 
 int spParserGetMove(const SPCommand* command) {
-	int locations = 0; // Preparations
-    locations |= spParserGetBoardLocationFromString(command->arguments); // First coordinates
+	if (!command) {
+		return 0;
+	}
+    int locations = spParserGetBoardLocationFromString(command->arguments); // First coordinates
     locations <<= 8; // Make room
     locations |= spParserGetBoardLocationFromString(&command->arguments[5]); // Second coordinates
     return spParserDestroyLocationIfNeeded(locations); // Do they need destruction in their lives?

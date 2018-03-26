@@ -5,22 +5,8 @@
 
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
-#define PAWN 'M'
-#define KING 'K'
-#define QUEEN 'Q'
-#define BISHOP 'B'
-#define ROOK 'R'
-#define KNIGHT 'N'
 #define BLANK '_'
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
-#define KING_LOC(color) (4+color*3*N_COLUMNS)
-#define QUEEN_LOC(color) (3+color*3*N_COLUMNS)
-#define LEFT_ROOK_LOC(color) (0+color*3*N_COLUMNS)
-#define RIGHT_ROOK_LOC(color) (7+color*3*N_COLUMNS)
-#define LEFT_KNIGHT_LOC(color) (1+color*3*N_COLUMNS)
-#define RIGHT_KNIGHT_LOC(color) (6+color*3*N_COLUMNS)
-#define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
-#define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
 #define CONSOLE 0
 #define GUI 1
@@ -56,15 +42,16 @@ char spChessGameGetCurrentPositionFromMove(unsigned int move) {
     return (char) move; // Get 3rd Byte from the left
 }
 
-unsigned int spChessGameGetColumnFromPosition(unsigned char position) {
-    position <<= 4;
-    position >>= 4;
-    return (unsigned int) position; // Get 4 rightmost bits
+unsigned int spChessGameGetColumnFromPosition(char position) {
+    position <<= 5;
+    position >>= 5;
+    return (unsigned int) position; // Get 3 rightmost bits
 }
 
-unsigned int spChessGameGetRowFromPosition(unsigned char position) {
-    position >>= 4;
-    return (unsigned int) position; // Get 4 leftmost bits
+unsigned int spChessGameGetRowFromPosition(char position) {
+	position <<= 2;
+    position >>= 5;
+    return (unsigned int) position; // Get next 3 bits
 }
 
 SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file) {
@@ -210,14 +197,14 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
             for (int i = 0; i < N_ROWS; i++) {
                 argument = strtok(buffer, DELIMITERS);
                 for (int j = 0; j < N_COLUMNS; j++) {
-                	location = 0;
+                	location = 1 << 3;
                 	location |= i;
-                	location <<= 4;
+                	location <<= 3;
                 	location |= j;
                     argument = strtok(NULL, DELIMITERS);
                     piece = argument[0];
                     game->gameBoard[i][j] = piece;
-                    if (piece == PAWN) {
+                    if (piece == PAWN(BLACK)) {
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
                     			game->locations[i + N_COLUMNS] = location;
@@ -225,7 +212,7 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     		}
                     	}
                     }
-                    else if (piece == CAPITAL_TO_LOW(PAWN)) {
+                    else if (piece == PAWN(WHITE)) {
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
                     			game->locations[i + N_COLUMNS] = location;
@@ -234,68 +221,68 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     	}
                     }
 
-                    else if (piece == KING) {
+                    else if (piece == KING(BLACK)) {
                         game->locations[KING_LOC(BLACK)] = location;
                     }
-                    else if (piece == CAPITAL_TO_LOW(KING)) {
+                    else if (piece == KING(WHITE)) {
                         game->locations[KING_LOC(WHITE)] = location;
                     }
 
-                    else if (piece == QUEEN) {
+                    else if (piece == QUEEN(BLACK)) {
                     	game->locations[QUEEN_LOC(BLACK)] = location;
                     }
-                    else if (piece == CAPITAL_TO_LOW(QUEEN)) {
+                    else if (piece == QUEEN(WHITE)) {
                     	game->locations[QUEEN_LOC(WHITE)] = location;
                     }
 
-                    else if (piece == ROOK) {
+                    else if (piece == ROOK(BLACK)) {
                     	if (!game->locations[LEFT_ROOK_LOC(BLACK)]) {
                     		game->locations[LEFT_ROOK_LOC(BLACK)] = location;
                     	}
                     	else {
-                    		game->locations[LEFT_ROOK_LOC(BLACK)] = location;
+                    		game->locations[RIGHT_ROOK_LOC(BLACK)] = location;
                     	}
                     }
-                    else if (piece == CAPITAL_TO_LOW(ROOK)) {
+                    else if (piece == ROOK(WHITE)) {
                     	if (!game->locations[LEFT_ROOK_LOC(WHITE)]) {
                     		game->locations[LEFT_ROOK_LOC(WHITE)] = location;
                     	}
                     	else {
-                    		game->locations[LEFT_ROOK_LOC(WHITE)] = location;
+                    		game->locations[RIGHT_ROOK_LOC(WHITE)] = location;
                     	}
                     }
 
-                    else if (piece == BISHOP) {
+                    else if (piece == BISHOP(BLACK)) {
                     	if (!game->locations[LEFT_BISHOP_LOC(BLACK)]) {
                     		game->locations[LEFT_BISHOP_LOC(BLACK)] = location;
                     	}
                     	else {
-                    		game->locations[LEFT_BISHOP_LOC(BLACK)] = location;
+                    		game->locations[RIGHT_BISHOP_LOC(BLACK)] = location;
                     	}
                     }
-                    else if (piece == CAPITAL_TO_LOW(BISHOP)) {
+                    else if (piece == BISHOP(WHITE)) {
                     	if (!game->locations[LEFT_BISHOP_LOC(WHITE)]) {
                     		game->locations[LEFT_BISHOP_LOC(WHITE)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_BISHOP_LOC(WHITE)]) {
-                    		game->locations[LEFT_BISHOP_LOC(WHITE)] = location;
+                    	else {
+                    		game->locations[RIGHT_BISHOP_LOC(WHITE)] = location;
                     	}
                     }
 
-                    else if (piece == KNIGHT) {
+                    else if (piece == KNIGHT(BLACK)) {
                     	if (!game->locations[LEFT_KNIGHT_LOC(BLACK)]) {
                     		game->locations[LEFT_KNIGHT_LOC(BLACK)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_KNIGHT_LOC(BLACK)]) {
-                    		game->locations[LEFT_KNIGHT_LOC(BLACK)] = location;
+                    	else {
+                    		game->locations[RIGHT_KNIGHT_LOC(BLACK)] = location;
                     	}
                     }
-                    else if (piece == CAPITAL_TO_LOW(KNIGHT)) {
+                    else if (piece == KNIGHT(WHITE)) {
                     	if (!game->locations[LEFT_KNIGHT_LOC(WHITE)]) {
                     		game->locations[LEFT_KNIGHT_LOC(WHITE)] = location;
                     	}
-                    	else if (!game->locations[RIGHT_KNIGHT_LOC(WHITE)]) {
-                    		game->locations[LEFT_KNIGHT_LOC(WHITE)] = location;
+                    	else {
+                    		game->locations[RIGHT_KNIGHT_LOC(WHITE)] = location;
                     	}
                     }
                 }
@@ -327,7 +314,7 @@ SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char posi
 
     int row = spChessGameGetRowFromPosition(position);
     int column = spChessGameGetColumnFromPosition(position);
-    if (row >= 0 && row < N_ROWS && column >= 0 && column < N_COLUMNS) {
+    if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
         return SP_CHESS_GAME_INVALID_POSITION;
     }
 
@@ -358,22 +345,22 @@ void spPrintComputerMove(char piece, int move) {
 
     printf("Computer: move ");
 
-    if (piece == PAWN || piece == CAPITAL_TO_LOW(PAWN)) {
+    if (piece == PAWN(BLACK) || piece == PAWN(WHITE)) {
         printf("pawn");
     }
-    else if (piece == BISHOP || piece == CAPITAL_TO_LOW(BISHOP)) {
+    else if (piece == BISHOP(BLACK) || piece == BISHOP(WHITE)) {
         printf("bishop");
     }
-    else if (piece == KNIGHT || piece == CAPITAL_TO_LOW(KNIGHT)) {
+    else if (piece == KNIGHT(BLACK) || piece == KNIGHT(WHITE)) {
         printf("knight");
     }
-    else if (piece == ROOK || piece == CAPITAL_TO_LOW(ROOK)) {
+    else if (piece == ROOK(BLACK) || piece == ROOK(WHITE)) {
         printf("rook");
     }
-    else if (piece == QUEEN || piece == CAPITAL_TO_LOW(QUEEN)) {
+    else if (piece == QUEEN(BLACK) || piece == QUEEN(WHITE)) {
         printf("queen");
     }
-    else if (piece == KING || piece == CAPITAL_TO_LOW(KING)) {
+    else if (piece == KING(BLACK) || piece == KING(WHITE)) {
         printf("king");
     }
     else {

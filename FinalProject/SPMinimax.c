@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define KING 'K'
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
 #define PAWN_SCORE 1
 #define KNIGHT_SCORE 3
@@ -108,22 +107,27 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 
 	int v = game->currentPlayer ? INT_MIN : INT_MAX; // Set worst result for current player
 	int index;
-	int location;
+	char currentLocation;
+	char destinationLocation;
+	int move;
+	int step;
 
 	if (game->currentPlayer) { // Current player is white
 		for (int i = 0; i < 2 * N_COLUMNS; i++) { // Go over all possible player pieces
 			index = i + 2 * N_COLUMNS;
 
-			location = ((int) game->locations[index]) << 8; // So we have starting position ready to be added to a move
-			if (location) { // Piece is still in play, index is white pieces' range
-				SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[index]); // Get piece's moves
+			currentLocation = game->locations[index]; // So we have starting position ready to be added to a move
+			if (currentLocation) { // Piece is still in play, index is white pieces' range
+				SPArrayList* possibleMoves = spChessGameGetMoves(game, currentLocation); // Get piece's moves
 				if (!possibleMoves) { // Oops
 					return 0;
 				}
 
 				while (!spArrayListIsEmpty(possibleMoves)) { // As long as there are any we haven't checked
-					int move = (int) spChessGameGetDestinationPositionFromMove(spArrayListGetFirst(possibleMoves)); // Get destination position
-					move |= location;
+					step = spArrayListGetFirst(possibleMoves);
+					destinationLocation = spChessGameGetDestinationPositionFromMove(step); // Get destination position
+					move = currentLocation << 8;
+					move |= destinationLocation;
 
 					SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves); // Delete move
 					if (message != SP_ARRAY_LIST_SUCCESS) { // Shouldn't happen
@@ -163,16 +167,18 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 
 	else { // Current player is black
 		for (int i = 0; i < 2 * N_COLUMNS; i++) { // Go over all possible player pieces
-			location = ((int) game->locations[i]) << 8;
-			if (location) { // Black pieces' range, and piece in play
-				SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[i]); // Get moves for piece
+			currentLocation = game->locations[i];
+			if (currentLocation) { // Black pieces' range, and piece in play
+				SPArrayList* possibleMoves = spChessGameGetMoves(game, currentLocation); // Get moves for piece
 				if (!possibleMoves) { // Oops
 					return 0;
 				}
 
 				while (spArrayListSize(possibleMoves)) { // While there are moves we haven't checked
-					int move = (int) spChessGameGetDestinationPositionFromMove(spArrayListGetFirst(possibleMoves)); // Get destination from move
-					move |= location;
+					step = spArrayListGetFirst(possibleMoves);
+					destinationLocation = spChessGameGetDestinationPositionFromMove(step);
+					move = currentLocation << 8;
+					move |= destinationLocation;
 
 					SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves); // Delete move
 					if (message != SP_ARRAY_LIST_SUCCESS) { // Shouldn't happen
@@ -257,8 +263,8 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 
 			while (!spArrayListIsEmpty(possibleMoves)) { // For each move
 				destinationPosition = spChessGameGetDestinationPositionFromMove(spArrayListGetFirst(possibleMoves)); // Get move
-				move = (int) destinationPosition;
-				move |= (((int) startingPosition) << 8); // Move is now in the correct format for spChessGameSetMove
+				move = startingPosition << 8;
+				move |= destinationPosition; // Move is now in the correct format for spChessGameSetMove
 
 				SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves); // Remove move
 				if (message != SP_ARRAY_LIST_SUCCESS) { // Shouldn't happen
@@ -296,9 +302,9 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-							(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
-							(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
-							(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
+						(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
+						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
+						(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;
@@ -357,8 +363,8 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 
 			while (!spArrayListIsEmpty(possibleMoves)) {
 				destinationPosition = spChessGameGetDestinationPositionFromMove(spArrayListGetFirst(possibleMoves)); // Get move
-				move = (int) destinationPosition;
-				move |= (((int) startingPosition) << 8);
+				move = startingPosition << 8;
+				move |= destinationPosition;
 
 				SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(possibleMoves);
 				if (message != SP_ARRAY_LIST_SUCCESS) {
