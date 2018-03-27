@@ -185,4 +185,28 @@ int spChessGameGetLastMovePlayed(SPChessGame* game);
 
 SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game);
 
+/***
+ * Resets src's game board to the starting set-up
+ * @param src
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL
+ *         SP_CHESS_GAME_SUCCESS otherwise
+ */
+SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src);
+/***
+ * Prepares an int to represent a move, so as to be accepted by spChessGameSetMove(...)
+ * @param currentRow
+ * @param currentColumn
+ * @param destinationRow
+ * @param destinationColumn
+ * @return
+ * An int representing the move indicated by the arguments
+ */
+int setMoveCoordinatesToInt(int currentRow, int currentColumn, int destinationRow, int destinationColumn) ;
+
+int spChessGameStepWillCapture(int step);
+
+int spChessGameStepWillThreaten(int step);
+
+char spChessGameSetLocation(int row, int column);
+
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
