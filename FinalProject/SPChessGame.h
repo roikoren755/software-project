@@ -181,7 +181,7 @@ SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src);
  */
 SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file);
 
-int spChessGameGetLastMovePlayed(SPChessGame* game);
+unsigned int spChessGameGetLastMovePlayed(SPChessGame* game);
 
 SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game);
 
@@ -201,12 +201,12 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src);
  * @return
  * An int representing the move indicated by the arguments
  */
-int setMoveCoordinatesToInt(int currentRow, int currentColumn, int destinationRow, int destinationColumn) ;
+unsigned int setMoveCoordinatesToInt(unsigned int currentRow, unsigned int currentColumn, unsigned int destinationRow, unsigned int destinationColumn);
 
-int spChessGameStepWillCapture(int step);
+int spChessGameStepWillCapture(unsigned int step);
 
-int spChessGameStepWillThreaten(int step);
+int spChessGameStepWillThreaten(unsigned int step);
 
-char spChessGameSetLocation(int row, int column);
+unsigned char spChessGameSetLocation(unsigned int row, unsigned int column);
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
