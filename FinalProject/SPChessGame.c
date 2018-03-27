@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-char spChessGameSetLocation(int row, int column) {
+unsigned char spChessGameSetLocation(unsigned int row, unsigned int column) {
 	if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
 		return 0;
 	}
 
-	char location = 1 << 3;
+	unsigned char location = 1 << 3;
 	location = (row | location) << 3;
 	location |= column;
 
@@ -325,7 +325,7 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
             step = setStepCoordinatesToInt(destinationRow, destinationColumn, threatened, !CAPTURES);
             add = 1;
         }
-        else if (!(CHECK_COLOR(color,piece))) {
+        else if (color != CHECK_COLOR(piece)) {
             step = setStepCoordinatesToInt(destinationRow, destinationColumn, threatened, CAPTURES);
             add = 1;
         }
@@ -489,11 +489,11 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src, SPArrayLis
     return SP_CHESS_GAME_SUCCESS;
 }
 
-int spChessGameStepWillThreaten(int step) {
+int spChessGameStepWillThreaten(unsigned int step) {
     return (step << 24) >> 28; //Get bits [4-7]
 }
 
-int spChessGameStepWillCapture(int step) {
+int spChessGameStepWillCapture(unsigned int step) {
     return (step << 28) >> 28; //Get 4 right most bits
 }
 
@@ -663,12 +663,12 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
 
     char piece = src->gameBoard[currentRow][currentColumn];
     int color = src->currentPlayer;
-    if (!piece || !CHECK_COLOR(color, piece)) {
+    if (!piece || color != CHECK_COLOR(piece)) {
         return SP_CHESS_GAME_NO_PIECE_IN_POSITION;
     }
 
     char captured = src->gameBoard[destinationRow][destinationColumn];
-    if (CHECK_COLOR(color, captured) == color) { // Can't capture own piece
+    if (CHECK_COLOR(captured) == color) { // Can't capture own piece
         return SP_CHESS_GAME_ILLEGAL_MOVE;
     }
 
@@ -752,7 +752,7 @@ int spChessGameIsPieceThreatened(SPChessGame* src, char location) {
     int row = spChessGameGetRowFromPosition(location);
 
     char piece = src->gameBoard[row][column];
-    int color = CHECK_COLOR(WHITE, piece);
+    int color = CHECK_COLOR(piece);
 
     if (spChessGameCheckStraightLineMove(src, location, src->locations[LEFT_ROOK_LOC(!color)]) == 1 ||
         spChessGameCheckStraightLineMove(src, location, src->locations[RIGHT_ROOK_LOC(!color)]) == 1) {
@@ -807,7 +807,7 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
     int currentColumn = spChessGameGetColumnFromPosition(position);
     int currentRow = spChessGameGetRowFromPosition(position);
     char piece = src->gameBoard[currentRow][currentColumn];
-    int color = CHECK_COLOR(WHITE,piece);
+    int color = CHECK_COLOR(piece);
 
     if (piece == QUEEN(color) || piece == BISHOP(color)) {
         spChessGameAddStepsToList(src, steps, position, DOWN, LEFT, color);
@@ -1029,12 +1029,12 @@ SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src) {
     return spChessGameFprintBoard(src, stdout);
 }
 
-int spChessGameGetLastMovePlayed(SPChessGame* game) {
+unsigned int spChessGameGetLastMovePlayed(SPChessGame* game) {
     if (!game || spArrayListIsEmpty(game->history)) {
         return -1;
     }
 
-    return spArrayListGetFirst(game->history) >> 8;
+    return ((unsigned int) spArrayListGetFirst(game->history)) >> 8;
 }
 
 SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {

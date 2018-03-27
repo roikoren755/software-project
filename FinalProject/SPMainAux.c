@@ -10,7 +10,7 @@
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
 #define CONSOLE 0
 #define GUI 1
-#define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
+#define CHECK_COLOR(piece) (piece > 'Z')
 #define PIECE_NAME_LENGTH 6
 
 int min(int a,int b){
@@ -319,7 +319,7 @@ SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char posi
     }
 
     char piece = game->gameBoard[row][column];
-    return CHECK_COLOR(game->currentPlayer, piece) ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
+    return CHECK_COLOR(piece) == game->currentPlayer ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
 }
 
 void spPrintUndoneMove(int move, int color) {

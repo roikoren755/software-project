@@ -36,7 +36,7 @@
 #define RIGHT_KNIGHT_LOC(color) (6+color*3*N_COLUMNS)
 #define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
 #define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
-#define CHECK_COLOR(color,piece) ((1-2*color)*(piece) < (1-2*color)*('Z'))
+#define CHECK_COLOR(piece) (piece > 'Z')
 #define LEFT -1
 #define RIGHT 1
 #define UP -1
