@@ -9,16 +9,16 @@ static int spChessGameBasicTest() {
 	return 1;
 }
 
-char spChessGameSetPosition2(int row, int column) {
-	char ret = 1 << 3;
+unsigned char spChessGameSetPosition2(unsigned int row, unsigned int column) {
+	unsigned char ret = 1 << 3;
 	ret |= row;
 	ret <<= 3;
 	ret |= column;
 	return ret;
 }
 
-int spChessGameSetMoveCoordinates(int startingRow, int startingColumn, int endingRow, int endingColumn) {
-	int move = spChessGameSetPosition2(startingRow, startingColumn) << 8;
+unsigned int spChessGameSetMoveCoordinates(unsigned int startingRow, unsigned int startingColumn, unsigned int endingRow, unsigned int endingColumn) {
+	unsigned int move = spChessGameSetPosition2(startingRow, startingColumn) << 8;
 	move |= spChessGameSetPosition2(endingRow, endingColumn);
 	return move;
 }
@@ -76,17 +76,7 @@ static int spChessGameTestSetMove() {
 	ASSERT_TRUE(game);
 	SPChessGame* copy = spChessGameCopy(game);
 	ASSERT_TRUE(copy);
-	int move = spChessGameSetMoveCoordinates(0, 0, 0, 0);
-	ASSERT_TRUE(spChessGameSetMove(game, move) == SP_CHESS_GAME_INVALID_ARGUMENT);for (int i = 0; i < N_ROWS; i++) {
-		for (int j = 0; j < N_COLUMNS; j++) {
-			ASSERT_TRUE(game->gameBoard[i][j] == copy->gameBoard[i][j]);
-			if (j < 4) {
-				ASSERT_TRUE(game->locations[i + j * N_COLUMNS] == copy->locations[i + j * N_COLUMNS]);
-			}
-		}
-	}
-	ASSERT_TRUE(game->currentPlayer == copy->currentPlayer);
-	move = spChessGameSetMoveCoordinates(6, 0, 5, 0);
+	int move = spChessGameSetMoveCoordinates(6, 0, 5, 0);
 	ASSERT_TRUE(spChessGameSetMove(game, move) == SP_CHESS_GAME_SUCCESS);
 	for (int i = 0; i < N_ROWS; i++) {
 		for (int j = 0; j < N_COLUMNS; j++) {
@@ -135,32 +125,6 @@ static int spChessGameTestUndoMove() {
 	spChessGameDestroy(game);
 	spChessGameDestroy(copy);
 	return 1;
-}
-
-char spChessGameGetDestinationPositionFromMove2(unsigned int move) {
-    move >>= 8;
-    move <<= 24;
-    move >>= 24;
-    return (char) move; // Get 2nd byte from the right
-}
-
-char spChessGameGetCurrentPositionFromMove2(unsigned int move) {
-    move >>= 16;
-    move <<= 24;
-    move >>= 24;
-    return (char) move; // Get 3rd Byte from the left
-}
-
-unsigned int spChessGameGetColumnFromPosition2(unsigned char position) {
-    position <<= 5;
-    position >>= 5;
-    return (unsigned int) position; // Get 3 rightmost bits
-}
-
-unsigned int spChessGameGetRowFromPosition2(unsigned char position) {
-	position <<= 2;
-    position >>= 5;
-    return (unsigned int) position; // Get next 3 bits
 }
 
 int main() {

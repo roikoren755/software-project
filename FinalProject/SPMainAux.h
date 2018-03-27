@@ -16,28 +16,28 @@ int max(int a,int b);
  * @param move
  * @return the destination position as a char
  */
-char spChessGameGetDestinationPositionFromMove(unsigned int move);
+unsigned char spChessGameGetDestinationPositionFromMove(unsigned int move);
 
 /***
  * Get current position from int representing a move
  * @param move
  * @return the current location as a char
  */
-char spChessGameGetCurrentPositionFromMove(unsigned int move);
+unsigned char spChessGameGetCurrentPositionFromMove(unsigned int move);
 
 /***
  * Get column from char representing a location
  * @param position
  * @return the column number from the given position
  */
-unsigned int spChessGameGetColumnFromPosition(char position);
+unsigned int spChessGameGetColumnFromPosition(unsigned char position);
 
 /***
  * Get row from char representing a location
  * @param position
  * @return the row number of the given position
  */
-unsigned int spChessGameGetRowFromPosition(char position);
+unsigned int spChessGameGetRowFromPosition(unsigned char position);
 
 SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file);
 

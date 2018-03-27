@@ -28,27 +28,27 @@ int max(int a,int b){
 //	else{return -a;}
 //}
 
-char spChessGameGetDestinationPositionFromMove(unsigned int move) {
+unsigned char spChessGameGetDestinationPositionFromMove(unsigned int move) {
     move >>= 8;
     move <<= 24;
     move >>= 24;
-    return (char) move; // Get 2nd byte from the right
+    return (unsigned char) move; // Get 2nd byte from the right
 }
 
-char spChessGameGetCurrentPositionFromMove(unsigned int move) {
+unsigned char spChessGameGetCurrentPositionFromMove(unsigned int move) {
     move >>= 16;
     move <<= 24;
     move >>= 24;
-    return (char) move; // Get 3rd Byte from the left
+    return (unsigned char) move; // Get 3rd Byte from the left
 }
 
-unsigned int spChessGameGetColumnFromPosition(char position) {
+unsigned int spChessGameGetColumnFromPosition(unsigned char position) {
     position <<= 5;
     position >>= 5;
     return (unsigned int) position; // Get 3 rightmost bits
 }
 
-unsigned int spChessGameGetRowFromPosition(char position) {
+unsigned int spChessGameGetRowFromPosition(unsigned char position) {
 	position <<= 2;
     position >>= 5;
     return (unsigned int) position; // Get next 3 bits

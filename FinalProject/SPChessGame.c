@@ -570,8 +570,8 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
 
     for (int i = 0; i < N_ROWS; i++) {
         for (int j = 0; j < N_COLUMNS; j++) {
-            if (j < 2) {
-                ret->locations[i + j] = src->locations[i + j]; // Copy locations
+            if (j < 4) {
+                ret->locations[i + j * N_COLUMNS] = src->locations[i + j * N_COLUMNS]; // Copy locations
             }
 
             ret->gameBoard[i][j] = src->gameBoard[i][j]; // And game board
@@ -662,7 +662,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
     }
 
     char piece = src->gameBoard[currentRow][currentColumn];
-    int color = CHECK_COLOR(WHITE, piece);
+    int color = src->currentPlayer;
     if (!piece || !CHECK_COLOR(color, piece)) {
         return SP_CHESS_GAME_NO_PIECE_IN_POSITION;
     }
@@ -870,10 +870,6 @@ SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
 
 SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     if (!src) {
-        return SP_CHESS_GAME_INVALID_ARGUMENT;
-    }
-
-    if (!spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
