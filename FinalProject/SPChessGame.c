@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-unsigned char spChessGameSetLocation(unsigned int row, unsigned int column) {
+unsigned char spChessGameSetLocation(int row, int column) {
 	if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
 		return 0;
 	}
@@ -114,7 +114,7 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
     char temp;
     int direction;
 
-    if (targetColumn == threatColumn && targetRow != threatRow) { // Horizontal move
+    if (targetColumn != threatColumn && targetRow == threatRow) { // Horizontal move
         direction = threatColumn > targetColumn ? RIGHT : LEFT;
         for (int i = 1; i < abs(threatRow - targetRow); i++) {
             temp = src->gameBoard[targetRow][targetColumn + i * direction];
@@ -126,11 +126,14 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
         return 1;
     }
 
-    if (targetRow == threatRow && targetColumn != threatColumn) { // Vertical move
+    if (targetRow != threatRow && targetColumn == threatColumn) { // Vertical move
+    	printf("Here\n");
         direction = threatRow > targetRow ? DOWN : UP;
         for (int i = 1; i < abs(threatRow - targetRow); i++) {
             temp = src->gameBoard[targetRow + i * direction][targetColumn];
+            printf("%d\n", src->gameBoard[6][4]);
             if (temp) { // Blockage
+            	printf("shit %d\n", targetRow + i * direction);
                 return 0;
             }
         }
@@ -227,6 +230,10 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         return -1; // Out of bounds
     }
 
+    int column = spChessGameGetColumnFromPosition(location);
+    int row = spChessGameGetRowFromPosition(location);
+    printf("%d,%d\n", row, column);
+
     int lastMove = 0;
     int full = 0;
     int threatened = 0;
@@ -240,7 +247,8 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         return -1;
     }
 
-    if (spChessGameIsPieceThreatened(src, location)) { //
+    if (spChessGameIsPieceThreatened(src, location) == 1) { //
+    	printf("Please...\n");
         threatened = 1;
     }
 
@@ -256,6 +264,8 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         }
     }
 
+    //printf("%d,%d -> %d,%d\n", targetRow, targetColumn, threatRow, threatColumn);
+
     return threatened;
 }
 
@@ -268,8 +278,8 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
  * @return
  * An int representing the move indicated by the arguments
  */
-int setMoveCoordinatesToInt(int currentRow, int currentColumn, int destinationRow, int destinationColumn) {
-    int move = spChessGameSetLocation(currentRow, currentColumn) << 8; // format is 4 bits current row, 4 current column, 4 destination row, 4 destination column
+unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int currentColumn,unsigned int destinationRow, unsigned int destinationColumn) {
+    unsigned int move = spChessGameSetLocation(currentRow, currentColumn) << 8; // format is 4 bits current row, 4 current column, 4 destination row, 4 destination column
     move |= spChessGameSetLocation(destinationRow, destinationColumn);
     return move;
 }
@@ -668,7 +678,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
     }
 
     char captured = src->gameBoard[destinationRow][destinationColumn];
-    if (CHECK_COLOR(captured) == color) { // Can't capture own piece
+    if (captured && CHECK_COLOR(captured) == color) { // Can't capture own piece
         return SP_CHESS_GAME_ILLEGAL_MOVE;
     }
 
@@ -719,7 +729,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
         }
     }
 
-    else if (piece == KNIGHT(piece)) {
+    else if (piece == KNIGHT(color)) {
         if (spChessGameCheckKnightMove(src, destinationPosition, currentPosition)) {
             legalMove = 1;
         }
@@ -727,6 +737,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
 
     if (legalMove) {
     	int kingWillBeThreatened = spChessGameCheckPotentialThreat(src, move, kingLocation);
+    	printf("Threatened: %d\n", kingWillBeThreatened);
         if (kingWillBeThreatened) {
             if (kingThreatened) {
                 return SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED;
@@ -771,6 +782,7 @@ int spChessGameIsPieceThreatened(SPChessGame* src, char location) {
 
     if (spChessGameCheckDiagonalMove(src, location, src->locations[QUEEN_LOC(!color)]) == 1 ||
         spChessGameCheckStraightLineMove(src, location, src->locations[QUEEN_LOC(!color)]) == 1) {
+    	printf("HUH?\n");
         return 1;
     }
 

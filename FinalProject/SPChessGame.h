@@ -207,6 +207,6 @@ int spChessGameStepWillCapture(unsigned int step);
 
 int spChessGameStepWillThreaten(unsigned int step);
 
-unsigned char spChessGameSetLocation(unsigned int row, unsigned int column);
+unsigned char spChessGameSetLocation(int row, int column);
 
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H
