@@ -64,11 +64,11 @@ int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char thr
 
     int distance = abs(threatRow - targetRow);
     if (abs(threatColumn - targetColumn) == distance) { // Move is an actual diagonal move
-        int columnDirection = threatColumn > targetColumn ? RIGHT : LEFT; // Where are we going?
-        int rowDirection = threatRow > targetRow ? DOWN : UP; // And now?
+        int columnDirection = threatColumn > targetColumn ? LEFT : RIGHT; // Where are we going?
+        int rowDirection = threatRow > targetRow ? UP : DOWN; // And now?
         char temp;
         for (int i = 1; i < distance; i++) {
-            temp = src->gameBoard[targetRow + i * rowDirection][targetColumn + i * columnDirection];
+            temp = src->gameBoard[threatRow + i * rowDirection][threatColumn + i * columnDirection];
             if (temp) { // There's something blocking the way!
                 return 0;
             }
@@ -309,14 +309,20 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
     }
 
     char destinationPosition = spChessGameGetDestinationPositionFromMove(move << 8);
-    if (!spChessGameVerifyLocation(destinationPosition)) {
+    char currentPosition = spChessGameGetCurrentPositionFromMove(move << 8);
+    if (!spChessGameVerifyLocation(currentPosition) ||
+        !spChessGameVerifyLocation(destinationPosition)) {
     	return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
+
+    int currentRow = spChessGameGetRowFromPosition(currentPosition);
+    int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
     char piece = src->gameBoard[destinationRow][destinationColumn];
     int threatened = spChessGameCheckPotentialThreat(src, move, destinationPosition) == 1; // Piece will be threatened?
-    int kingNotThreatened = spChessGameCheckPotentialThreat(src, move, src->locations[KING_LOC(color)]) == 0; // King won't?
+    int kingNotThreatened = src->gameBoard[currentRow][currentColumn] == KING(color) ? // King won't?
+                            !threatened : spChessGameCheckPotentialThreat(src, move, src->locations[KING_LOC(color)]) == 0;
     int step;
     int add = 0;
 
@@ -348,7 +354,6 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src, SPArrayList* s
     int destinationRow;
     int destinationColumn;
     int move;
-    char piece;
 
     int availbleRows = verticalDirection == LEFT ? currentRow + 1 : N_ROWS - currentRow;
     if (!verticalDirection) {
@@ -368,13 +373,12 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src, SPArrayList* s
         destinationRow = currentRow + i * verticalDirection;
         destinationColumn = currentColumn + i * horizontalDirection;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
-
-        if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
-            return SP_CHESS_GAME_INVALID_ARGUMENT;
+        if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
+            if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+                return SP_CHESS_GAME_INVALID_ARGUMENT;
+            }
         }
-
-        piece = src->gameBoard[destinationRow][destinationColumn];
-        if (piece) {
+        else {
             return SP_CHESS_GAME_SUCCESS;
         }
     }
@@ -432,8 +436,8 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* src, SPArrayLis
     int destinationRow;
 
     for (int i = -1; i < 2; i++) {
-        for (int i = -1; i < 2; i++) {
-            destinationColumn = currentColumn + i;
+        for (int j = -1; j < 2; j++) {
+            destinationColumn = currentColumn + j;
             destinationRow = currentRow + i;
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
@@ -614,6 +618,8 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
 
             if (!spArrayListIsEmpty(possibleMoves)) { // There's a piece that can move
                 gameOver = 0; // Game isn't over
+                spArrayListDestroy(possibleMoves);
+                break;
             }
 
             spArrayListDestroy(possibleMoves);
@@ -706,20 +712,20 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
 
     else if (abs(destinationRow - currentRow) == abs(destinationColumn - currentColumn)) { // diagonal move
         if ((piece == QUEEN(color) || piece == BISHOP(color)) &&
-            spChessGameCheckDiagonalMove(src, destinationPosition, currentPosition)) { // piece can perform diagonal move
+            spChessGameCheckDiagonalMove(src, destinationPosition, currentPosition) == 1) { // piece can perform diagonal move
             legalMove = 1;
         }
     }
 
     else if (destinationRow == currentRow || destinationColumn == currentColumn) { // straight line move
         if ((piece == QUEEN(color) || piece == ROOK(color)) &&
-            spChessGameCheckStraightLineMove(src, destinationPosition, currentPosition)) { // piece can perform straight line move
+            spChessGameCheckStraightLineMove(src, destinationPosition, currentPosition) == 1) { // piece can perform straight line move
             legalMove = 1;
         }
     }
 
     else if (piece == KNIGHT(color)) {
-        if (spChessGameCheckKnightMove(src, destinationPosition, currentPosition)) {
+        if (spChessGameCheckKnightMove(src, destinationPosition, currentPosition) == 1) {
             legalMove = 1;
         }
     }

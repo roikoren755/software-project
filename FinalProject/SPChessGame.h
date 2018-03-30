@@ -17,25 +17,25 @@
 #define LAST_ROW 7
 #define LEFT_MOST_COL 0
 #define RIGHT_MOST_COL 7
-#define PAWN(color) ('M'+color*('a'-'A'))
-#define KNIGHT(color) ('N'+color*('a'-'A'))
-#define BISHOP(color) ('B'+color*('a'-'A'))
-#define ROOK(color) ('R'+color*('a'-'A'))
-#define QUEEN(color) ('Q'+color*('a'-'A'))
-#define KING(color) ('K'+color*('a'-'A'))
+#define PAWN(color) ('M' + color * ('a' - 'A'))
+#define KNIGHT(color) ('N' + color * ('a' - 'A'))
+#define BISHOP(color) ('B' + color * ('a' - 'A'))
+#define ROOK(color) ('R' + color * ('a' - 'A'))
+#define QUEEN(color) ('Q' + color * ('a' - 'A'))
+#define KING(color) ('K' + color * ('a' - 'A'))
 #define BLANK '_'
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
-#define KING_LOC(color) (4+color*3*N_COLUMNS)
-#define QUEEN_LOC(color) (3+color*3*N_COLUMNS)
-#define LEFT_ROOK_LOC(color) (0+color*3*N_COLUMNS)
-#define RIGHT_ROOK_LOC(color) (7+color*3*N_COLUMNS)
-#define LEFT_KNIGHT_LOC(color) (1+color*3*N_COLUMNS)
-#define RIGHT_KNIGHT_LOC(color) (6+color*3*N_COLUMNS)
-#define LEFT_BISHOP_LOC(color) (2+color*3*N_COLUMNS)
-#define RIGHT_BISHOP_LOC(color) (5+color*3*N_COLUMNS)
+#define KING_LOC(color) (4 + color * 3 * N_COLUMNS)
+#define QUEEN_LOC(color) (3 + color * 3 * N_COLUMNS)
+#define LEFT_ROOK_LOC(color) (0 + color * 3 * N_COLUMNS)
+#define RIGHT_ROOK_LOC(color) (7 + color * 3 * N_COLUMNS)
+#define LEFT_KNIGHT_LOC(color) (1 + color * 3 * N_COLUMNS)
+#define RIGHT_KNIGHT_LOC(color) (6 + color * 3 * N_COLUMNS)
+#define LEFT_BISHOP_LOC(color) (2 + color * 3 * N_COLUMNS)
+#define RIGHT_BISHOP_LOC(color) (5 + color * 3 * N_COLUMNS)
 #define CHECK_COLOR(piece) (piece > 'Z')
 #define LEFT -1
 #define RIGHT 1
@@ -44,7 +44,7 @@
 #define STAY 0
 #define CAPTURES 1
 #define HISTORY_SIZE 3
-#define COL_NUM_TO_LETTER(column) (column+'A')
+#define COL_NUM_TO_LETTER(column) (column + 'A')
 #define CHECKMATE 3
 #define CHECK 2
 #define DRAW 1

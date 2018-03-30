@@ -142,7 +142,6 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command, int
 	SP_CHESS_GAME_MESSAGE message = spChessGameIsValidMove(game, move);
 	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
 		printf("ERROR: Something went wrong! Quitting...\n");
-		return message;
 	}
 	else if (message == SP_CHESS_GAME_INVALID_POSITION) {
 		if (!mode) {
@@ -171,7 +170,7 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command, int
 	}
 	else {
 		message = spChessGameSetMove(game, move);
-		if (message != SP_CHESS_GAME_SUCCESS) {
+		if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
 			printf("ERROR: OOPS... something went wrong while setting up a move! Quitting...\n");
 		}
 		else {
@@ -195,7 +194,6 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command, int
 					}
 					else {
 						printf("ERROR: Something went wrong while checking game state. Quitting...\n");
-						return message;
 					}
 				}
 			}
@@ -309,76 +307,15 @@ int main(int argc, char* argv[]) {
             command = spGetCommand(mode);
             if (command.cmd == SP_MOVE) {
             	message = spChessGameMove(game, &command, mode);
-//            	switch (message) {
-//            	case SP_CHESS_GAME_INVALID_ARGUMENT:
-//            		quit = 1;
-//            		break;
-//            	case SP_CHESS_GAME_SUCCESS:
-//            		break;
-//            	default:
-//            		break;
-//            	}
-                int move = spParserGetMove(&command);
-                message = spChessGameIsValidMove(game, move);
-				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
-					perror("ERROR: Something went wrong! Quitting...\n");
-					quit = 1;
-				}
-				else if (message == SP_CHESS_GAME_INVALID_POSITION) {
-					printf("Invalid position on the board\n");
-				}
-				else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
-					printf("The specified position does not contain your piece\n");
-				}
-				else if (message == SP_CHESS_GAME_ILLEGAL_MOVE) {
-					printf("Illegal move\n");
-				}
-				else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED) {
-					printf("Illegal move: king is still threatened\n");
-				}
-				else if (message == SP_CHESS_GAME_KING_BECOMES_THREATENED) {
-					printf("Illegal move: king will be threatened\n");
-				}
-				else {
-					message = spChessGameSetMove(game, move);
-					if (message != SP_CHESS_GAME_SUCCESS) {
-						perror("ERROR: OOPS... something went wrong while setting up a move! Quitting...\n");
-						quit = 1;
-					}
-					else {
-						message = spChessCheckGameState(game, game->currentPlayer);
-						if (message != SP_CHESS_GAME_SUCCESS) {
-							if (message == SP_CHESS_GAME_CHECK) {
-								printf("Check: %s king is threatened\n", game->currentPlayer ? "white" : "black");
-							}
-							else {
-								quit = 1;
-								if (message == SP_CHESS_GAME_CHECKMATE) {
-									printf("Checkmate! %s player wins the game\n", game->currentPlayer ? "black" : "white");
-								}
-								else if (message == SP_CHESS_GAME_DRAW) {
-									printf("The game ends in a draw\n");
-								}
-								else {
-									perror("ERROR: Something went wrong while checking game state. Quitting...\n");
-								}
-							}
-						}
-
-						if (!quit && game->gameMode == 1) {
-							move = spMinimaxSuggestMove(game);
-							if (move == -1) {
-								perror("ERROR: Couldn't figure out computer move. Quitting...\n");
-								quit = 1;
-							}
-							else {
-								char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
-								spPrintComputerMove(piece, move);
-								spChessGameSetMove(game, move);
-							}
-						}
-					}
-				}
+            	switch (message) {
+                    case SP_CHESS_GAME_CHECKMATE:
+                    case SP_CHESS_GAME_DRAW:
+                    case SP_CHESS_GAME_INVALID_ARGUMENT:
+                        quit = 1;
+                        break;
+                    default:
+                        break;
+            	}
             }
 
 			else if (command.cmd == SP_GET_MOVES) {
