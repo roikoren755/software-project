@@ -127,13 +127,10 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
     }
 
     if (targetRow != threatRow && targetColumn == threatColumn) { // Vertical move
-    	printf("Here\n");
         direction = threatRow > targetRow ? DOWN : UP;
         for (int i = 1; i < abs(threatRow - targetRow); i++) {
             temp = src->gameBoard[targetRow + i * direction][targetColumn];
-            printf("%d\n", src->gameBoard[6][4]);
             if (temp) { // Blockage
-            	printf("shit %d\n", targetRow + i * direction);
                 return 0;
             }
         }
@@ -230,10 +227,6 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         return -1; // Out of bounds
     }
 
-    int column = spChessGameGetColumnFromPosition(location);
-    int row = spChessGameGetRowFromPosition(location);
-    printf("%d,%d\n", row, column);
-
     int lastMove = 0;
     int full = 0;
     int threatened = 0;
@@ -248,7 +241,6 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
     }
 
     if (spChessGameIsPieceThreatened(src, location) == 1) { //
-    	printf("Please...\n");
         threatened = 1;
     }
 
@@ -263,8 +255,6 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
             return -1;
         }
     }
-
-    //printf("%d,%d -> %d,%d\n", targetRow, targetColumn, threatRow, threatColumn);
 
     return threatened;
 }
@@ -654,11 +644,10 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    move <<= 8;
-    char currentPosition = spChessGameGetCurrentPositionFromMove(move);
+    char currentPosition = spChessGameGetCurrentPositionFromMove(move << 8);
     int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int currentRow = spChessGameGetRowFromPosition(currentPosition);
-    char destinationPosition = spChessGameGetDestinationPositionFromMove(move);
+    char destinationPosition = spChessGameGetDestinationPositionFromMove(move << 8);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 
@@ -737,8 +726,7 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
 
     if (legalMove) {
     	int kingWillBeThreatened = spChessGameCheckPotentialThreat(src, move, kingLocation);
-    	printf("Threatened: %d\n", kingWillBeThreatened);
-        if (kingWillBeThreatened) {
+        if (kingWillBeThreatened == 1) {
             if (kingThreatened) {
                 return SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED;
             }
@@ -782,7 +770,6 @@ int spChessGameIsPieceThreatened(SPChessGame* src, char location) {
 
     if (spChessGameCheckDiagonalMove(src, location, src->locations[QUEEN_LOC(!color)]) == 1 ||
         spChessGameCheckStraightLineMove(src, location, src->locations[QUEEN_LOC(!color)]) == 1) {
-    	printf("HUH?\n");
         return 1;
     }
 

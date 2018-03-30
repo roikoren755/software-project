@@ -9,12 +9,12 @@ SDL_LIB = -L/usr/local/lib/sdl_2.0.5/lib -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@
 SPChessParserUnitTest: SPChessParser.o SPChessParserUnitTest.o
-	$(CC) SPChesSParser.o SPChessParserUnitTest.o -o $@
+	$(CC) SPChessParser.o SPChessParserUnitTest.o -o $@
 SPChessParserUnitTest.o: SPChessParserUnitTest.c SPChessParser.h unit_test_util.h
 	$(CC) $(CC_COMP_FLAG) -c $*.c
-SPChessGameUnitTest: SPChessGame.o SPChessGameUnitTest.o
-	$(CC) SPChessGame.o SPChessGameUnitTest.o -o $@
-SPChessGameUnitTest.o: SPChessGameUnitTest.c SPChessGame.h unit_test_util.h
+SPChessGameUnitTest: SPChessGame.o SPChessGameUnitTest.o SPMainAux.o SPArrayList.o SPChessParser.o
+	$(CC) SPChessGame.o SPChessGameUnitTest.o SPMainAux.o SPArrayList.o SPChessParser.o -o $@
+SPChessGameUnitTest.o: SPChessGameUnitTest.c SPChessGame.h unit_test_util.h SPMainAux.h SPArrayList.h SPChessParser.h
 	$(CC) $(CC_COMP_FLAG) -c $*.c
 SPMinimax.o: SPMinimax.h SPMinimax.c SPChessGame.h SPMainAux.h
 	$(CC) $(CC_COMP_FLAG) -c $*.c
@@ -29,4 +29,4 @@ SPArrayList.o: SPArrayList.h SPArrayList.c
 main.o: main.c SPChessParser.h SPChessGame.h SPArrayList.h SPMainAux.h SPMinimax.h
 	$(CC) $(CC_COMP_FLAG) -c $*.c
 clean:
-	rm -f *.o $(EXEC)
+	rm -f *.o $(EXEC) *Test
