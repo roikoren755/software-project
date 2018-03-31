@@ -95,10 +95,14 @@ SPCommand spParserParseLine(const char* str) {
     char* nextToken = strtok(NULL, DELIMITERS); // Next word
 
     if (notMatched && // No match yet
-            !strcmp(command, GAME_MODE) && // First word matches GAME_MODE
-            nextToken) { // And there's something after it
+            !strcmp(command, GAME_MODE)) { // First word matches GAME_MODE
         cmd.cmd = SP_GAME_MODE;
-        strcpy(cmd.arguments, nextToken);
+        if (nextToken) {
+            strcpy(cmd.arguments, nextToken);
+        }
+        else {
+            cmd.arguments[0] = '\0';
+        }
         notMatched = 0;
     }
 

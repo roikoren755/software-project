@@ -174,7 +174,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 					return 0;
 				}
 
-				while (spArrayListSize(possibleMoves)) { // While there are moves we haven't checked
+				while (!spArrayListIsEmpty(possibleMoves)) { // While there are moves we haven't checked
 					step = spArrayListGetFirst(possibleMoves);
 					destinationLocation = spChessGameGetDestinationPositionFromMove(step);
 					move = currentLocation << 8;
@@ -302,9 +302,9 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-						(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
+						(startingColumn == bestDestinationColumn && (startingRow > bestStartingRow || // 2. Starting row
 						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
-						(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
+						(destinationColumn == bestDestinationColumn && (destinationRow > bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;
@@ -402,9 +402,9 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-						(startingColumn == bestDestinationColumn && (startingRow < bestStartingRow || // 2. Starting row
+						(startingColumn == bestDestinationColumn && (startingRow > bestStartingRow || // 2. Starting row
 						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
-						(destinationColumn == bestDestinationColumn && (destinationRow < bestDestinationRow))))))) { // 4. Destination Row
+						(destinationColumn == bestDestinationColumn && (destinationRow > bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;

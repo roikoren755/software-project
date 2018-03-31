@@ -90,6 +90,50 @@ static int spChessGameTestGetMoves() {
 	possibleMoves = spChessGameGetMoves(game, position);
 	ASSERT_TRUE(possibleMoves);
 	ASSERT_TRUE(spArrayListSize(possibleMoves) == 2);
+	position = spChessGameSetPosition2(4, 4);
+	for (int i = 0; i < 2 * N_COLUMNS; i++) {
+		if (i % 2 == 0) {
+			game->gameBoard[4][4] = STARTING_ROW[i / 2];
+			game->currentPlayer = BLACK;
+		}
+		else {
+			game->gameBoard[4][4] = CAPITAL_TO_LOW(STARTING_ROW[i / 2]);
+			game->currentPlayer = WHITE;
+		}
+		possibleMoves = spChessGameGetMoves(game, position);
+		ASSERT_TRUE(possibleMoves);
+		switch (i / 2) {
+			case RIGHT_ROOK_LOC(BLACK):
+			case LEFT_ROOK_LOC(BLACK):
+				ASSERT_TRUE(spArrayListSize(possibleMoves) == 11);
+				break;
+			case RIGHT_KNIGHT_LOC(BLACK):
+			case LEFT_KNIGHT_LOC(BLACK):
+				if (game->currentPlayer) {
+					ASSERT_TRUE(spArrayListSize(possibleMoves) == 6);
+				}
+				else {
+					ASSERT_TRUE(spArrayListSize(possibleMoves) == 8);
+				}
+				break;
+			case RIGHT_BISHOP_LOC(BLACK):
+			case LEFT_BISHOP_LOC(BLACK):
+				ASSERT_TRUE(spArrayListSize(possibleMoves) == 8);
+				break;
+			case QUEEN_LOC(BLACK):
+				ASSERT_TRUE(spArrayListSize(possibleMoves) == 19);
+				break;
+			case KING_LOC(BLACK):
+				if (game->currentPlayer) {
+					ASSERT_TRUE(spArrayListSize(possibleMoves) == 8);
+				}
+				else {
+					ASSERT_TRUE(spArrayListSize(possibleMoves) == 5);
+				}
+			default:
+				break;
+		}
+	}
 	spArrayListDestroy(possibleMoves);
 	spChessGameDestroy(game);
 	return 1;
@@ -172,30 +216,49 @@ static int spChessGameTestUndoMove() {
 static int spChessGameTestCheckGameState() {
     SPChessGame* game = spChessGameCreate();
     ASSERT_TRUE(game);
+    ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_SUCCESS);
+    game->currentPlayer = BLACK;
+    ASSERT_TRUE(spChessCheckGameState(game, BLACK) == SP_CHESS_GAME_SUCCESS);
+    for (int i = 0; i < N_COLUMNS; i++) {
+    	for (int j = 0; j < N_ROWS; j++) {
+    		game->gameBoard[i][j] = '\0';
+    	}
+    }
     for (int i = 0; i < N_COLUMNS * 4; i++) {
         if (i == KING_LOC(WHITE)) {
             game->locations[i] = spChessGameSetPosition2(0, 0);
+            game->gameBoard[0][0] = KING(WHITE);
         }
         else if (i == RIGHT_BISHOP_LOC(BLACK)) {
             game->locations[i] = spChessGameSetPosition2(2, 1);
+            game->gameBoard[2][1] = BISHOP(BLACK);
         }
         else if (i == LEFT_BISHOP_LOC(BLACK)) {
             game->locations[i] = spChessGameSetPosition2(2, 2);
+			game->gameBoard[2][2] = BISHOP(BLACK);
         }
         else if (i == QUEEN_LOC(BLACK)) {
             game->locations[i] = spChessGameSetPosition2(2, 3);
+			game->gameBoard[2][3] = QUEEN(BLACK);
+        }
+        else if (i == KING_LOC(BLACK)) {
+        	game->locations[i] = spChessGameSetPosition2(7, 7);
+			game->gameBoard[7][7] = KING(BLACK);
         }
         else {
             game->locations[i] = 0;
         }
     }
+    game->currentPlayer = WHITE;
     ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_CHECKMATE);
-    game->locations[RIGHT_BISHOP_LOC(BLACK)] = game->locations[LEFT_BISHOP_LOC(BLACK)] = 0;
-//    ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_CHECK);
-//    for (int i = 0; i < N_COLUMNS * 4; i++) {
-//        game->locations[i] = 0;
-//    }
-//    ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_DRAW);
+    game->locations[RIGHT_BISHOP_LOC(BLACK)] = game->locations[QUEEN_LOC(BLACK)] = game->gameBoard[2][1] = game->gameBoard[2][3] = 0;
+    ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_CHECK);
+    for (int i = 0; i < N_COLUMNS * 4; i++) {
+        game->locations[i] = 0;
+    }
+	ASSERT_TRUE(spChessCheckGameState(game, BLACK) == SP_CHESS_GAME_DRAW);
+    game->currentPlayer = WHITE;
+    ASSERT_TRUE(spChessCheckGameState(game, WHITE) == SP_CHESS_GAME_DRAW);
     spChessGameDestroy(game);
     return 1;
 }

@@ -400,7 +400,7 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src, SPArrayL
     for (int i = -1; i < 2; i += 2) {
         for (int j = -1; j < 2; j += 2) {
             destinationRow = currentRow + i;
-            destinationColumn = currentColumn + 2 * i;
+            destinationColumn = currentColumn + 2 * j;
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
             if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
@@ -410,7 +410,7 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src, SPArrayL
             }
 
             destinationRow = currentRow + 2 * i;
-            destinationColumn = currentColumn + i;
+            destinationColumn = currentColumn + j;
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
             if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
@@ -543,7 +543,7 @@ SPChessGame* spChessGameCreate() {
     game->userColor = WHITE;
     game->difficulty = 2;
     game->gameMode = 1;
-    game->gameMode = NORMAL;
+    game->gameState = NORMAL;
 
     spChessGameResetBoard(game);
 
@@ -627,7 +627,7 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
     }
 
     if (gameOver) {
-        if (kingThreatened) {
+        if (kingThreatened == 1) {
         	src->gameState = CHECKMATE;
             return SP_CHESS_GAME_CHECKMATE;
         }
@@ -900,14 +900,15 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // Shouldn't happen
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
+    int color = CHECK_COLOR(src->gameBoard[currentRow][currentColumn]);
 
-    for (int i = 0; i < N_COLUMNS * 4; i++) {
-        if (src->locations[i] == destinationPosition) { // Change captured piece's location
-            src->locations[i] = 0;
+    for (int i = 0; i < N_COLUMNS * 2; i++) {
+        if (src->locations[i + (!color) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
+            src->locations[i + (!color) * 2 * N_COLUMNS] = 0;
         }
 
-        if (src->locations[i] == currentPosition) { // Change moved piece's location
-            src->locations[i] = destinationPosition;
+        if (src->locations[i + color * 2 * N_COLUMNS] == currentPosition) { // Change moved piece's location
+            src->locations[i + color * 2 * N_COLUMNS] = destinationPosition;
         }
     }
 

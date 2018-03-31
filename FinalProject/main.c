@@ -247,6 +247,7 @@ int main(int argc, char* argv[]) {
 	int quit = 0;
 	int settings = 1;
 	int printedWelcome = 0;
+	int gameStarted = 0;
 	SP_CHESS_GAME_MESSAGE message;
 	SPCommand command;
 	while (!quit) {
@@ -254,15 +255,12 @@ int main(int argc, char* argv[]) {
 			if (!printedWelcome) {
 				printf("Specify game settings or type 'start' to begin a game with the current settings:\n");
 				printedWelcome = 1;
+				gameStarted = 0;
 			}
-			printf("GET COMMAND MESSAGE\n"); // TODO - fix me!
 			command = spGetCommand(mode);
 
 			if (command.cmd == SP_GAME_MODE) {
 				message = spChessGameSetGameMode(game, &command, mode);
-				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
-					quit = 1;
-				}
 			}
 
 			else if (command.cmd == SP_DIFFICULTY && game->gameMode == 1) {
@@ -275,6 +273,7 @@ int main(int argc, char* argv[]) {
 
 			else if (command.cmd == SP_LOAD) {
 				message = spChessGameLoadGame(game, &command, mode);
+				gameStarted = 1;
 			}
 
 			else if (command.cmd == SP_DEFAULT) {
@@ -297,26 +296,41 @@ int main(int argc, char* argv[]) {
 			}
 
 			else {
-				printf("ERROR: Invalid command\n");
+				printf("ERROR: invalid command\n");
 			}
 		}
 
         else {
-            spChessGamePrintBoard(game);
-            printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
-            command = spGetCommand(mode);
-            if (command.cmd == SP_MOVE) {
-            	message = spChessGameMove(game, &command, mode);
-            	switch (message) {
-                    case SP_CHESS_GAME_CHECKMATE:
-                    case SP_CHESS_GAME_DRAW:
-                    case SP_CHESS_GAME_INVALID_ARGUMENT:
-                        quit = 1;
-                        break;
-                    default:
-                        break;
-            	}
+            if (game->gameMode == 1 && !gameStarted && game->currentPlayer != game->userColor) {
+            	gameStarted = 1;
+				int move = spMinimaxSuggestMove(game);
+				if (move == -1) {
+					printf("ERROR: Couldn't figure out computer move. Quitting...\n");
+					quit = 1;
+				}
+				else {
+					char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
+					spPrintComputerMove(piece, move);
+					spChessGameSetMove(game, move);
+				}
             }
+
+			spChessGamePrintBoard(game);
+			printf("Enter your move (%s player):\n", game->currentPlayer ? "white" : "black");
+			command = spGetCommand(mode);
+
+			if (command.cmd == SP_MOVE) {
+				message = spChessGameMove(game, &command, mode);
+				switch (message) {
+					case SP_CHESS_GAME_CHECKMATE:
+					case SP_CHESS_GAME_DRAW:
+					case SP_CHESS_GAME_INVALID_ARGUMENT:
+						quit = 1;
+						break;
+					default:
+						break;
+				}
+			}
 
 			else if (command.cmd == SP_GET_MOVES) {
 				char location = spParserGetLocation(&command);
@@ -375,6 +389,7 @@ int main(int argc, char* argv[]) {
 			else if (command.cmd == SP_RESET) {
 				settings = 1;
 				message = spChessGameResetGame(game);
+				printedWelcome = 0;
 				if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
 					printf("ERROR: Something went awry while resetting game! Quitting... \n");
 					quit = 1;
@@ -386,7 +401,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			else {
-				printf("ERROR: Invalid command\n");
+				printf("ERROR: invalid command\n");
 			}
         }
 	}
