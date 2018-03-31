@@ -41,7 +41,7 @@ unsigned int spChessGameGetRowFromPosition(unsigned char position);
 
 SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file);
 
-SPCommand spGetCommand();
+SPCommand spGetCommand(int mode);
 
 SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file);
 
