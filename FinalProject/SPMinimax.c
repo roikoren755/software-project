@@ -107,8 +107,8 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
 
 	int v = game->currentPlayer ? INT_MIN : INT_MAX; // Set worst result for current player
 	int index;
-	char currentLocation;
-	char destinationLocation;
+	unsigned char currentLocation;
+	unsigned char destinationLocation;
 	int move;
 	int step;
 
@@ -244,8 +244,8 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 	int index;
 	int move;
 	int score;
-	char startingPosition;
-	char destinationPosition;
+	unsigned char startingPosition;
+	unsigned char destinationPosition;
 	int startingColumn;
 	int startingRow;
 	int destinationColumn;
@@ -344,8 +344,8 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 	int index;
 	int move;
 	int score;
-	char startingPosition;
-	char destinationPosition;
+	unsigned char startingPosition;
+	unsigned char destinationPosition;
 	int startingColumn;
 	int startingRow;
 	int destinationColumn;

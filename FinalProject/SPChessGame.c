@@ -479,7 +479,7 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src, SPArrayLis
     }
 
     destinationRow = currentRow + direction;
-    for (int i = -1; i < 2; i+=2) {
+    for (int i = -1; i < 2; i += 2) {
         destinationColumn = currentColumn + i;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
@@ -547,7 +547,7 @@ SPChessGame* spChessGameCreate() {
 
     spChessGameResetBoard(game);
 
-    game->history = spArrayListCreate(HISTORY_SIZE);
+    game->history = spArrayListCreate(2 * HISTORY_SIZE);
     if (!game->history) { // Failed creating spArrayList for history
         free(game);
         return 0;
@@ -903,7 +903,7 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     int color = CHECK_COLOR(src->gameBoard[currentRow][currentColumn]);
 
     for (int i = 0; i < N_COLUMNS * 2; i++) {
-        if (src->locations[i + (!color) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
+        if (captured && src->locations[i + (!color) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
             src->locations[i + (!color) * 2 * N_COLUMNS] = 0;
         }
 
@@ -935,7 +935,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    char captured = CLEAN_EXCESS_BYTES(move); // Get captured piece
+    char captured = CLEAN_EXCESS_BYTES((unsigned int) move); // Get captured piece
     char destinationPosition = spChessGameGetDestinationPositionFromMove(move); // Location of captured piece
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
@@ -945,7 +945,8 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
 
     src->gameBoard[currentRow][currentColumn] = src->gameBoard[destinationRow][destinationColumn]; // Set board
     src->gameBoard[destinationRow][destinationColumn] = captured;
-    int currentPlayer = src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE; // And current player
+    src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE; // And current player
+    int currentPlayer = !(src->currentPlayer);
 
     for (int i = 0; i < N_COLUMNS * 4; i++) { // Update location for moved piece
         if (src->locations[i] == destinationPosition) {
@@ -953,6 +954,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
+    int index = -1;
     if (captured == PAWN(currentPlayer)) { // Update location if pawn was captured
         int startIndex = currentPlayer ? 2 * N_COLUMNS : N_COLUMNS; // Pawn locations by color
         for (int i = 0; i < N_COLUMNS; i++) {
@@ -962,8 +964,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
-    int index = -1;
-    if (captured == KNIGHT(currentPlayer)) { // Update location if knight was captured
+    else if (captured == KNIGHT(currentPlayer)) { // Update location if knight was captured
         if (!src->locations[RIGHT_KNIGHT_LOC(currentPlayer)]) {
             index = RIGHT_KNIGHT_LOC(currentPlayer);
         }
@@ -972,7 +973,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
-    if (captured == ROOK(currentPlayer)) { // Rook taken
+    else if (captured == ROOK(currentPlayer)) { // Rook taken
         if (!src->locations[RIGHT_ROOK_LOC(currentPlayer)]) {
             index = RIGHT_ROOK_LOC(currentPlayer);
         }
@@ -981,7 +982,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
-    if (captured == BISHOP(currentPlayer)) { // Bishop
+    else if (captured == BISHOP(currentPlayer)) { // Bishop
         if (!src->locations[RIGHT_BISHOP_LOC(currentPlayer)]) {
             index = RIGHT_BISHOP_LOC(currentPlayer);
         }
@@ -990,7 +991,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         }
     }
 
-    if (captured == QUEEN(currentPlayer)) { // QUEEN???
+    else if (captured == QUEEN(currentPlayer)) { // QUEEN???
         index = QUEEN_LOC(currentPlayer);
     }
     if (index != -1) {
