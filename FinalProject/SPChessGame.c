@@ -244,21 +244,27 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         threatened = 1;
     }
 
-    gameMessage = spChessGameUndoMove(src);
-    if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
-        return -1;
-    }
 
-    if (full) {
-        SP_ARRAY_LIST_MESSAGE message = spArrayListAddLast(src->history, lastMove);
-        if (message != SP_ARRAY_LIST_SUCCESS) {
-            return -1;
-        }
+    int success = spUndoAndRestoreHistory( src, lastMove, full);
+    if(!success){
+    	return -1;
     }
-
     return threatened;
 }
 
+int spUndoAndRestoreHistory(SPChessGame* src, int lastMove, int full){
+	SP_CHESS_GAME_MESSAGE gameMessage = spChessGameUndoMove(src);
+	if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
+	        return 0;
+	}
+    if (full) {
+	    SP_ARRAY_LIST_MESSAGE message = spArrayListAddLast(src->history, lastMove);
+	    if (message != SP_ARRAY_LIST_SUCCESS) {
+	         return 0;
+        }
+	}
+    return 1;
+}
 /***
  * Prepares an int to represent a move, so as to be accepted by spChessGameSetMove(...)
  * @param currentRow
@@ -645,6 +651,8 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
+
+
 SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
     if (!src) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
@@ -916,6 +924,8 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     src->gameBoard[currentRow][currentColumn] = '\0';
 
     src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE; // Change current player
+    
+	spChessCheckGameState(src,color);
 
     return SP_CHESS_GAME_SUCCESS;
 }
@@ -998,6 +1008,8 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         src->locations[index] = destinationPosition;
     }
 
+		spChessCheckGameState(src,color);
+	
     return SP_CHESS_GAME_SUCCESS;
 }
 
