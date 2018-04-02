@@ -12,7 +12,7 @@ int var=0;
 
 int SPDrawBoard(SDL_Renderer* rend){
 	SDL_Rect frameRect = { .x = 5, .y = 5, .w = 650, .h = 650 };
-	SDL_SetRenderDrawColor(rend, 0, 0, 0, 0);
+	SDL_SetRenderDrawColor(rend, 0, 0, 0, 0);  //draw black frame
 	SDL_RenderFillRect (rend, & frameRect);
 
 	frameRect.x+=5;
@@ -20,14 +20,14 @@ int SPDrawBoard(SDL_Renderer* rend){
 	frameRect.h-=(5*2);
 	frameRect.w-=(5*2);
 	    // Color from within the rectangle
-	SDL_SetRenderDrawColor (rend, 255, 255, 102, 0);
+	SDL_SetRenderDrawColor (rend, CHESS_YELLOW_COLOR);
 	// Fill in the rectangle
 	SDL_RenderFillRect (rend, & frameRect);
 	int i,j;
 	for( i = 0; i<8; i++){ //Draw board
 			for( j = 10+(1-i%2)*80 ; j<640; j+=160){
 				SDL_Rect rect = { .x = j, .y = 10+i*80, .w = 80, .h = 80 };
-				SDL_SetRenderDrawColor(rend, 204, 102, 0, 0);
+				SDL_SetRenderDrawColor(rend, CHESS_BROWN_COLOR);
 				SDL_RenderFillRect(rend, &rect);
 			}
 		}
@@ -36,23 +36,32 @@ int SPDrawBoard(SDL_Renderer* rend){
 
 int SPUpdateBoard(Screen** screens, SPChessGame* game){
 	SDL_Renderer* rend = screens[0]->renderer;
+	SDL_RenderClear(rend);
 	SPDrawBoard(rend);
 	int raw,col;
 	int i;
 	for( i = 0; i<32; i++){
-
 		if(game->locations[i]){
 			raw = spChessGameGetRowFromPosition(game->locations[i]);
 			col = spChessGameGetColumnFromPosition(game->locations[i]);
-//printf("%c-<%d,%d>\n",game->gameBoard[raw][col],col,raw);
 			Sticker * sticker = (Sticker *)screens[0]->widgets[i]->data;
 			sticker->location.x = 10+col*80;
 			sticker->location.y = 10+raw*80;
-			screens[0]->widgets[i]->draw(screens[0]->widgets[i],rend);
 
+			screens[0]->widgets[i]->shown = SHOWN; //ensure widget is shown
+			//screens[0]->widgets[i]->draw(screens[0]->widgets[i],rend);
+		}
+		else{
+			screens[0]->widgets[i]->shown = HIDE; //ensure widget is hidden
 		}
 
 	}
+	int success = SPUpdateGameState(screens,game);
+
+	if(!success){
+		//TODO undo
+	}
+
 	SDL_RenderPresent(rend);
 
 	return 0;
@@ -60,54 +69,122 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game){
 
 void SPShowGameState(Screen** screens, int state){
 	int i;
-	for(i=GS_CHECK; i<3; i++){
-		screens[GAME_SCREEN]->widgets[GS_CHECK]->shown = (i==state?1:0);
+	for(i=GS_CHECK; i<GS_CHECK+3; i++){
+		screens[GAME_SCREEN]->widgets[i]->shown = (i==state)?SHOWN:HIDE;
 	}
 }
 
 int SPUpdateGameState(Screen** screens, SPChessGame* game){
-
-	SP_CHESS_GAME_MESSAGE message = spChessCheckGameState(game, game->currentPlayer);
-	if (message != SP_CHESS_GAME_SUCCESS) {
-		if (message == SP_CHESS_GAME_CHECK) {
-			SPShowGameState(screens,GS_CHECK);
-		}
-		else if (message == SP_CHESS_GAME_CHECKMATE) {
+	switch(game->gameState){
+		case NORMAL:
+			SPShowGameState(screens,NONE);
+			break;
+		case GS_CHECK:
+			SPShowGameState(screens,NONE);
+			break;
+		case CHECKMATE:
 			SPShowGameState(screens,GS_CHECK_MATE);
-			}
-		else if (message == SP_CHESS_GAME_DRAW) {
-			SPShowGameState(screens,DRAW);
-			}
-		else {
-				printf("ERROR: Something went wrong while checking game state. Quitting...\n");
-				return -1;
-			}
-		}
-	else{
-		SPShowGameState(screens,NONE); //dont show any state
-
+			break;
+		case DRAW:
+			SPShowGameState(screens,GS_DRAW);
+			break;
 	}
 	return 1;
 }
 
 
-
-
-int SPDrawScreen(Screen** screens, int window){
-	SDL_Renderer* rend = screens[window]->renderer;
-	SDL_SetRenderDrawColor(rend, 255, 204, 153, 0);
-	SDL_RenderClear(rend);
-
-	if(window == GAME_SCREEN){
-		SPDrawBoard(rend);
-	}
-	//SDL_Delay(50);
-	//printf("%d.drawing window %d\n",var++,window);
-
+void SPDrawWidgets(Screen* screen){
 	Widget * widget;
 	int i = 0;
-	for(i=0; i<screens[window]->widgetsSize; i++){
-		widget = screens[window]->widgets[i];
+
+	for(i=0; i<screen->widgetsSize; i++){
+		widget = screen->widgets[i];
+		if(widget && widget->shown){
+			widget->draw(widget, screen->renderer);
+		}
+	}
+
+}
+
+void SPDefaultDrawScreen(Screen* screen){
+	if(screen==NULL){
+		return;
+	}
+	SDL_Renderer* rend = screen->renderer;
+	SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
+	SDL_RenderClear(rend);
+
+	SPDrawWidgets(screen);
+
+	SDL_Delay(10);
+	SDL_RenderPresent(rend);
+
+}
+
+void SPDrawGameScreen(Screen* screen){
+	if(screen==NULL){
+		return;
+	}
+	SDL_Renderer* rend = screen->renderer;
+	SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
+	SDL_RenderClear(rend);
+
+	SPDrawBoard(rend);
+	SPDrawWidgets(screen);
+
+	SDL_Delay(10);
+	SDL_RenderPresent(rend);
+
+}
+
+void SPDrawLoadSaveScreen(Screen* screen){
+	SDL_Renderer* rend = screen->renderer;
+	SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
+	SDL_RenderClear(rend);
+
+	Widget * widget;
+	int i,j;
+
+	SDL_Rect scrollRect = { .x = 0, .y = 100, .w = 600, .h = 300 };
+	SDL_SetRenderDrawColor(rend, CHESS_YELLOW_COLOR);
+	SDL_RenderFillRect (rend, & scrollRect);
+
+	SDL_Rect scrollbar = { .x = 565, .y = 135, .w = 35, .h = 300 };
+	SDL_SetRenderDrawColor(rend, 224,224,224,0); //draw scrollbar in gray
+	SDL_RenderFillRect (rend, & scrollbar);
+
+	float scrollbarIndicatorPos,scrollbarMaxPos = SCROLLBAR_MAX_POSITION;
+	if(scrollbarMaxPos==0){
+		scrollbarIndicatorPos = 135;
+	}
+	else{               //calculate relative position of scrollbar Indicator
+		scrollbarIndicatorPos = 135+screen->scrollBarPosition*(180/scrollbarMaxPos);
+	}
+	SDL_Rect scrollbarIndicator = { .x = 565, .y = (int)scrollbarIndicatorPos, .w = 35, .h = 50 };
+	SDL_SetRenderDrawColor(rend, 160,160,160,0); // darker gray
+	SDL_RenderFillRect (rend, &scrollbarIndicator);
+
+
+	int firstShownSlotIndex = screen->scrollBarPosition/SLOT_HEIGHT+1;
+	int firstShownSlotPosition = 100-screen->scrollBarPosition%SLOT_HEIGHT;
+
+	for(j=0,i=firstShownSlotIndex; i<=firstShownSlotIndex+300/SLOT_HEIGHT; j++,i++){
+		widget = screen->widgets[LSG_SLOT(i)];
+		if(widget){
+			widget->data->location.y = firstShownSlotPosition+SLOT_HEIGHT*j;
+			widget->draw(widget, rend);
+		}
+		widget = screen->widgets[LSG_SLOT_INDICATOR(i)];
+		if(widget&&widget->shown){
+			widget->data->location.y = firstShownSlotPosition+SLOT_HEIGHT*j+10;
+			widget->draw(widget, rend);
+		}
+
+	}
+
+
+	for(i=0; i<NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS; i++){//draw other widgets
+		widget = screen->widgets[i];
 		if(widget && widget->shown){
 			widget->draw(widget, rend);
 		}
@@ -116,54 +193,80 @@ int SPDrawScreen(Screen** screens, int window){
 	SDL_Delay(10);
 	SDL_RenderPresent(rend);
 
-	return 1;
 }
 
+int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 
+		if(widgetIndex == LSG_UP_ARRAW){
+				screens[screenIndex]->scrollBarPosition -= 7;
+		}
+		else if(widgetIndex == LSG_DOWN_ARRAW){
+					screens[screenIndex]->scrollBarPosition += 7;
+		}
 
-int SPRestartGame(Screen** screens ,SPChessGame* game,int j){
+		if(screens[screenIndex]->scrollBarPosition <= 0){ //make sure we are in bounds
+					screens[screenIndex]->scrollBarPosition = 0;
+		}
+		if(screens[screenIndex]->scrollBarPosition >= SCROLLBAR_MAX_POSITION){
+					screens[screenIndex]->scrollBarPosition = SCROLLBAR_MAX_POSITION;
+		}
+		SPDrawLoadSaveScreen(screens[screenIndex]);
+
+	return 0;
+}
+
+int SPOpenPreviousWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	return SPOpenWindow(screens,screens[screenIndex]->previousWindow);
+}
+
+int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
     spChessGameResetBoard(game);
     SPUpdateBoard(screens,game);
 	return 0;
 }
-int SPOpenSaveGameWindow(Screen** screens ,SPChessGame* game,int j){
+
+int SPOpenSaveGameWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	screens[SAVE_GAME_WINDOW]->previousWindow = screenIndex; //update where to return
+	return SPOpenWindow(screens,SAVE_GAME_WINDOW);
 	return 0;
 }
-int SPOpenLoadGameWindow(Screen** screens ,SPChessGame* game,int j){
-	return 0;
+int SPOpenLoadGameWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	screens[LOAD_GAME_WINDOW]->previousWindow = screenIndex; //update where to return
+	return SPOpenWindow(screens,LOAD_GAME_WINDOW);
 }
 
-int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int j){
+int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	printf("%d.opening main menu\n",var++);
 	return SPOpenWindow(screens,MAIN_MENU_WINDOW);
 }
 
-int SPOpenGetModeWindow(Screen** screens ,SPChessGame* game,int j){
+int SPOpenGetModeWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	printf("%d.opening get mode\n",var++);
-
+	spChessGameResetBoard(game);   //this function only called when the button 'new game' is pressed.
+	SPUpdateBoard(screens,game);
 	return SPOpenWindow(screens,GET_MODE_WINDOW);
 }
 
-int SPOpenGetDifficultyWindow(Screen** screens ,SPChessGame* game,int j){
+int SPOpenGetDifficultyWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	printf("%d.opening GetDifficulty\n",var++);
 	return SPOpenWindow(screens,GET_DIFFICULTY_WINDOW);
 }
 
-int SPOpenGetColorWindow(Screen** screens ,SPChessGame* game,int j){
+int SPOpenGetColorWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	printf("%d.opening GetColorWindow\n",var++);
 	return SPOpenWindow(screens,GET_COLOR_WINDOW);
 }
 
-int SPOpenGameScreen(Screen** screens ,SPChessGame* game,int j){
+int SPOpenGameScreen(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	printf("%d.opening GameScreen\n",var++);
 	return SPOpenWindow(screens,GAME_SCREEN);
 }
 
-int SPQuit(Screen** screens ,SPChessGame* game,int j){
+int SPQuit(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	return 1;
 }
 
-int SPUndoMove(Screen** screens ,SPChessGame* game,int j){
+int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	spChessGameUndoMove(game);
 
 	//update undo button availability
@@ -173,43 +276,147 @@ int SPUndoMove(Screen** screens ,SPChessGame* game,int j){
 	return 0;
 }
 
-int SPSetGameMode(Screen** screens ,SPChessGame* game,int j){
-	game->gameMode = j;//the game mode is the same as the widget position
-	return SPOpenWindow(screens,j==1?GET_DIFFICULTY_WINDOW:GAME_SCREEN);
+int SPSetGameMode(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	game->gameMode = widgetIndex;//the game mode is the same as the widget index
+	return SPOpenWindow(screens,widgetIndex==1?GET_DIFFICULTY_WINDOW:GAME_SCREEN);
 }
-int SPSetGameDifficulty(Screen** screens ,SPChessGame* game,int j){
-	game->difficulty = j; //the difficulty is the same as the widget position
+int SPSetGameDifficulty(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	game->difficulty = widgetIndex; //the difficulty is the same as the widget position
 	return SPOpenWindow(screens,GET_COLOR_WINDOW);
 }
 
-int SPSetGameColor(Screen** screens ,SPChessGame* game,int j){
-	game->userColor = j; //the color is the same as the widget position
+int SPSetGameColor(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	game->userColor = widgetIndex; //the color is the same as the widget position
 	return SPOpenWindow(screens,GAME_SCREEN);
 }
 
 
-int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int j){
+int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	int slotIndex = WIDGET_TO_SLOT_INDEX(widgetIndex);
+	if(!screens[screenIndex]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown){
+		return 0;    //slot has no file
+	}
+	char fileName[30];
+	sprintf(fileName,"game_slot%d.txt",slotIndex);
+	SP_CHESS_GAME_MESSAGE massage = spChessLoadGame(game,fileName);
+	if(massage != SP_CHESS_GAME_SUCCESS){
+		printf("ERROR: could not load the game\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"ERROR: could not load the game", NULL);
+	}
+	SPUpdateLoadSaveSlots(screens);
+	return 	SPUpdateBoard(screens, game);
+
+}
+
+int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	int slotIndex = WIDGET_TO_SLOT_INDEX(widgetIndex);
+	char fileName[30];
+	sprintf(fileName,"game_slot%d.txt",slotIndex);
+	SP_CHESS_GAME_MESSAGE massage = spChessSaveGame(game,fileName);
+	if(massage != SP_CHESS_GAME_SUCCESS){
+		printf("ERROR: could not save the game\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"ERROR: could not save the game", NULL);
+	}
+	SPUpdateLoadSaveSlots(screens);
 	return 0;
+}
+
+void SPUpdateLoadSaveSlots(Screen** screens){
+	int i;
+	char fileName[30];
+	for(i=0; i<NUM_SLOTS; i++){
+		sprintf(fileName,"game_slot%d.txt",i+1);
+		int shown = (access(fileName,F_OK) != -1) ? SHOWN : HIDE;
+		screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(i+1)]->shown =  shown;
+		screens[SAVE_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(i+1)]->shown =  shown;
+	}
 }
 
 int SPOpenWindow(Screen** screens,int window){
 	int i;
 	for(i = 0; i<NUM_SCREENS; i++){
 		if(i == window){
-			screens[i]->shown = 1;
+			screens[i]->shown = SHOWN;
 			printf("%d.open window: %d\n",var++,i);
 			SDL_ShowWindow(screens[i]->window);
 		}
 		else{
-			screens[i]->shown = 0;
+			screens[i]->shown = HIDE;
 			SDL_HideWindow(screens[i]->window);
 		}
 	}
 	return 0;
 }
+SP_CHESS_GAME_MESSAGE spChessGameHandleMove(SPChessGame* game, int move) {
+	SP_CHESS_GAME_MESSAGE message = spChessGameIsValidMove(game, move);
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+		printf("ERROR: Something went wrong! try again...\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"ERROR: Something went wrong! try again", NULL);
+		return message;
+	}
 
+	else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"That's not your piece!", NULL);
+	}
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"Illegal move!", NULL);
+
+	}
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"Illegal move: king is still threatened!", NULL);
+
+	}
+	else if (message == SP_CHESS_GAME_KING_BECOMES_THREATENED) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"Illegal move: king will be threatened!", NULL);
+	}
+	else if(message == SP_CHESS_GAME_SUCCESS){
+		int full = 0, lastMove = 0;
+		if (spArrayListIsFull(game->history)) { // in error case, we might want to undo the user move.
+			lastMove = spArrayListGetLast(game->history); // A move will be lost if we add another to the game's history
+			full = 1; 									// So save it for later
+		}
+		message = spChessGameSetMove(game, move);
+		if (message != SP_CHESS_GAME_SUCCESS) {
+				printf("ERROR: Something went wrong while setting up a move! try again...\n");
+				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+											"ERROR: Something went wrong while setting up a move! try again", NULL);
+		}
+		else if(game->gameMode == 1) {
+				move = spMinimaxSuggestMove(game);
+				printf("%d__",move);
+				if (move == -1) {
+					printf("ERROR: Couldn't figure out computer move. try again...\n");
+					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+																"ERROR:  Couldn't figure out computer move move. try again", NULL);
+				    int success = spUndoAndRestoreHistory(game, lastMove, full);
+				    if(!success){//TODO
+				    }
+				 	return SP_CHESS_GAME_INVALID_ARGUMENT;
+				}
+				else {
+					char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
+					spPrintComputerMove(piece, move);
+					spChessGameSetMove(game, move);
+				}
+		}
+	}
+
+
+	return message;
+}
 
 int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* game){
+	if(game->gameState == CHECKMATE || game->gameState == DRAW){
+		return 0;  //gameOver
+	}
+
 	Sticker * piece = (Sticker *)src->data;
 
 	int curRow = SCREEN_TO_BOARD_LOCATION(piece->location.y);
@@ -244,7 +451,7 @@ int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* gam
 		}
 
 		printf("%d.in the movement, done-%d,move-%d\n",var++,done,movement);
-		SPDrawScreen(screens,GAME_SCREEN);
+		screens[GAME_SCREEN]->draw(screens[GAME_SCREEN]);
 
 		//src->draw(src,screens[GAME_SCREEN]->renderer);
 		SDL_WaitEvent(&e);
@@ -262,7 +469,7 @@ int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* gam
 	SP_CHESS_GAME_MESSAGE massage = spChessGameHandleMove(game,move);
 	printf("%d.massage-%d\n",var++,massage);
 
-	if(massage!=SP_CHESS_GAME_SUCCESS ){ //no move occurred
+	if(massage!=SP_CHESS_GAME_SUCCESS){ //no move occurred
 		printf("%d.no move, raw-%d,col-%d,\n",var++,curRow,curCol);
 
 		piece->location.x = BOARD_TO_SCREEN_LOCATION(curCol);
@@ -270,20 +477,17 @@ int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* gam
 		return 0;
 	}
 
-	int success = SPUpdateGameState(screens,game);
 
-	if(!success){
-		//TODO undo
-	}
 
 	// check if enabling undo is required
 	screens[GAME_SCREEN]->widgets[GS_UNDO]->shown = (spArrayListIsEmpty(game->history))?HIDE:SHOWN;
-	if(spArrayListIsEmpty(game->history)){
-		printf("empty, shown=%d\n",screens[GAME_SCREEN]->widgets[GS_UNDO]->shown);
-	}
-	else{printf("undo available, shown=%d\n",screens[GAME_SCREEN]->widgets[GS_UNDO]->shown);}
+//	if(spArrayListIsEmpty(game->history)){
+//		printf("empty, shown=%d\n",screens[GAME_SCREEN]->widgets[GS_UNDO]->shown);
+//	}
+//	else{printf("undo available, shown=%d\n",screens[GAME_SCREEN]->widgets[GS_UNDO]->shown);}
 
 	SPUpdateBoard(screens,game);
+	printLocations(game);
 	return 0;
 }
 
@@ -393,4 +597,14 @@ int SPCloseWindow(Screen** screens ,SPChessGame* game,int j){
 
 int SPNoOperation(Screen** screens ,SPChessGame* game,Widget * src){
 	return 0;
+}
+
+void printLocations(SPChessGame* game){
+	printf("%d.",var++);
+	for(int i=0;i<32;i++){
+		printf("<%d,%d>\n",
+					spChessGameGetRowFromPosition(game->locations[i]),
+					spChessGameGetColumnFromPosition(game->locations[i]));
+
+	}
 }

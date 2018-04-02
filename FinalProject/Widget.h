@@ -16,7 +16,7 @@ typedef struct widget_t Widget;
 struct widget_t {
 	int shown;
 	void (*draw)(Widget*, SDL_Renderer*);
-	int (*handleEvent)(Widget*, SDL_Event*,Screen**,SPChessGame*,int);
+	int (*handleEvent)(Widget*, SDL_Event*,Screen**,SPChessGame*,int,int);
 	void (*destroy)(Widget*);
 	Button* data;
 };
@@ -27,10 +27,19 @@ struct screen_t {
 	SDL_Renderer* renderer;
 	Widget* widgets[N_MAX_WIDGETS];
 	int shown;
+	int previousWindow;
+	int nextWindow;
 	int widgetsSize;
+	int scrollBarPosition;
+	void (*draw)(Screen*);
 };
 
-Screen* createScreen();
+Screen* createScreen(int width,int height,
+		char* screenName,
+		int widgetsSize,
+		int shown,
+		int previousWindow,
+		void (*draw)(Screen*));
 // useful function for NULL-safe destroy
 void destroyWidget(Widget* src);
 

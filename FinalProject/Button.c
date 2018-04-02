@@ -4,7 +4,7 @@
 Widget* createButton(
 	SDL_Renderer* renderer,
 	const char* image,
-	int (*action)(Screen** screen ,SPChessGame* game,int j),
+	int (*action)(Screen** screen ,SPChessGame* game, int screenIndex ,int widgetIndex),
 	int x, int y, int w, int h,int shown)
 {
 	// allocate data
@@ -23,6 +23,7 @@ Widget* createButton(
 	// we use the surface as a temp var
 	SDL_Surface* surface = SDL_LoadBMP(image);
 	if (surface == NULL) {
+		printf("ERROR: unable to load image: %s\n", SDL_GetError());
 		free(res);
 		free(data);
 		return NULL;
@@ -63,7 +64,7 @@ void destroyButton(Widget* src)
 }
 
 int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
-		SPChessGame* game,int j)
+		SPChessGame* game,int screenIndex ,int widgetIndex)
 {
 	if (e->type == SDL_MOUSEBUTTONUP) {
 		Button* button = (Button*) src->data;
@@ -71,7 +72,7 @@ int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
 		if (SDL_PointInRect(&point, &button->location)) {
 			printf("button pressed at <%d,%d>\n",button->location.x,button->location.y);
 			SDL_Delay(10); //TODO
-			return button->action(screens,game, j);
+			return button->action(screens,game,  screenIndex , widgetIndex);
 		}
 	}
 	return 0;
@@ -103,6 +104,7 @@ Widget* createLable(
 	// we use the surface as a temp var
 	SDL_Surface* surface = SDL_LoadBMP(image);
 	if (surface == NULL) {
+		printf("ERROR: unable to load image: %s\n", SDL_GetError());
 		free(res);
 		free(data);
 		return NULL;
@@ -139,7 +141,7 @@ void destroyLable(Widget* src){
 	free(lable);
 	free(src);
 }
-int handleLableEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int j){
+int handleLableEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int screenIndex ,int widgetIndex){
 	return 0;
 }
 void drawLable(Widget* src, SDL_Renderer* rend){
@@ -169,6 +171,7 @@ Widget* createSticker(
 		// we use the surface as a temp var
 		SDL_Surface* surface = SDL_LoadBMP(image);
 		if (surface == NULL) {
+			printf("ERROR: unable to load image: %s\n", SDL_GetError());
 			free(res);
 			free(data);
 			return NULL;
@@ -206,7 +209,8 @@ void destroySticker(Widget* src){
 	free(piece);
 	free(src);
 }
-int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens, SPChessGame* game,int j){
+int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens,
+		SPChessGame* game,int screenIndex ,int widgetIndex){
 	if (e->type == SDL_MOUSEBUTTONDOWN) {
 		Sticker* sticker = (Sticker*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };

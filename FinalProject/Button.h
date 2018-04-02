@@ -14,7 +14,7 @@ struct button_t {
 	SDL_Renderer* render;
 	SDL_Texture* texture;
 	SDL_Rect location;
-	int (*action)(Screen** screen ,SPChessGame* game,int j);
+	int (*action)(Screen** screen ,SPChessGame* game,int screenIndex ,int widgetIndex);
 };
 
 typedef struct label_t Lable;
@@ -36,10 +36,11 @@ struct sticker_t {
 Widget* createButton(
 	SDL_Renderer* renderer,
 	const char* image,
-	int (*action)(Screen** screen ,SPChessGame* game,int j),
+	int (*action)(Screen** screen ,SPChessGame* game,int screenIndex ,int widgetIndex),
 	int x, int y, int w, int h,int shown);
 void destroyButton(Widget* src);
-int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int j);
+int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
+		SPChessGame* game,int screenIndex ,int widgetIndex);
 void drawButton(Widget*, SDL_Renderer*);
 
 Widget* createLable(
@@ -47,7 +48,8 @@ Widget* createLable(
 	const char* image,
 	int x, int y, int w, int h,int shown);
 void destroyLable(Widget* src);
-int handleLableEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int j);
+int handleLableEvent(Widget* src, SDL_Event* e,Screen** screens,
+		SPChessGame* game,int screenIndex ,int widgetIndex);
 void drawLable(Widget*, SDL_Renderer*);
 
 Widget* createSticker(
@@ -57,7 +59,8 @@ Widget* createSticker(
 	int (*rightAction)(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game),
 	int x, int y, int w, int h,int shown);
 void destroySticker(Widget* src);
-int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int j);
+int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens,
+		SPChessGame* game,int screenIndex ,int widgetIndex);
 void drawSticker(Widget* src, SDL_Renderer* rend);
 
 

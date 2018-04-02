@@ -37,36 +37,29 @@ int SPGameCreateScreens(Screen** screens){
 	if(!screens[GET_COLOR_WINDOW]){
 		return 0;
 	}
-
+	screens[LOAD_GAME_WINDOW] = SPCreateLoadSaveGameWindow("Load");
+	if(!screens[LOAD_GAME_WINDOW]){
+		return 0;
+	}
+	screens[SAVE_GAME_WINDOW] = SPCreateLoadSaveGameWindow("Save");
+	if(!screens[SAVE_GAME_WINDOW]){
+		return 0;
+	}
 	return 1;
 }
 
 Screen* SPGameCreateGameScreen(){
-	Screen* gameScreen = createScreen(N_MAX_WIDGETS);
+	Screen* gameScreen = createScreen(900,660,
+			"Chess Game",
+			N_MAX_WIDGETS,
+			HIDE,
+			NONE,
+			SPDrawGameScreen);
 		if (gameScreen == NULL){
 			return NULL;
 		}
+		SDL_Renderer* rend = gameScreen->renderer;
 
-	SDL_Window* window = SDL_CreateWindow(
-			"Chess Game",
-			SDL_WINDOWPOS_CENTERED,
-			SDL_WINDOWPOS_CENTERED,
-			900,
-			660,
-			SDL_WINDOW_OPENGL);
-
-	if (window == NULL ) {
-		printf("ERROR: unable to create window: %s\n", SDL_GetError());
-		SPDestroyScreen(gameScreen);
-		return 0;
-	}
-
-	SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (rend == NULL) {
-		printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-		SPDestroyScreen(gameScreen);
-		return 0;
-	}
 
 //	SDL_SetRenderDrawBlendMode(rend, SDL_BLENDMODE_BLEND);
 
@@ -144,41 +137,22 @@ Screen* SPGameCreateGameScreen(){
 
 	//SDL_RenderPresent(rend);
 
-	gameScreen->window = window;
-	gameScreen->renderer = rend;
-	SDL_HideWindow(window);
-	gameScreen->shown = 0;
-
-
 	return gameScreen;
 }
 
 Screen* SPGameCreateMainMenuWindow(){
-	Screen* mainMenuWindow = createScreen(3);
+	Screen* mainMenuWindow = createScreen(450,400,
+			"Main Menu",
+			3,
+			SHOWN,
+			NONE,
+			SPDefaultDrawScreen);
+
 		if (mainMenuWindow == NULL){
 			return NULL;
 		}
+		SDL_Renderer* rend = mainMenuWindow->renderer;
 
-		SDL_Window* window = SDL_CreateWindow(
-			"Main Menu",
-			SDL_WINDOWPOS_CENTERED,
-			SDL_WINDOWPOS_CENTERED,
-			450,
-			400,
-			SDL_WINDOW_OPENGL);
-
-		if (window == NULL ) {
-			printf("ERROR: unable to create window: %s\n", SDL_GetError());
-			return 0; //TODO errors
-		}
-
-		// create a renderer for the window
-		SDL_Renderer* rend = SDL_CreateRenderer(window, -1,
-				SDL_RENDERER_ACCELERATED);
-		if (rend == NULL) {
-			printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-			return 0; //TODO errors
-		}
 		mainMenuWindow->widgets[MM_NEW_GAME] = createButton(rend,
 									"new_game.bmp",SPOpenGetModeWindow,100,100,250,50,SHOWN);
 		mainMenuWindow->widgets[MM_LOAD_GAME] = createButton(rend,
@@ -186,42 +160,21 @@ Screen* SPGameCreateMainMenuWindow(){
 		mainMenuWindow->widgets[MM_QUIT] = createButton(rend,
 									"quit_mm.bmp",SPQuit,100,250,250,50,SHOWN);
 
-		mainMenuWindow->window = window;
-		mainMenuWindow->renderer = rend;
-		mainMenuWindow->shown = 1;
-
-
 	return mainMenuWindow;
 }
 
 Screen* SPGameCreateGetModeWindow(){
-	Screen* getModeWindow = createScreen(4);
+	Screen* getModeWindow = createScreen(600,400,
+			"Select Mode:",
+			4,
+			HIDE,
+			MAIN_MENU_WINDOW,
+			SPDefaultDrawScreen);
 		if (getModeWindow == NULL){
 			return NULL;
 		}
 
-	SDL_Window* window = SDL_CreateWindow(
-					"Select Game Mode:",
-					SDL_WINDOWPOS_CENTERED,
-					SDL_WINDOWPOS_CENTERED,
-					600,
-					400,
-					SDL_WINDOW_OPENGL);
-
-	if (window == NULL ) {
-					printf("ERROR: unable to create window: %s\n", SDL_GetError());
-					SDL_Quit();
-					return 0;
-				}
-	SDL_HideWindow(window);
-
-				// create a renderer for the window
-	SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (rend == NULL) {
-					printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-					SDL_Quit();
-					return 0;
-		}
+	SDL_Renderer* rend = getModeWindow->renderer;
 
 		getModeWindow->widgets[GM_MASSAGE] = createLable(rend,
 									"gm_select_game_mode.bmp",100,62,400,50,SHOWN);
@@ -233,41 +186,21 @@ Screen* SPGameCreateGetModeWindow(){
 									"back_to_main_menu.bmp",SPOpenMainMenuWindow,300,287,250,50,SHOWN);
 
 
-		getModeWindow->window = window;
-		getModeWindow->renderer = rend;
-		getModeWindow->shown = 0;
-
 		return getModeWindow;
 }
 
 Screen* SPCreateGetDifficultyWindow(){
-	Screen* getDifficultyWindow = createScreen(8);
+	Screen* getDifficultyWindow = createScreen(600,490,
+			"Select Difficulty:",
+			8,
+			HIDE,
+			GET_MODE_WINDOW,
+			SPDefaultDrawScreen);
 		if (getDifficultyWindow == NULL){
 			return NULL;
 		}
-	SDL_Window* window = SDL_CreateWindow(
-				"Select Game Difficulty:",
-				SDL_WINDOWPOS_CENTERED,
-				SDL_WINDOWPOS_CENTERED,
-				600,
-				490,
-				SDL_WINDOW_OPENGL);
 
-		if (window == NULL ) {
-			printf("ERROR: unable to create window: %s\n", SDL_GetError());
-			SDL_Quit();
-			return 0;
-		}
-		SDL_HideWindow(window);
-
-		// create a renderer for the window
-		SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (rend == NULL) {
-			printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-			SDL_DestroyWindow(window);
-			SDL_Quit();
-			return 0;
-		}
+	SDL_Renderer* rend = getDifficultyWindow->renderer;
 
 		getDifficultyWindow->widgets[GD_MASSAGE] = createLable(rend,
 									"gd_select_game_difficulty.bmp",100,25,400,50,SHOWN);
@@ -275,52 +208,31 @@ Screen* SPCreateGetDifficultyWindow(){
 		char * difficulties[5] = {"gd_amateur.bmp","gd_easy.bmp","gd_moderate.bmp","gd_hard.bmp","gd_expert.bmp"};
 		int i;
 		for(i=0; i<5; i++){
-			getDifficultyWindow->widgets[LG_DIFFICULTY(i+1)] = createButton(rend,
+			getDifficultyWindow->widgets[GD_DIFFICULTY(i+1)] = createButton(rend,
 					difficulties[i],SPSetGameDifficulty,175,100+i*60,250,50,SHOWN);
 		}
 		getDifficultyWindow->widgets[GD_BACK] = createButton(rend,
-									"back.bmp",SPOpenGetModeWindow,50,415,250,50,SHOWN);
+									"back.bmp",SPOpenPreviousWindow,50,415,250,50,SHOWN);
 		getDifficultyWindow->widgets[GD_BACK_TO_MM] = createButton(rend,
 									"back_to_main_menu.bmp",SPOpenMainMenuWindow,300,415,250,50,SHOWN);
 
-
-		getDifficultyWindow->window = window;
-		getDifficultyWindow->renderer = rend;
-		getDifficultyWindow->shown = 0;
 
 		return getDifficultyWindow;
 
 }
 
 Screen* SPCreateGetColorWindow(){
-	Screen* getColorWindow = createScreen(5);
+	Screen* getColorWindow = createScreen(600,400,
+			"Select Color:",
+			5,
+			HIDE,
+			GET_DIFFICULTY_WINDOW,
+			SPDefaultDrawScreen);
 		if (getColorWindow == NULL){
 			return NULL;
 		}
-		SDL_Window* window = SDL_CreateWindow(
-					"Select Game Color:",
-					SDL_WINDOWPOS_CENTERED,
-					SDL_WINDOWPOS_CENTERED,
-					600,
-					400,
-					SDL_WINDOW_OPENGL);
 
-
-		if (window == NULL ) {
-			printf("ERROR: unable to create window: %s\n", SDL_GetError());
-			SDL_Quit();
-			return 0;
-		}
-		SDL_HideWindow(window);
-
-		// create a renderer for the window
-		SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (rend == NULL) {
-			printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-			SDL_DestroyWindow(window);
-			SDL_Quit();
-			return 0;
-		}
+		SDL_Renderer* rend = getColorWindow->renderer;
 
 		getColorWindow->widgets[GC_MASSAGE] = createLable(rend,
 									"gc_select_user_color.bmp",100,62,400,50,SHOWN);
@@ -329,68 +241,58 @@ Screen* SPCreateGetColorWindow(){
 		getColorWindow->widgets[GC_BLACK] = createButton(rend,
 									"gc_black.bmp",SPSetGameColor,175,212,250,50,SHOWN);
 		getColorWindow->widgets[GC_BACK] = createButton(rend,
-									"back.bmp",SPOpenGetDifficultyWindow,50,287,250,50,SHOWN);
+									"back.bmp",SPOpenPreviousWindow,50,287,250,50,SHOWN);
 		getColorWindow->widgets[GC_BACK_TO_MM] = createButton(rend,
 									"back_to_main_menu.bmp",SPOpenMainMenuWindow,300,287,250,50,SHOWN);
 
-
-		getColorWindow->window = window;
-		getColorWindow->renderer = rend;
-		getColorWindow->shown = 0;
 
 		return getColorWindow;
 
 }
 
-Screen* SPCreateLoadGameWindow(){
-	Screen* LoadGameWindow = createScreen(5);
-		if (LoadGameWindow == NULL){
+Screen* SPCreateLoadSaveGameWindow(char* screenName){
+	char temp_str[30];
+	sprintf(temp_str,"%s Game",screenName);
+	Screen* window = createScreen(600,550,
+			temp_str,
+			NUM_SLOTS+NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS,
+			HIDE,
+			GAME_SCREEN,
+			SPDrawLoadSaveScreen);
+		if (window == NULL){
 			return NULL;
 		}
-		SDL_Window* window = SDL_CreateWindow(
-					"Select Game Color:",
-					SDL_WINDOWPOS_CENTERED,
-					SDL_WINDOWPOS_CENTERED,
-					600,
-					400,
-					SDL_WINDOW_OPENGL);
 
+		SDL_Renderer* rend = window->renderer;
 
-		if (window == NULL ) {
-			printf("ERROR: unable to create window: %s\n", SDL_GetError());
-			SDL_Quit();
-			return 0;
-		}
-		SDL_HideWindow(window);
+		sprintf(temp_str,"lsg_select_game_to_%s.bmp",screenName);
+		window->widgets[LSG_MASSAGE] = createLable(rend,
+									temp_str,0,0,600,100,SHOWN);
 
-		// create a renderer for the window
-		SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (rend == NULL) {
-			printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-			SDL_DestroyWindow(window);
-			SDL_Quit();
-			return 0;
-		}
+		window->widgets[LSG_BOTTOM_COVER] = createLable(rend,
+									"lg_bottom_cover.bmp",0,400,600,50,SHOWN);
+		window->widgets[LSG_BACK] = createButton(rend,
+									"back.bmp",SPOpenPreviousWindow,50,450,250,50,SHOWN);
+		window->widgets[LSG_UP_ARRAW] = createButton(rend,
+									"up_arrow.bmp",SPMoveScrollbar,565,100,35,35,SHOWN);
+		window->widgets[LSG_DOWN_ARRAW] = createButton(rend,
+									"down_arrow.bmp",SPMoveScrollbar,565,400-35,35,35,SHOWN);
 
-		LoadGameWindow->widgets[LG_MASSAGE] = createLable(rend,
-									"gc_Load_game_massage.bmp",100,62,400,50,SHOWN);
 		int i;
-
-		char * slots[5] = {"lg_s1","lg_s2","lg_s3","lg_s4","lg_s5"};
-		for(i=0; i<5; i++){
-			LoadGameWindow->widgets[LG_SLOT(i+1)] = createButton(rend,
-										slots[i],SPLoadChosenGame,175,137,250,50,SHOWN);
+		int (*action)(Screen**,SPChessGame*,int,int) =
+				(strcmp(screenName,"Load")==0)?SPLoadChosenGame:SPSaveChosenGame;
+		for(i=0; i<NUM_SLOTS; i++){
+			sprintf(temp_str,"lsg_slot%d.bmp",i+1);
+			window->widgets[LSG_SLOT(i+1)] = createButton(rend,
+										temp_str,action,175,NONE,250,50,SHOWN);
 		}
-		LoadGameWindow->widgets[LG_BACK] = createButton(rend,
-									"gc_black.bmp",SPSetGameColor,175,212,250,50,SHOWN);
-		LoadGameWindow->widgets[GC_BACK] = createButton(rend,
-									"lg_back.bmp",SPCloseWindow,50,287,250,50,SHOWN);
+
+		for(i=0; i<NUM_SLOTS; i++){
+			window->widgets[LSG_SLOT_INDICATOR(i+1)] = createLable(rend,
+									"lsg_indicator.bmp",200,NONE,50,30,HIDE);
+		}
 
 
-		LoadGameWindow->window = window;
-		LoadGameWindow->renderer = rend;
-		LoadGameWindow->shown = 0;
-
-		return LoadGameWindow;
+		return window;
 
 }

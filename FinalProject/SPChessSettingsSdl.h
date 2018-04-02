@@ -30,4 +30,8 @@ Screen* SPCreateGetDifficultyWindow();
 
 Screen* SPCreateGetColorWindow();
 
+Screen* SPCreateLoadGameWindow();
+
+Screen* SPCreateLoadSaveGameWindow(char* screenName);
+
 #endif /* SPCHESSSDL_H_ */
