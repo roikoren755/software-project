@@ -535,6 +535,8 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src) {
         src->locations[i + 3 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW, i); // White STARTING_ROW
         src->locations[i + 2 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW - 1, i); // White pawns
     }
+	
+	src->gameState = NORMAL;
 
     return SP_CHESS_GAME_SUCCESS;
 }
