@@ -823,7 +823,13 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
     int currentRow = spChessGameGetRowFromPosition(position);
     char piece = src->gameBoard[currentRow][currentColumn];
     int color = CHECK_COLOR(piece);
-
+    
+	int changed = 0;
+    if(color!=src->currentPlayer){
+    	src->currentPlayer = color;
+    	changed = 1;
+    }
+	
     if (piece == QUEEN(color) || piece == BISHOP(color)) {
         spChessGameAddStepsToList(src, steps, position, DOWN, LEFT, color);
         spChessGameAddStepsToList(src, steps, position, UP, LEFT, color);
@@ -850,6 +856,10 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
         spChessGameAddKingStepsToList(src, steps, position, color);
     }
 
+	if (changed){
+    	src->currentPlayer = (src->currentPlayer==WHITE) ? BLACK : WHITE;
+    }
+	
     return steps;
 }
 
