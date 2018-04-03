@@ -319,7 +319,7 @@ SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char posi
     }
 
     char piece = game->gameBoard[row][column];
-    return CHECK_COLOR(piece) == game->currentPlayer ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
+    return piece ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
 }
 
 void spPrintUndoneMove(int move, int color) {

@@ -208,6 +208,20 @@ int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threa
     return 0; // Nope
 }
 
+int spUndoAndRestoreHistory(SPChessGame* src, int lastMove, int full) {
+    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameUndoMove(src);
+    if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        return 0;
+    }
+    if (full) {
+        SP_ARRAY_LIST_MESSAGE message = spArrayListAddLast(src->history, lastMove);
+        if (message != SP_ARRAY_LIST_SUCCESS) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 /***
  * Checks whether the piece on src's game board, at location, will be threatened after making move.
  * @param src - Game to check on
@@ -244,27 +258,13 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
         threatened = 1;
     }
 
-
-    int success = spUndoAndRestoreHistory( src, lastMove, full);
-    if(!success){
-    	return -1;
+    if (!spUndoAndRestoreHistory(src, lastMove, full)) {
+        return -1;
     }
+
     return threatened;
 }
 
-int spUndoAndRestoreHistory(SPChessGame* src, int lastMove, int full){
-	SP_CHESS_GAME_MESSAGE gameMessage = spChessGameUndoMove(src);
-	if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
-	        return 0;
-	}
-    if (full) {
-	    SP_ARRAY_LIST_MESSAGE message = spArrayListAddLast(src->history, lastMove);
-	    if (message != SP_ARRAY_LIST_SUCCESS) {
-	         return 0;
-        }
-	}
-    return 1;
-}
 /***
  * Prepares an int to represent a move, so as to be accepted by spChessGameSetMove(...)
  * @param currentRow
@@ -611,7 +611,7 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
 
-    int kingThreatened = spChessGameIsPieceThreatened(src,src->locations[KING_LOC(color)]);
+    int kingThreatened = spChessGameIsPieceThreatened(src, src->locations[KING_LOC(color)]);
     int gameOver = 1;
     int index;
 
@@ -819,10 +819,15 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
         return 0;
     }
 
+    int changedCurrentPlayer = 0;
     int currentColumn = spChessGameGetColumnFromPosition(position);
     int currentRow = spChessGameGetRowFromPosition(position);
     char piece = src->gameBoard[currentRow][currentColumn];
     int color = CHECK_COLOR(piece);
+    if (color != src->currentPlayer) {
+        src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE;
+        changedCurrentPlayer = 1;
+    }
 
     if (piece == QUEEN(color) || piece == BISHOP(color)) {
         spChessGameAddStepsToList(src, steps, position, DOWN, LEFT, color);
@@ -848,6 +853,10 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
 
     else if (piece == KING(color)) {
         spChessGameAddKingStepsToList(src, steps, position, color);
+    }
+
+    if (changedCurrentPlayer) {
+        src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE;
     }
 
     return steps;
@@ -926,8 +935,6 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     src->gameBoard[currentRow][currentColumn] = '\0';
 
     src->currentPlayer = src->currentPlayer == WHITE ? BLACK : WHITE; // Change current player
-    
-	spChessCheckGameState(src,color);
 
     return SP_CHESS_GAME_SUCCESS;
 }
@@ -1009,9 +1016,6 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
     if (index != -1) {
         src->locations[index] = destinationPosition;
     }
-
-		spChessCheckGameState(src,color);
-	
     return SP_CHESS_GAME_SUCCESS;
 }
 
@@ -1062,11 +1066,6 @@ SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {
     if (!game) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
-
-    game->currentPlayer = WHITE; // Defaults
-    game->userColor = WHITE;
-    game->difficulty = 2;
-    game->gameMode = 1;
 
     spChessGameResetBoard(game);
 
