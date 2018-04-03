@@ -286,6 +286,9 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     	}
                     }
                 }
+
+                clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
+                fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
             }
 
             finishedLoading = 1;
