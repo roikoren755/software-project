@@ -267,7 +267,7 @@ int main(int argc, char* argv[]) {
 				printedWelcome = 1;
 				gameStarted = 0;
 			}
-			command = spGetCommand(mode);
+			command = spGetCommand();
 
 			if (command.cmd == SP_GAME_MODE) {
 				message = spChessGameSetGameMode(game, &command);
@@ -335,7 +335,7 @@ int main(int argc, char* argv[]) {
             	moveMade = 0;
             }
 			printf("Enter your move (%s player):\n", GET_COLOR(game->currentPlayer));
-			command = spGetCommand(mode);
+			command = spGetCommand();
 
 			if (command.cmd == SP_MOVE) {
 				message = spChessGameMove(game, &command);

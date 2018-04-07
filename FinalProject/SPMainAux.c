@@ -302,11 +302,9 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SPCommand spGetCommand(int mode) {
+SPCommand spGetCommand() {
     char input[MAXIMUM_COMMAND_LENGTH + 1];
-    if (mode == CONSOLE) {
-        fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
-    }
+    fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
     return spParserParseLine(input);
 }
 
