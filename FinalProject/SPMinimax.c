@@ -7,7 +7,6 @@
 #include "SPMinimax.h"
 #include "SPMainAux.h"
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
@@ -57,7 +56,7 @@ int spChessScoreBoard(SPChessGame* game) {
     if (message == SP_CHESS_GAME_DRAW) { // Draw
         return 0;
     }
-    if (message == SP_CHESS_GAME_CHECKMATE) { // Check
+    else if (message == SP_CHESS_GAME_CHECKMATE) { // Check
         return game->currentPlayer ? -1000 : 1000; // And mate
     }
 
@@ -71,7 +70,7 @@ int spChessScoreBoard(SPChessGame* game) {
 			result += PAWN_SCORE;
 		}
 
-		pieceScore = indexToPieceScore(i); // Get pieces score at index
+		pieceScore = indexToPieceScore(i); // Get piece's score at index
 
 		if (game->locations[i]) { // Subtract for black
 			result -= pieceScore;
@@ -293,19 +292,18 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 					bestDestinationPosition = destinationPosition;
 				}
                 else if (score == bestScore) { // If score is same, prefer move with lowest:
-					bestStartingColumn = spChessGameGetColumnFromPosition(bestStartingPosition);
-					bestStartingRow = spChessGameGetRowFromPosition(bestStartingPosition);
-					bestDestinationColumn = spChessGameGetColumnFromPosition(bestDestinationPosition);
-					bestDestinationRow = spChessGameGetRowFromPosition(bestDestinationPosition);
-					startingColumn = spChessGameGetColumnFromPosition(startingPosition);
-					startingRow = spChessGameGetRowFromPosition(startingPosition);
-					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
-					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
-					if (startingColumn < bestStartingColumn || // 1. Starting column
-						(startingColumn == bestDestinationColumn && (startingRow > bestStartingRow || // 2. Starting row
+                    bestStartingColumn = spChessGameGetColumnFromPosition(bestStartingPosition);
+                    bestStartingRow = spChessGameGetRowFromPosition(bestStartingPosition);
+                    bestDestinationColumn = spChessGameGetColumnFromPosition(bestDestinationPosition);
+                    bestDestinationRow = spChessGameGetRowFromPosition(bestDestinationPosition);
+                    startingColumn = spChessGameGetColumnFromPosition(startingPosition);
+                    startingRow = spChessGameGetRowFromPosition(startingPosition);
+                    destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
+                    destinationRow = spChessGameGetRowFromPosition(destinationPosition);
+                    if (startingColumn < bestStartingColumn || // 1. Starting column
+						(startingColumn == bestStartingColumn && (startingRow > bestStartingRow || // 2. Starting row
 						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
 						(destinationColumn == bestDestinationColumn && (destinationRow > bestDestinationRow))))))) { // 4. Destination Row
-						bestScore = score;
 						bestMove = move;
 						bestStartingPosition = startingPosition;
 						bestDestinationPosition = destinationPosition;
@@ -402,7 +400,7 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 					destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
 					destinationRow = spChessGameGetRowFromPosition(destinationPosition);
 					if (startingColumn < bestStartingColumn || // 1. Starting column
-						(startingColumn == bestDestinationColumn && (startingRow > bestStartingRow || // 2. Starting row
+						(startingColumn == bestStartingColumn && (startingRow > bestStartingRow || // 2. Starting row
 						(startingRow == bestStartingRow && (destinationColumn < bestDestinationColumn || // 3. Destination column
 						(destinationColumn == bestDestinationColumn && (destinationRow > bestDestinationRow))))))) { // 4. Destination Row
 						bestScore = score;

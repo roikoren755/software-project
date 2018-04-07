@@ -116,7 +116,7 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
 
     if (targetColumn != threatColumn && targetRow == threatRow) { // Horizontal move
         direction = threatColumn > targetColumn ? LEFT : RIGHT;
-        for (int i = 1; i < abs(targetRow - threatRow); i++) {
+        for (int i = 1; i < abs(targetColumn - threatColumn); i++) {
             temp = src->gameBoard[threatRow][threatColumn + i * direction];
             if (temp) { // Blocked
                 return 0;
@@ -825,21 +825,12 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
     int currentRow = spChessGameGetRowFromPosition(position);
     char piece = src->gameBoard[currentRow][currentColumn];
     int color = CHECK_COLOR(piece);
-<<<<<<< HEAD
-    
-	int changed = 0;
-    if(color!=src->currentPlayer){
-    	src->currentPlayer = color;
-    	changed = 1;
-    }
-	
-=======
+
     if (color != src->currentPlayer) {
         src->currentPlayer = src->currentPlayer ? BLACK : WHITE;
         changedCurrentPlayer = 1;
     }
 
->>>>>>> 955935b0e2a72c5a6d8a3dae2a9c2f5fe6f910ed
     if (piece == QUEEN(color) || piece == BISHOP(color)) {
         spChessGameAddStepsToList(src, steps, position, DOWN, LEFT, color);
         spChessGameAddStepsToList(src, steps, position, UP, LEFT, color);
@@ -866,17 +857,10 @@ SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
         spChessGameAddKingStepsToList(src, steps, position, color);
     }
 
-<<<<<<< HEAD
-	if (changed){
-    	src->currentPlayer = (src->currentPlayer==WHITE) ? BLACK : WHITE;
-    }
-	
-=======
     if (changedCurrentPlayer) {
         src->currentPlayer = src->currentPlayer ? BLACK : WHITE;
     }
 
->>>>>>> 955935b0e2a72c5a6d8a3dae2a9c2f5fe6f910ed
     return steps;
 }
 
@@ -998,6 +982,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
         for (int i = 0; i < N_COLUMNS; i++) {
             if (!src->locations[i + startIndex]) {
                 src->locations[i + startIndex] = destinationPosition;
+                break;
             }
         }
     }
@@ -1032,6 +1017,11 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
     else if (captured == QUEEN(currentPlayer)) { // QUEEN???
         index = QUEEN_LOC(currentPlayer);
     }
+
+    else if (captured == KING(currentPlayer)) { // For get moves, and check potential threat functions
+        index = KING_LOC(currentPlayer);
+    }
+
     if (index != -1) {
         src->locations[index] = destinationPosition;
     }

@@ -147,33 +147,32 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command) {
 		}
 		else {
 			message = spChessCheckGameState(game, game->currentPlayer);
-			if (message != SP_CHESS_GAME_SUCCESS) {
-				if (message == SP_CHESS_GAME_CHECK) {
+			switch (message) {
+				case SP_CHESS_GAME_CHECK:
 					printf("Check: %s king is threatened\n", GET_COLOR(game->currentPlayer));
-				}
-				else {
-					if (message == SP_CHESS_GAME_CHECKMATE) {
-						printf("Checkmate! %s player wins the game\n", GET_COLOR(!game->currentPlayer));
+				case SP_CHESS_GAME_SUCCESS:
+					if (game->gameMode == 1) {
+						move = spMinimaxSuggestMove(game);
+						if (move == -1) {
+							printf("ERROR: Couldn't figure out computer move. Quitting...\n");
+							return SP_CHESS_GAME_INVALID_ARGUMENT;
+						}
+						else {
+							char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
+							spPrintComputerMove(piece, move);
+							spChessGameSetMove(game, move);
+						}
 					}
-					else if (message == SP_CHESS_GAME_DRAW) {
-							printf("The game ends in a draw\n");
-					}
-					else {
-						printf("ERROR: Something went wrong while checking game state. Quitting...\n");
-					}
-				}
-			}
-			else if (game->gameMode == 1) {
-				move = spMinimaxSuggestMove(game);
-				if (move == -1) {
-					printf("ERROR: Couldn't figure out computer move. Quitting...\n");
-					return SP_CHESS_GAME_INVALID_ARGUMENT;
-				}
-				else {
-					char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
-					spPrintComputerMove(piece, move);
-					spChessGameSetMove(game, move);
-				}
+					break;
+				case SP_CHESS_GAME_CHECKMATE:
+					printf("Checkmate! %s player wins the game\n", GET_COLOR(!game->currentPlayer));
+					break;
+				case SP_CHESS_GAME_DRAW:
+					printf("The game ends in a draw\n");
+					break;
+				default:
+					printf("ERROR: Something went wrong while checking game state. Quitting...\n");
+					break;
 			}
 		}
 	}
@@ -346,6 +345,7 @@ int main(int argc, char* argv[]) {
 					case SP_CHESS_GAME_INVALID_ARGUMENT:
 						quit = 1;
 					case SP_CHESS_GAME_SUCCESS:
+					case SP_CHESS_GAME_CHECK:
 						moveMade = 1;
 					default:
 						break;
@@ -373,7 +373,7 @@ int main(int argc, char* argv[]) {
 						quit = 1;
 						break;
 					case SP_CHESS_GAME_NO_HISTORY:
-						if (spArrayListIsEmpty(game->history)) {
+						if (game->gameMode == 1 && game->currentPlayer != game->userColor) {
 							gameStarted = 0;
 						}
 					default:
@@ -404,8 +404,10 @@ int main(int argc, char* argv[]) {
         }
 	}
 
+	if (game->gameState == NORMAL || game->gameState == CHECK) {
+		printf("Exiting...\n");
+	}
 	spChessGameDestroy(game);
-	printf("Exiting...\n");
 
 	return 0;
 }
