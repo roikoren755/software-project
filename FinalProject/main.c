@@ -137,7 +137,7 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command) {
 	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED) {
 		printf("Illegal move: king is still threatened\n");
 	}
-	else if (message == SP_CHESS_GAME_KING_BECOMES_THREATENED) {
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_KING_BECOMES_THREATENED) {
 		printf("Illegal move: king will be threatened\n");
 	}
 	else {

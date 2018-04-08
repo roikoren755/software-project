@@ -9,7 +9,6 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
 #define PAWN_SCORE 1
 #define KNIGHT_SCORE 3
 #define BISHOP_SCORE KNIGHT_SCORE
@@ -465,6 +464,7 @@ int spMinimaxSuggestMove(SPChessGame* currentGame) {
 	minimaxGame->userColor = currentGame->userColor; // And everything else quasi-important
 	minimaxGame->currentPlayer = currentGame->currentPlayer;
 	minimaxGame->gameMode = currentGame->gameMode;
+	minimaxGame->difficulty = currentGame->difficulty;
 
 	return spMinimaxGetBestMove(minimaxGame); // And gimme a move
 }

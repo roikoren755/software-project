@@ -3,23 +3,30 @@
 //
 
 #include "SPChessGame.h"
-#include "SPArrayList.h"
 #include "SPMainAux.h"
 #include <stdlib.h>
-#include <math.h>
 
-unsigned char spChessGameSetLocation(int row, int column) {
-	if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
-		return 0;
-	}
+#define FIRST_ROW 0
+#define LAST_ROW 7
+#define LEFT_MOST_COL 0
+#define RIGHT_MOST_COL 7
+#define SEPARATOR '-'
+#define FIRST_COLUMN 'A'
+#define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
+#define LEFT -1
+#define RIGHT 1
+#define UP -1
+#define DOWN 1
+#define STAY 0
+#define CAPTURES 1
+#define HISTORY_SIZE 3
 
-	unsigned char location = 1 << 3;
-	location = (row | location) << 3;
-	location |= column;
-
-	return location;
-}
-
+/***
+ * Verifies the location represents a valid location on the board.
+ * @param location - Location to verify
+ * @return 0 if location does not represent a valid location.
+ *         1 otherwise.
+ */
 int spChessGameVerifyLocation(char location) {
 	int column = spChessGameGetColumnFromPosition(location);
     int row = spChessGameGetRowFromPosition(location);
@@ -34,16 +41,16 @@ int spChessGameVerifyLocation(char location) {
 /***
  * Check whether a piece at threatLocation can make a DIAGONAL move to targetLocation,
  * without having to jump over a piece enroute.
- * @param src - Game to check move on
+ * @param game - Game to check move on
  * @param targetLocation - Location you want to get to
  * @param threatLocation - Location you are at
  * @return
- * -1 if src is NULL, or one of the positions isn't on the board
+ * -1 if game is NULL, or one of the positions isn't on the board
  *  0 if there isn't a legal DIAGONAL move
  *  1 otherwise
  */
-int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) { // src is NULL
+int spChessGameCheckDiagonalMove(SPChessGame* game, char targetLocation, char threatLocation) {
+    if (!game) { // game is NULL
         return -1;
     }
 
@@ -57,7 +64,7 @@ int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char thr
     int threatColumn = spChessGameGetColumnFromPosition(threatLocation);
     int threatRow = spChessGameGetRowFromPosition(threatLocation);
 
-    char piece = src->gameBoard[threatRow][threatColumn];
+    char piece = game->gameBoard[threatRow][threatColumn];
     if (!piece) {
         return -1;
     }
@@ -68,7 +75,7 @@ int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char thr
         int rowDirection = threatRow > targetRow ? UP : DOWN; // And now?
         char temp;
         for (int i = 1; i < distance; i++) {
-            temp = src->gameBoard[threatRow + i * rowDirection][threatColumn + i * columnDirection];
+            temp = game->gameBoard[threatRow + i * rowDirection][threatColumn + i * columnDirection];
             if (temp) { // There's something blocking the way!
                 return 0;
             }
@@ -83,16 +90,16 @@ int spChessGameCheckDiagonalMove(SPChessGame* src, char targetLocation, char thr
 /***
  * Checks whether a piece at threatLocation can make a STRAIGHT LINE move to targetLocation,
  * without having to jump over any piece on the way.
- * @param src - Game to check move in
+ * @param game - Game to check move in
  * @param targetLocation - Finishing location
  * @param threatLocation - Starting location?
  * @return
- * -1 if src is NULL or one of the locations isn't on the board
+ * -1 if game is NULL or one of the locations isn't on the board
  *  0 if no legal move can be made
  *  1 otherwise
  */
-int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) { // src is NULL
+int spChessGameCheckStraightLineMove(SPChessGame* game, char targetLocation, char threatLocation) {
+    if (!game) { // game is NULL
         return -1;
     }
 
@@ -106,7 +113,7 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
     int threatColumn = spChessGameGetColumnFromPosition(threatLocation);
     int threatRow = spChessGameGetRowFromPosition(threatLocation);
 
-    char piece = src->gameBoard[threatRow][threatColumn];
+    char piece = game->gameBoard[threatRow][threatColumn];
     if (!piece) {
         return -1;
     }
@@ -117,7 +124,7 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
     if (targetColumn != threatColumn && targetRow == threatRow) { // Horizontal move
         direction = threatColumn > targetColumn ? LEFT : RIGHT;
         for (int i = 1; i < abs(targetColumn - threatColumn); i++) {
-            temp = src->gameBoard[threatRow][threatColumn + i * direction];
+            temp = game->gameBoard[threatRow][threatColumn + i * direction];
             if (temp) { // Blocked
                 return 0;
             }
@@ -129,7 +136,7 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
     if (targetRow != threatRow && targetColumn == threatColumn) { // Vertical move
         direction = threatRow > targetRow ? UP : DOWN;
         for (int i = 1; i < abs(targetRow - threatRow); i++) {
-            temp = src->gameBoard[threatRow + i * direction][threatColumn];
+            temp = game->gameBoard[threatRow + i * direction][threatColumn];
             if (temp) { // Blockage
                 return 0;
             }
@@ -143,16 +150,16 @@ int spChessGameCheckStraightLineMove(SPChessGame* src, char targetLocation, char
 
 /***
  * Checks whether a move can be made from threatLocation to targetLocation by a knight.
- * @param src - Game to check on
+ * @param game - Game to check on
  * @param targetLocation - Finish
  * @param threatLocation - Start
  * @return
- * -1 if src is NULL or a position is out of bounds
+ * -1 if game is NULL or a position is out of bounds
  *  0 if the move cannot be made, not by a Knight Who Says Ni
  *  1 otherwise
  */
-int spChessGameCheckKnightMove(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) { // src is NULL
+int spChessGameCheckKnightMove(SPChessGame* game, char targetLocation, char threatLocation) {
+    if (!game) { // game is NULL
         return -1;
     }
 
@@ -177,17 +184,17 @@ int spChessGameCheckKnightMove(SPChessGame* src, char targetLocation, char threa
 }
 
 /***
- * Checks whether a king can make the move from threatLocation to targetLocation.
- * @param src - Game to check on
+ * Checks whether a king at threatLocation is threatening piece at targetLocation.
+ * @param game - Game to check on
  * @param targetLocation - Finish line
  * @param threatLocation - Start line
  * @return
- * -1 if src is NULL or one of the location's isn't on the board
- *  0 if the move can't be made
+ * -1 if game is NULL or one of the location's isn't on the board
+ *  0 if the king isn't threatening targetLocation
  *  1 otherwise
  */
-int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threatLocation) {
-    if (!src) { // src is NULL
+int spChessGameCheckKingThreat(SPChessGame* game, char targetLocation, char threatLocation) {
+    if (!game) { // game is NULL
         return -1;
     }
 
@@ -208,32 +215,100 @@ int spChessGameCheckKingThreat(SPChessGame* src, char targetLocation, char threa
     return 0; // Nope
 }
 
-int spUndoAndRestoreHistory(SPChessGame* src, int lastMove, int full) {
-    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameUndoMove(src);
-    if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) {
+/***
+ * Undoes the last move made in game, and restores lastMove as the last (first entered) move
+ * in game->history, if full
+ * @param game - Pointer to game to change.
+ * @param lastMove - Move to be restored as last move.
+ * @return 0 if an error occurred during undoing or restoration.
+ *         1 otherwise.
+ */
+int spUndoAndRestoreHistory(SPChessGame* game, int lastMove) {
+    int full = spArrayListIsFull(game->history);
+    if (spChessGameUndoMove(game) == SP_CHESS_GAME_INVALID_ARGUMENT) {
         return 0;
     }
-    if (full) {
-        SP_ARRAY_LIST_MESSAGE message = spArrayListAddLast(src->history, lastMove);
-        if (message != SP_ARRAY_LIST_SUCCESS) {
-            return 0;
-        }
+
+    if (full && spArrayListAddLast(game->history, lastMove) != SP_ARRAY_LIST_SUCCESS) {
+        return 0;
     }
+
     return 1;
 }
 
+/**
+ * Checks if a piece is threatened by an opponent.
+ *
+ * @param game - The source game
+ * @param col - The specified column
+ * @return
+ * true  - if the a disc can be put in the target column
+ * false - otherwise.
+ */
+int spChessGameIsPieceThreatened(SPChessGame* game, char location) {
+    if (!game || !spChessGameVerifyLocation(location)) {
+        return -1;
+    }
+
+    int column = spChessGameGetColumnFromPosition(location);
+    int row = spChessGameGetRowFromPosition(location);
+
+    char piece = game->gameBoard[row][column];
+    int color = CHECK_COLOR(piece);
+    int opponentColor = color ? BLACK : WHITE;
+
+    if (spChessGameCheckStraightLineMove(game, location, game->locations[LEFT_ROOK_LOC(opponentColor)]) == 1 ||
+        spChessGameCheckStraightLineMove(game, location, game->locations[RIGHT_ROOK_LOC(opponentColor)]) == 1) {
+        return 1;
+    }
+
+    if (spChessGameCheckKnightMove(game, location, game->locations[LEFT_KNIGHT_LOC(opponentColor)]) == 1 ||
+        spChessGameCheckKnightMove(game, location, game->locations[RIGHT_KNIGHT_LOC(opponentColor)]) == 1) {
+        return 1;
+    }
+
+    if (spChessGameCheckDiagonalMove(game, location, game->locations[LEFT_BISHOP_LOC(opponentColor)]) == 1 ||
+        spChessGameCheckDiagonalMove(game, location, game->locations[RIGHT_BISHOP_LOC(opponentColor)]) == 1) {
+        return 1;
+    }
+
+    if (spChessGameCheckDiagonalMove(game, location, game->locations[QUEEN_LOC(opponentColor)]) == 1 ||
+        spChessGameCheckStraightLineMove(game, location, game->locations[QUEEN_LOC(opponentColor)]) == 1) {
+        return 1;
+    }
+
+    if (spChessGameCheckKingThreat(game, location, game->locations[KING_LOC(opponentColor)]) == 1) {
+        return 1;
+    }
+
+    int protectedRow = color ? FIRST_ROW : LAST_ROW; //pawn cant get there
+    if (row == protectedRow) {
+        return 0;
+    }
+
+    int direction = color ? UP : DOWN; //check pawn threat
+    char opponentPawn = PAWN(opponentColor);
+
+    if ((column != LEFT_MOST_COL && game->gameBoard[row + direction][column - 1] == opponentPawn) ||
+        (column != RIGHT_MOST_COL && game->gameBoard[row + direction][column + 1] == opponentPawn)) {
+        return 1;
+    }
+
+    return 0;
+}
+
 /***
- * Checks whether the piece on src's game board, at location, will be threatened after making move.
- * @param src - Game to check on
+ * Checks whether the piece on game's game board, at location, will be threatened after making move.
+ * @param game - Game to check on
  * @param move - Move to make
  * @param location - Location to check
  * @return
- * SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL, move isn't a legal move, or an error ocurred along the way
+ * SP_CHESS_GAME_INVALID_ARGUMENT if game is NULL, move isn't a legal move, or an error ocurred along the way
  * SP_CHESS_GAME_MOVE_WILL_THREATEN if piece at location will be threatened after making move
  * SP_CHESS_GAME_SUCCESS otherwise
  */
-int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
-    if (!src) { // src is NULL
+int spChessGameCheckPotentialThreat(SPChessGame* game, int move, char location) {
+    if (!game) { // game is NULL
         return -1;
     }
 
@@ -242,42 +317,25 @@ int spChessGameCheckPotentialThreat(SPChessGame* src, int move, char location) {
     }
 
     int lastMove = 0;
-    int full = 0;
     int threatened = 0;
-    if (spArrayListIsFull(src->history)) { // A move will be lost if we add another to the game's history
-        lastMove = spArrayListGetLast(src->history); // So save it for later
-        full = 1;
+    if (spArrayListIsFull(game->history)) { // A move will be lost if we add another to the game's history
+        lastMove = spArrayListGetLast(game->history); // So save it for later
     }
 
-    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(src, move); // Make the move
+    SP_CHESS_GAME_MESSAGE gameMessage = spChessGameSetMove(game, move); // Make the move
     if (gameMessage == SP_CHESS_GAME_INVALID_ARGUMENT) { // Oops, can't guarantee what happened
         return -1;
     }
 
-    if (spChessGameIsPieceThreatened(src, location) == 1) { //
+    if (spChessGameIsPieceThreatened(game, location) == 1) { // Is anyone threatening me now?
         threatened = 1;
     }
 
-    if (!spUndoAndRestoreHistory(src, lastMove, full)) {
+    if (!spUndoAndRestoreHistory(game, lastMove)) { // Undo move, and restore "forgotten" move
         return -1;
     }
 
     return threatened;
-}
-
-/***
- * Prepares an int to represent a move, so as to be accepted by spChessGameSetMove(...)
- * @param currentRow
- * @param currentColumn
- * @param destinationRow
- * @param destinationColumn
- * @return
- * An int representing the move indicated by the arguments
- */
-unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int currentColumn,unsigned int destinationRow, unsigned int destinationColumn) {
-    unsigned int move = spChessGameSetLocation(currentRow, currentColumn) << 8; // format is 4 bits current row, 4 current column, 4 destination row, 4 destination column
-    move |= spChessGameSetLocation(destinationRow, destinationColumn);
-    return move;
 }
 
 /***
@@ -291,7 +349,7 @@ unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int curren
  * An int representing the step
  */
 int setStepCoordinatesToInt(int destinationRow, int destinationColumn, int threatened, int captures) {
-    int step = spChessGameSetLocation(destinationRow, destinationColumn) << 4; // format is 4 bits destination row, 4 destination column, 4 if will be threatened, 4 if captures
+    int step = spChessGameSetLocation(destinationRow, destinationColumn) << 4; // format is 8 bits destination location, 4 if will be threatened, 4 if captures
     step = (threatened | step) << 4;
     step |= captures;
     return step;
@@ -301,23 +359,23 @@ int setStepCoordinatesToInt(int destinationRow, int destinationColumn, int threa
  * Adds a single step, indicated by move, to steps, by verifying the king isn't threatened after the move,
  * and adding the information as to whether the move captures another piece and/or results in the moving piece
  * being threatened.
- * @param src - Game where the move is made
+ * @param game - Game where the move is made
  * @param steps - SPArrayList to add the step to
  * @param move - move to get step from, assumed to be a legal move!
  * @param color - moving player's color
  * @return
- * SP_CHESS_GAME_INVALID_ARGUMENT if src or steps are NULL, or an error ocurred while adding the step to steps
+ * SP_CHESS_GAME_INVALID_ARGUMENT if game or steps are NULL, or an error ocurred while adding the step to steps
  * SP_CHESS_GAME_SUCCESS otherwise
  */
-SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayList* steps, int move, int color) {
-    if (!src || !steps) { // Something is NULL
+SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* game, SPArrayList* steps, int move, int color) {
+    if (!game || !steps) { // Something is NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     char destinationPosition = spChessGameGetDestinationPositionFromMove(move << 8);
     char currentPosition = spChessGameGetCurrentPositionFromMove(move << 8);
     if (!spChessGameVerifyLocation(currentPosition) ||
-        !spChessGameVerifyLocation(destinationPosition)) {
+        !spChessGameVerifyLocation(destinationPosition)) { // One of the positions is out of bounds
     	return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -325,19 +383,19 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
     int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int destinationRow = spChessGameGetRowFromPosition(destinationPosition);
     int destinationColumn = spChessGameGetColumnFromPosition(destinationPosition);
-    char piece = src->gameBoard[destinationRow][destinationColumn];
-    int threatened = spChessGameCheckPotentialThreat(src, move, destinationPosition) == 1; // Piece will be threatened?
-    int kingNotThreatened = src->gameBoard[currentRow][currentColumn] == KING(color) ? // King won't?
-                            !threatened : spChessGameCheckPotentialThreat(src, move, src->locations[KING_LOC(color)]) == 0;
+    char piece = game->gameBoard[destinationRow][destinationColumn];
+    int threatened = spChessGameCheckPotentialThreat(game, move, destinationPosition) == 1; // Piece will be threatened?
+    int kingNotThreatened = game->gameBoard[currentRow][currentColumn] == KING(color) ? // King won't?
+                            !threatened : spChessGameCheckPotentialThreat(game, move, game->locations[KING_LOC(color)]) == 0;
     int step;
     int add = 0;
 
-    if (kingNotThreatened) {
-        if (!piece) {
+    if (kingNotThreatened) { // Legal move
+        if (!piece) { // The doesn't capture
             step = setStepCoordinatesToInt(destinationRow, destinationColumn, threatened, !CAPTURES);
             add = 1;
         }
-        else if (color != CHECK_COLOR(piece)) {
+        else if (color != CHECK_COLOR(piece)) { // Or that does
             step = setStepCoordinatesToInt(destinationRow, destinationColumn, threatened, CAPTURES);
             add = 1;
         }
@@ -350,8 +408,21 @@ SP_CHESS_GAME_MESSAGE spChessGameAddSingleStepToList(SPChessGame* src, SPArrayLi
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src, SPArrayList* steps, char position, int verticalDirection, int horizontalDirection, int color) {
-    if (!src || !steps || !spChessGameVerifyLocation(position)) {
+/***
+ * Adds all possible steps in verticalDirection and horizontalDirection, from position to steps.
+ * Assumes piece at position is of color.
+ * @param game - Game to check movement at.
+ * @param steps - SPArrayList to add steps to
+ * @param position - Starting position
+ * @param verticalDirection - Moving left or right? Or neither?
+ * @param horizontalDirection - Up or down? Neither?
+ * @param color - Black or white?
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or steps ar NULL, if position is out of bounds or an error ocurred
+ *                                        while adding step to steps.
+ *         SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* game, SPArrayList* steps, char position, int verticalDirection, int horizontalDirection, int color) {
+    if (!game || !steps || !spChessGameVerifyLocation(position)) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -363,37 +434,44 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* src, SPArrayList* s
 
     int availbleRows = verticalDirection == LEFT ? currentRow + 1 : N_ROWS - currentRow;
     if (!verticalDirection) {
-        availbleRows = N_ROWS; // if verticalDirection == 0 we want the # of for loop iterations decided by availbleColumns only
+        availbleRows = N_ROWS; // if verticalDirection == STAY we want the # of for loop iterations decided by availbleColumns only
     }
 
     int availbleColumns = horizontalDirection == UP ? currentColumn + 1 : N_COLUMNS - currentColumn;
     if (!horizontalDirection) {
-        availbleColumns = N_COLUMNS;
+        availbleColumns = N_COLUMNS; // If horizontalDirection is STAY, # of for loops decided by availableColumns
     }
 
-    if (!verticalDirection && !horizontalDirection) {
+    if (!verticalDirection && !horizontalDirection) { // Both are STAY, no moves!
         return SP_CHESS_GAME_SUCCESS;
     }
 
     for (int i = 1; i < min(availbleRows, availbleColumns); i++) {
         destinationRow = currentRow + i * verticalDirection;
         destinationColumn = currentColumn + i * horizontalDirection;
-        move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
-        if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-            if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn); // One step further
+        if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // Valid move?
+            if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // Error adding
                 return SP_CHESS_GAME_INVALID_ARGUMENT;
             }
-        }
-        else {
-            return SP_CHESS_GAME_SUCCESS;
         }
     }
 
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src, SPArrayList* steps, char position, int color) {
-    if (!src || !steps || !spChessGameVerifyLocation(position)) {
+/***
+ * Adds all legal knight moves starting at position, assuming piece is of color, in game to steps
+ * @param game - Game to check moves in
+ * @param steps - SPArrayList to add steps to
+ * @param position - Position moves start in
+ * @param color - Piece color
+ * @return SP_CHESS_GAME_INVALID_ARGUENT if game or steps are NULL, position is out of bounds, or an error occurred
+ *                                       while adding step to steps
+ *         SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* game, SPArrayList* steps, char position, int color) {
+    if (!game || !steps || !spChessGameVerifyLocation(position)) { // Oops
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -406,21 +484,21 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src, SPArrayL
     for (int i = -1; i < 2; i += 2) {
         for (int j = -1; j < 2; j += 2) {
             destinationRow = currentRow + i;
-            destinationColumn = currentColumn + 2 * j;
+            destinationColumn = currentColumn + 2 * j; // One knight move
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
-            if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-                if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+            if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // That is valid
+                if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // Couldn't add!
                     return SP_CHESS_GAME_INVALID_ARGUMENT;
                 }
             }
 
             destinationRow = currentRow + 2 * i;
-            destinationColumn = currentColumn + j;
+            destinationColumn = currentColumn + j; // Different knight move
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
-            if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-                if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+            if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // Is valid
+                if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // No add
                     return SP_CHESS_GAME_INVALID_ARGUMENT;
                 }
             }
@@ -430,8 +508,18 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* src, SPArrayL
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* src, SPArrayList* steps, char position, int color) {
-    if (!src || !steps || !spChessGameVerifyLocation(position)) {
+/***
+ * Adds king steps, starting at position, assuming piece is of color, to steps, chacking validity at game's game board.
+ * @param game - Game to check moves at.
+ * @param steps - SPArrayList to add steps to
+ * @param position - Starting position
+ * @param color - Piece's color
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or steps are NULL, position in out of bounds or an error occurred
+ *                                        while adding single step to list.
+ *         SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* game, SPArrayList* steps, char position, int color) {
+    if (!game || !steps || !spChessGameVerifyLocation(position)) { // Oops...
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -444,11 +532,11 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* src, SPArrayLis
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
             destinationColumn = currentColumn + j;
-            destinationRow = currentRow + i;
+            destinationRow = currentRow + i; // One step in one direction
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
-            if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-                if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+            if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // Valid!
+                if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // NOOOOO
                     return SP_CHESS_GAME_INVALID_ARGUMENT;
                 }
             }
@@ -458,8 +546,18 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* src, SPArrayLis
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src, SPArrayList* steps, char position, int color) {
-    if (!src || !steps || !spChessGameVerifyLocation(position)) {
+/***
+ * Adds pawn steps to steps, starting at position, assuming piece is of color, checking validity at game's game board.
+ * @param game - Game to check validity at.
+ * @param steps - SPArrayList to add steps to.
+ * @param position - Starting position of the steps
+ * @param color - Piece's color
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or steps are NULL, position is out of bounds or an error occurred while
+ *                                        adding step to steps.
+ *         SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* game, SPArrayList* steps, char position, int color) {
+    if (!game || !steps || !spChessGameVerifyLocation(position)) { // What is this you sent me? I don't want this!
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -470,27 +568,24 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src, SPArrayLis
     int destinationRow;
     int destinationColumn;
 
-    for (int i = 1; i < 3; i++) {
+    for (int i = 1; i < 3; i++) { // Can move one or two steps in direction
         destinationRow = currentRow + i * direction;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, currentColumn);
 
-        if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-            if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // Can he?
+            if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // But why?
                 return SP_CHESS_GAME_INVALID_ARGUMENT;
             }
-        }
-        else {
-            break; // if 1 step isn't valid, 2 steps also aren't
         }
     }
 
     destinationRow = currentRow + direction;
-    for (int i = -1; i < 2; i += 2) {
+    for (int i = -1; i < 2; i += 2) { // Check possible capturing moves
         destinationColumn = currentColumn + i;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
-        if (spChessGameIsValidMove(src, move) == SP_CHESS_GAME_SUCCESS) {
-            if (spChessGameAddSingleStepToList(src, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        if (spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS) { // YAY!
+            if (spChessGameAddSingleStepToList(game, steps, move, color) == SP_CHESS_GAME_INVALID_ARGUMENT) { // NAY...
                 return SP_CHESS_GAME_INVALID_ARGUMENT;
             }
         }
@@ -499,44 +594,30 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* src, SPArrayLis
     return SP_CHESS_GAME_SUCCESS;
 }
 
-int spChessGameStepWillThreaten(unsigned int step) {
-    return (step << 24) >> 28; //Get bits [4-7]
-}
-
-int spChessGameStepWillCapture(unsigned int step) {
-    return (step << 28) >> 28; //Get 4 right most bits
-}
-
-/***
- * Resets src's game board to the starting set-up
- * @param src
- * @return SP_CHESS_GAME_INVALID_ARGUMENT if src is NULL
- *         SP_CHESS_GAME_SUCCESS otherwise
- */
-SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* src) {
-    if (!src) { // src is NULL
+SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* game) {
+    if (!game) { // game is NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     char* starting_row = STARTING_ROW;
 
     for (int i = 0; i < N_COLUMNS; i++) {
-        src->gameBoard[1][i] = PAWN(BLACK); // Put black pawns on the board
-        src->gameBoard[6][i] = PAWN(WHITE); // Put white pawns on the board
-        src->gameBoard[0][i] = starting_row[i]; // Put other pieces on the board
-        src->gameBoard[7][i] = CAPITAL_TO_LOW(starting_row[i]); // For whitey too
+        game->gameBoard[1][i] = PAWN(BLACK); // Put black pawns on the board
+        game->gameBoard[6][i] = PAWN(WHITE); // Put white pawns on the board
+        game->gameBoard[0][i] = starting_row[i]; // Put other pieces on the board
+        game->gameBoard[7][i] = CAPITAL_TO_LOW(starting_row[i]); // For whitey too
 
         for (int j = 0; j < N_ROWS - 4; j++) {
-            src->gameBoard[j + 2][i] = '\0'; // Everything else is empty
+            game->gameBoard[j + 2][i] = '\0'; // Everything else is empty
         }
 
-        src->locations[i] = spChessGameSetLocation(FIRST_ROW, i); // Black STARTING_ROW
-        src->locations[i + N_COLUMNS] = spChessGameSetLocation(FIRST_ROW + 1, i); // Black pawns
-        src->locations[i + 3 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW, i); // White STARTING_ROW
-        src->locations[i + 2 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW - 1, i); // White pawns
+        game->locations[i] = spChessGameSetLocation(FIRST_ROW, i); // Black STARTING_ROW
+        game->locations[i + N_COLUMNS] = spChessGameSetLocation(FIRST_ROW + 1, i); // Black pawns
+        game->locations[i + 3 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW, i); // White STARTING_ROW
+        game->locations[i + 2 * N_COLUMNS] = spChessGameSetLocation(LAST_ROW - 1, i); // White pawns
     }
 	
-	src->gameState = NORMAL;
+	game->gameState = NORMAL; // Game starts as not check/checkmate/draw
 
     return SP_CHESS_GAME_SUCCESS;
 }
@@ -564,8 +645,8 @@ SPChessGame* spChessGameCreate() {
     return game;
 }
 
-SPChessGame* spChessGameCopy(SPChessGame* src) {
-    if (!src) { // src is NULL
+SPChessGame* spChessGameCopy(SPChessGame* game) {
+    if (!game) { // game is NULL
         return 0;
     }
 
@@ -574,23 +655,23 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
         return 0;
     }
 
-    ret->currentPlayer = src->currentPlayer; // Copy what needs to be copied
-    ret->difficulty = src->difficulty;
-    ret->userColor = src->userColor;
-    ret->gameMode = src->gameMode;
-    ret->gameState = src->gameMode;
+    ret->currentPlayer = game->currentPlayer; // Copy what needs to be copied
+    ret->difficulty = game->difficulty;
+    ret->userColor = game->userColor;
+    ret->gameMode = game->gameMode;
+    ret->gameState = game->gameMode;
 
     for (int i = 0; i < N_ROWS; i++) {
         for (int j = 0; j < N_COLUMNS; j++) {
             if (j < 4) {
-                ret->locations[i + j * N_COLUMNS] = src->locations[i + j * N_COLUMNS]; // Copy locations
+                ret->locations[i + j * N_COLUMNS] = game->locations[i + j * N_COLUMNS]; // Copy locations
             }
 
-            ret->gameBoard[i][j] = src->gameBoard[i][j]; // And game board
+            ret->gameBoard[i][j] = game->gameBoard[i][j]; // And game board
         }
     }
 
-    ret->history = spArrayListCopy(src->history); // Copy history
+    ret->history = spArrayListCopy(game->history); // Copy history
     if (!ret->history) {
         free(ret);
         return 0;
@@ -599,27 +680,27 @@ SPChessGame* spChessGameCopy(SPChessGame* src) {
     return ret;
 }
 
-void spChessGameDestroy(SPChessGame* src) {
-    if (src) {
-        spArrayListDestroy(src->history);
-        free(src);
+void spChessGameDestroy(SPChessGame* game) {
+    if (game) {
+        spArrayListDestroy(game->history);
+        free(game);
     }
 }
 
-SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
-	if (!src) {
+SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* game , int color) {
+	if (!game) {
 		return SP_CHESS_GAME_INVALID_ARGUMENT;
 	}
 
-    int kingThreatened = spChessGameIsPieceThreatened(src, src->locations[KING_LOC(color)]);
+    int kingThreatened = spChessGameIsPieceThreatened(game, game->locations[KING_LOC(color)]); // Color's king is currently threatened
     int gameOver = 1;
     int index;
 
     for (int i = 0; i < 2 * N_COLUMNS; i++) {
         index = i + color * 2 * N_COLUMNS;
 
-        if (src->locations[index]) {
-            SPArrayList* possibleMoves = spChessGameGetMoves(src, src->locations[index]);
+        if (game->locations[index]) {
+            SPArrayList* possibleMoves = spChessGameGetMoves(game, game->locations[index]);
             if (!possibleMoves) {
                 return SP_CHESS_GAME_INVALID_ARGUMENT;
             }
@@ -634,29 +715,27 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* src , int color) {
         }
     }
 
-    if (gameOver) {
-        if (kingThreatened == 1) {
-        	src->gameState = CHECKMATE;
+    if (gameOver) { // No moves to make
+        if (kingThreatened == 1) { // And king threatened!
+        	game->gameState = CHECKMATE;
             return SP_CHESS_GAME_CHECKMATE;
         }
-        else {
-        	src->gameState = DRAW;
+        else { // King isn't threatened
+        	game->gameState = DRAW;
             return SP_CHESS_GAME_DRAW;
         }
     }
-    if (kingThreatened) {
-    	src->gameState = CHECK;
+    if (kingThreatened) { // Or is he?
+    	game->gameState = CHECK;
         return SP_CHESS_GAME_CHECK;
     }
 
-    src->gameState = NORMAL;
+    game->gameState = NORMAL; // Never mind, he isn't...
     return SP_CHESS_GAME_SUCCESS;
 }
 
-
-
-SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
-    if (!src) {
+SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* game, int move) {
+    if (!game) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -676,29 +755,29 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
         return SP_CHESS_GAME_ILLEGAL_MOVE;
     }
 
-    char piece = src->gameBoard[currentRow][currentColumn];
-    int color = src->currentPlayer;
-    if (!piece || color != CHECK_COLOR(piece)) {
+    char piece = game->gameBoard[currentRow][currentColumn];
+    int color = game->currentPlayer;
+    if (!piece || color != CHECK_COLOR(piece)) { // What are you trying ot move?
         return SP_CHESS_GAME_NO_PIECE_IN_POSITION;
     }
 
-    char captured = src->gameBoard[destinationRow][destinationColumn];
+    char captured = game->gameBoard[destinationRow][destinationColumn];
     if (captured && CHECK_COLOR(captured) == color) { // Can't capture own piece
         return SP_CHESS_GAME_ILLEGAL_MOVE;
     }
 
-    char kingLocation = src->locations[KING_LOC(color)];
-    int kingThreatened = spChessGameIsPieceThreatened(src, kingLocation);
+    char kingLocation = game->locations[KING_LOC(color)];
+    int kingThreatened = spChessGameIsPieceThreatened(game, kingLocation); // Is the king threatened?
     int legalMove = 0;
 
     if (piece == KING(color)) {
-        kingLocation = destinationPosition;
-        if (abs(destinationRow - currentRow) <= 1 && abs(destinationColumn - currentColumn) <= 1) {
+        kingLocation = destinationPosition; // Update his position for checkPotentialThreat
+        if (abs(destinationRow - currentRow) <= 1 && abs(destinationColumn - currentColumn) <= 1) { // Move one step?
             legalMove = 1;
         }
     }
 
-    else if (piece == PAWN(color)) {
+    else if (piece == PAWN(color)) { // Pawn here
         int direction = color ? UP : DOWN;  // if pawn is white, can move up, if black otherwise
         int twoStepsRow = color ? LAST_ROW - 1 : FIRST_ROW + 1;
 
@@ -708,194 +787,122 @@ SP_CHESS_GAME_MESSAGE spChessGameIsValidMove(SPChessGame* src, int move) {
                     legalMove = 1;
                 }
                 else if (currentRow == twoStepsRow && destinationRow == currentRow + direction * 2 &&
-                		 !src->gameBoard[currentRow + direction][destinationColumn]) { // check conditions for 2 steps
+                		 !game->gameBoard[currentRow + direction][destinationColumn]) { // check conditions for 2 steps
                     legalMove = 1;
                 }
             }
         }
-        else if (abs(destinationColumn - currentColumn) == 1) { // got here if the move captures, check other conditions
-            if (destinationRow == currentRow + direction) {
-                legalMove = 1;
-            }
+        else if (abs(destinationColumn - currentColumn) == 1 && destinationRow == currentRow + direction) { // got here if the move captures, check other conditions
+            legalMove = 1;
         }
     }
 
-    else if (abs(destinationRow - currentRow) == abs(destinationColumn - currentColumn)) { // diagonal move
-        if ((piece == QUEEN(color) || piece == BISHOP(color)) &&
-            spChessGameCheckDiagonalMove(src, destinationPosition, currentPosition) == 1) { // piece can perform diagonal move
+    else if (abs(destinationRow - currentRow) == abs(destinationColumn - currentColumn)) { // diagonal move, not by pawn
+        if ((piece == QUEEN(color) || piece == BISHOP(color)) && // piece can perform diagonal move
+            spChessGameCheckDiagonalMove(game, destinationPosition, currentPosition) == 1) { // And that move is legal
             legalMove = 1;
         }
     }
 
     else if (destinationRow == currentRow || destinationColumn == currentColumn) { // straight line move
-        if ((piece == QUEEN(color) || piece == ROOK(color)) &&
-            spChessGameCheckStraightLineMove(src, destinationPosition, currentPosition) == 1) { // piece can perform straight line move
+        if ((piece == QUEEN(color) || piece == ROOK(color)) && // piece can perform straight line move
+            spChessGameCheckStraightLineMove(game, destinationPosition, currentPosition) == 1) { // And move is legal
             legalMove = 1;
         }
     }
 
-    else if (piece == KNIGHT(color)) {
-        if (spChessGameCheckKnightMove(src, destinationPosition, currentPosition) == 1) {
+    else if (piece == KNIGHT(color)) { // Knight here
+        if (spChessGameCheckKnightMove(game, destinationPosition, currentPosition) == 1) { // Legal knight move
             legalMove = 1;
         }
     }
 
-    if (legalMove) {
-    	int kingWillBeThreatened = spChessGameCheckPotentialThreat(src, move, kingLocation);
-        if (kingWillBeThreatened == 1) {
-            if (kingThreatened) {
+    if (legalMove) { // If the piece at the starting position can theoretically make the move
+    	int kingWillBeThreatened = spChessGameCheckPotentialThreat(game, move, kingLocation);
+        if (kingWillBeThreatened == 1) { // Will the king be threatened after the move?
+            if (kingThreatened) { // Then it isn't legal
                 return SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED;
             }
-            else {
-                return SP_CHESS_GAME_KING_BECOMES_THREATENED;
+            else { // For some reason
+                return SP_CHESS_GAME_ILLEGAL_MOVE_KING_BECOMES_THREATENED;
             }
         }
-        else {
+        else { // King won't be threatened after the move
             return SP_CHESS_GAME_SUCCESS;
         }
     }
 
-    return SP_CHESS_GAME_ILLEGAL_MOVE;
+    return SP_CHESS_GAME_ILLEGAL_MOVE; // No no no no no
 }
 
-int spChessGameIsPieceThreatened(SPChessGame* src, char location) {
-    if (!src || !spChessGameVerifyLocation(location)) {
-        return -1;
-    }
-
-    int column = spChessGameGetColumnFromPosition(location);
-    int row = spChessGameGetRowFromPosition(location);
-
-    char piece = src->gameBoard[row][column];
-    int color = CHECK_COLOR(piece);
-    int opponentColor = color ? BLACK : WHITE;
-
-    if (spChessGameCheckStraightLineMove(src, location, src->locations[LEFT_ROOK_LOC(opponentColor)]) == 1 ||
-        spChessGameCheckStraightLineMove(src, location, src->locations[RIGHT_ROOK_LOC(opponentColor)]) == 1) {
-        return 1;
-    }
-
-    if (spChessGameCheckKnightMove(src, location, src->locations[LEFT_KNIGHT_LOC(opponentColor)]) == 1 ||
-        spChessGameCheckKnightMove(src, location, src->locations[RIGHT_KNIGHT_LOC(opponentColor)]) == 1) {
-        return 1;
-    }
-
-    if (spChessGameCheckDiagonalMove(src, location, src->locations[LEFT_BISHOP_LOC(opponentColor)]) == 1 ||
-        spChessGameCheckDiagonalMove(src, location, src->locations[RIGHT_BISHOP_LOC(opponentColor)]) == 1) {
-        return 1;
-    }
-
-    if (spChessGameCheckDiagonalMove(src, location, src->locations[QUEEN_LOC(opponentColor)]) == 1 ||
-        spChessGameCheckStraightLineMove(src, location, src->locations[QUEEN_LOC(opponentColor)]) == 1) {
-        return 1;
-    }
-
-    if (spChessGameCheckKingThreat(src, location, src->locations[KING_LOC(opponentColor)]) == 1) {
-        return 1;
-    }
-
-    int protectedRow = color ? FIRST_ROW : LAST_ROW; //pawn cant get there
-    if (row == protectedRow) {
-        return 0;
-    }
-
-    int direction = color ? UP : DOWN; //check pawn threat
-    char opponentPawn = PAWN(opponentColor);
-
-    if ((column != LEFT_MOST_COL && src->gameBoard[row + direction][column - 1] == opponentPawn) ||
-        (column != RIGHT_MOST_COL && src->gameBoard[row + direction][column + 1] == opponentPawn)) {
-        return 1;
-    }
-
-    return 0;
-}
-
-SPArrayList* spChessGameGetMoves(SPChessGame* src, char position) {
-    if (!src || !spChessGameVerifyLocation(position)) {
+SPArrayList* spChessGameGetMoves(SPChessGame* game, char position) {
+    if (!game || !spChessGameVerifyLocation(position)) {
         return NULL;
     }
 
     SPArrayList* steps = spArrayListCreate(30); // TODO - find a better way to limit number of moves?
     if (!steps) {
-        return 0;
+        return NULL;
     }
 
-    int changedCurrentPlayer = 0;
+    int changedCurrentPlayer = 0; // Want the ability to getMoves for opponent pieces as well
     int currentColumn = spChessGameGetColumnFromPosition(position);
     int currentRow = spChessGameGetRowFromPosition(position);
-    char piece = src->gameBoard[currentRow][currentColumn];
+    char piece = game->gameBoard[currentRow][currentColumn];
     int color = CHECK_COLOR(piece);
 
-    if (color != src->currentPlayer) {
-        src->currentPlayer = src->currentPlayer ? BLACK : WHITE;
+    if (color != game->currentPlayer) {
+        game->currentPlayer = game->currentPlayer ? BLACK : WHITE; // So isValidMove will work
         changedCurrentPlayer = 1;
     }
 
-    if (piece == QUEEN(color) || piece == BISHOP(color)) {
-        spChessGameAddStepsToList(src, steps, position, DOWN, LEFT, color);
-        spChessGameAddStepsToList(src, steps, position, UP, LEFT, color);
-        spChessGameAddStepsToList(src, steps, position, DOWN, RIGHT, color);
-        spChessGameAddStepsToList(src, steps, position, UP, RIGHT, color);
+    if (piece == QUEEN(color) || piece == BISHOP(color)) { // Diagonal moves, in all directions
+        if (spChessGameAddStepsToList(game, steps, position, DOWN, LEFT, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, UP, LEFT, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, DOWN, RIGHT, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, UP, RIGHT, color) != SP_CHESS_GAME_SUCCESS) {
+            spArrayListDestroy(steps);
+            return NULL;
+        }
     }
 
-    if (piece == QUEEN(color) || piece == ROOK(color)) {
-        spChessGameAddStepsToList(src, steps, position, STAY, LEFT, color);
-        spChessGameAddStepsToList(src, steps, position, DOWN, STAY, color);
-        spChessGameAddStepsToList(src, steps, position, UP, STAY, color);
-        spChessGameAddStepsToList(src, steps, position, STAY, RIGHT, color);
+    if (piece == QUEEN(color) || piece == ROOK(color)) { // Straight line moves, in all directions
+        if (spChessGameAddStepsToList(game, steps, position, STAY, LEFT, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, DOWN, STAY, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, UP, STAY, color) != SP_CHESS_GAME_SUCCESS ||
+            spChessGameAddStepsToList(game, steps, position, STAY, RIGHT, color) != SP_CHESS_GAME_SUCCESS) {
+            spArrayListDestroy(steps);
+            return NULL;
+        }
     }
 
-    else if (piece == PAWN(color)) {
-        spChessGameAddPawnStepsToList(src, steps, position, color);
+    else if (piece == PAWN(color) && // Pawn moves
+             spChessGameAddPawnStepsToList(game, steps, position, color) != SP_CHESS_GAME_SUCCESS) {
+        spArrayListDestroy(steps);
+        return NULL;
     }
 
-    else if (piece == KNIGHT(color)) {
-        spChessGameAddKnightStepsToList(src, steps, position, color);
+    else if (piece == KNIGHT(color) && // Knight moves
+             spChessGameAddKnightStepsToList(game, steps, position, color) != SP_CHESS_GAME_SUCCESS) {
+        spArrayListDestroy(steps);
+        return NULL;
     }
 
-    else if (piece == KING(color)) {
-        spChessGameAddKingStepsToList(src, steps, position, color);
+    else if (piece == KING(color) && // And king moves
+             spChessGameAddKingStepsToList(game, steps, position, color) != SP_CHESS_GAME_SUCCESS) {
+        spArrayListDestroy(steps);
+        return NULL;
     }
 
-    if (changedCurrentPlayer) {
-        src->currentPlayer = src->currentPlayer ? BLACK : WHITE;
+    if (changedCurrentPlayer) { // Restore currentPlayer, if we changed it
+        game->currentPlayer = game->currentPlayer ? BLACK : WHITE;
     }
 
     return steps;
 }
 
-SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
-    if (!list) {
-        return SP_CHESS_GAME_INVALID_ARGUMENT;
-    }
-
-    int numOfMoves = spArrayListSize(list);
-    int step;
-    char location;
-    int row;
-    int column;
-
-    for (int i = 0 ; i < numOfMoves; i++) {
-        step = spArrayListGetAt(list, i);
-        location = spChessGameGetDestinationPositionFromMove(step);
-        row = spChessGameGetRowFromPosition(location);
-        column = spChessGameGetColumnFromPosition(location);
-        printf("<%d,%c>", 8 - row, COL_NUM_TO_LETTER(column));
-
-        if (spChessGameStepWillThreaten(step)) {
-            printf("*");
-        }
-        if (spChessGameStepWillCapture(step)) {
-            printf("^");
-        }
-        printf("\n");
-    }
-
-    return SP_CHESS_GAME_SUCCESS;
-}
-
-SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
-    if (!src) {
+SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* game, int move) {
+    if (!game) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -906,53 +913,53 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* src, int move) {
     char currentPosition = spChessGameGetCurrentPositionFromMove(move);
     int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int currentRow = spChessGameGetRowFromPosition(currentPosition);
-    char captured = src->gameBoard[destinationRow][destinationColumn]; // Get (potentially) captured piece
+    char captured = game->gameBoard[destinationRow][destinationColumn]; // Get (potentially) captured piece
     move |= captured; // Add captured piece to move for history
 
     SP_ARRAY_LIST_MESSAGE message;
-    if (spArrayListIsFull(src->history)) {
-        message = spArrayListRemoveLast(src->history); // Make room for new move in history, if needed
+    if (spArrayListIsFull(game->history)) {
+        message = spArrayListRemoveLast(game->history); // Make room for new move in history, if needed
         if (message != SP_ARRAY_LIST_SUCCESS) { // Shouldn't happen
             return SP_CHESS_GAME_INVALID_ARGUMENT;
         }
     }
 
-    message = spArrayListAddFirst(src->history, move); // Add move to history
+    message = spArrayListAddFirst(game->history, move); // Add move to history
     if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // Shouldn't happen
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
-    int color = CHECK_COLOR(src->gameBoard[currentRow][currentColumn]);
+    int color = CHECK_COLOR(game->gameBoard[currentRow][currentColumn]);
     int opponentColor = color ? BLACK : WHITE;
 
     for (int i = 0; i < N_COLUMNS * 2; i++) {
-        if (captured && src->locations[i + (opponentColor) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
-            src->locations[i + (opponentColor) * 2 * N_COLUMNS] = 0;
+        if (captured && game->locations[i + (opponentColor) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
+            game->locations[i + (opponentColor) * 2 * N_COLUMNS] = 0;
         }
 
-        if (src->locations[i + color * 2 * N_COLUMNS] == currentPosition) { // Change moved piece's location
-            src->locations[i + color * 2 * N_COLUMNS] = destinationPosition;
+        if (game->locations[i + color * 2 * N_COLUMNS] == currentPosition) { // Change moved piece's location
+            game->locations[i + color * 2 * N_COLUMNS] = destinationPosition;
         }
     }
 
-    src->gameBoard[destinationRow][destinationColumn] = src->gameBoard[currentRow][currentColumn]; // Set board accordingly
-    src->gameBoard[currentRow][currentColumn] = '\0';
+    game->gameBoard[destinationRow][destinationColumn] = game->gameBoard[currentRow][currentColumn]; // Set board accordingly
+    game->gameBoard[currentRow][currentColumn] = '\0';
 
-    src->currentPlayer = src->currentPlayer ? BLACK : WHITE; // Change current player
+    game->currentPlayer = game->currentPlayer ? BLACK : WHITE; // Change current player
 
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
-    if (!src) { // src is NULL
+SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* game) {
+    if (!game) { // game is NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    if (spArrayListIsEmpty(src->history)) { // no move to undo
+    if (spArrayListIsEmpty(game->history)) { // no move to undo
         return SP_CHESS_GAME_NO_HISTORY;
     }
 
-    int move = spArrayListGetFirst(src->history); // get last move made
-    SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(src->history); // remove move from history
+    int move = spArrayListGetFirst(game->history); // get last move made
+    SP_ARRAY_LIST_MESSAGE message = spArrayListRemoveFirst(game->history); // remove move from history
     if (message == SP_ARRAY_LIST_INVALID_ARGUMENT) { // shouldn't happen
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
@@ -965,14 +972,14 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
     int currentColumn = spChessGameGetColumnFromPosition(currentPosition);
     int currentRow = spChessGameGetRowFromPosition(currentPosition);
 
-    src->gameBoard[currentRow][currentColumn] = src->gameBoard[destinationRow][destinationColumn]; // Set board
-    src->gameBoard[destinationRow][destinationColumn] = captured;
-    src->currentPlayer = src->currentPlayer ? BLACK : WHITE; // And current player
-    int currentPlayer = !(src->currentPlayer);
+    game->gameBoard[currentRow][currentColumn] = game->gameBoard[destinationRow][destinationColumn]; // Set board
+    game->gameBoard[destinationRow][destinationColumn] = captured;
+    game->currentPlayer = game->currentPlayer ? BLACK : WHITE; // And current player
+    int currentPlayer = !(game->currentPlayer);
 
     for (int i = 0; i < N_COLUMNS * 4; i++) { // Update location for moved piece
-        if (src->locations[i] == destinationPosition) {
-            src->locations[i] = currentPosition;
+        if (game->locations[i] == destinationPosition) {
+            game->locations[i] = currentPosition;
         }
     }
 
@@ -980,36 +987,36 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
     if (captured == PAWN(currentPlayer)) { // Update location if pawn was captured
         int startIndex = currentPlayer ? 2 * N_COLUMNS : N_COLUMNS; // Pawn locations by color
         for (int i = 0; i < N_COLUMNS; i++) {
-            if (!src->locations[i + startIndex]) {
-                src->locations[i + startIndex] = destinationPosition;
+            if (!game->locations[i + startIndex]) {
+                game->locations[i + startIndex] = destinationPosition;
                 break;
             }
         }
     }
 
     else if (captured == KNIGHT(currentPlayer)) { // Update location if knight was captured
-        if (!src->locations[RIGHT_KNIGHT_LOC(currentPlayer)]) {
+        if (!game->locations[RIGHT_KNIGHT_LOC(currentPlayer)]) {
             index = RIGHT_KNIGHT_LOC(currentPlayer);
         }
-        else if (!src->locations[LEFT_KNIGHT_LOC(currentPlayer)]) {
+        else if (!game->locations[LEFT_KNIGHT_LOC(currentPlayer)]) {
             index = LEFT_KNIGHT_LOC(currentPlayer);
         }
     }
 
     else if (captured == ROOK(currentPlayer)) { // Rook taken
-        if (!src->locations[RIGHT_ROOK_LOC(currentPlayer)]) {
+        if (!game->locations[RIGHT_ROOK_LOC(currentPlayer)]) {
             index = RIGHT_ROOK_LOC(currentPlayer);
         }
-        else if (!src->locations[LEFT_ROOK_LOC(currentPlayer)]) {
+        else if (!game->locations[LEFT_ROOK_LOC(currentPlayer)]) {
             index = LEFT_ROOK_LOC(currentPlayer);
         }
     }
 
     else if (captured == BISHOP(currentPlayer)) { // Bishop
-        if (!src->locations[RIGHT_BISHOP_LOC(currentPlayer)]) {
+        if (!game->locations[RIGHT_BISHOP_LOC(currentPlayer)]) {
             index = RIGHT_BISHOP_LOC(currentPlayer);
         }
-        else if (!src->locations[LEFT_BISHOP_LOC(currentPlayer)]) {
+        else if (!game->locations[LEFT_BISHOP_LOC(currentPlayer)]) {
             index = LEFT_BISHOP_LOC(currentPlayer);
         }
     }
@@ -1023,20 +1030,20 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* src) {
     }
 
     if (index != -1) {
-        src->locations[index] = destinationPosition;
+        game->locations[index] = destinationPosition;
     }
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* src, FILE* file) {
-    if (!src || !file) { // src or file are NULL
+SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file) {
+    if (!game || !file) { // game or file are NULL
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     for (int i = 0; i < N_ROWS; i++) {
         fprintf(file, "%d|", N_ROWS - i); // Print row number
         for (int j = 0; j < N_COLUMNS; j++) {
-            char currChar = src->gameBoard[i][j];
+            char currChar = game->gameBoard[i][j];
             fprintf(file, " %c", currChar ? currChar : BLANK); // Print piece if it's there
         }
         fprintf(file, " |\n"); // End row
@@ -1059,16 +1066,16 @@ SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* src, FILE* file) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
-SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* src) {
-    return spChessGameFprintBoard(src, stdout);
+SP_CHESS_GAME_MESSAGE spChessGamePrintBoard(SPChessGame* game) {
+    return spChessGameFprintBoard(game, stdout);
 }
 
 unsigned int spChessGameGetLastMovePlayed(SPChessGame* game) {
     if (!game || spArrayListIsEmpty(game->history)) {
-        return -1;
+        return 0;
     }
 
-    return ((unsigned int) spArrayListGetFirst(game->history)) >> 8;
+    return ((unsigned int) spArrayListGetFirst(game->history)) >> 8; // Users of this function don't know move saves captured piece
 }
 
 SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {
@@ -1076,10 +1083,10 @@ SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    spChessGameResetBoard(game);
+    spChessGameResetBoard(game); // Reset board
 
     while (!spArrayListIsEmpty(game->history)) {
-        if (spArrayListRemoveFirst(game->history) != SP_ARRAY_LIST_SUCCESS) {
+        if (spArrayListRemoveFirst(game->history) != SP_ARRAY_LIST_SUCCESS) { // Delete history
             return SP_CHESS_GAME_INVALID_ARGUMENT;
         }
     }

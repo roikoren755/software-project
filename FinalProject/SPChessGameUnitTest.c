@@ -73,7 +73,7 @@ static int spChessGameTestIsValidMove() {
     ASSERT_TRUE(spChessGameIsValidMove(game, move) == SP_CHESS_GAME_SUCCESS);
 	game->gameBoard[4][4] = 'Q';
 	game->locations[QUEEN_LOC(BLACK)] = spChessGameSetPosition2(4, 4);
-	ASSERT_TRUE(spChessGameIsValidMove(game, move) == SP_CHESS_GAME_KING_BECOMES_THREATENED);
+	ASSERT_TRUE(spChessGameIsValidMove(game, move) == SP_CHESS_GAME_ILLEGAL_MOVE_KING_BECOMES_THREATENED);
 	spChessGameDestroy(game);
 	return 1;
 }

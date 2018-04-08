@@ -3,30 +3,13 @@
 #include "SPMainAux.h"
 #include <string.h>
 
+#define MAXIMUM_COMMAND_LENGTH 1024
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
-#define BLANK '_'
-#define CAPITAL_TO_LOW(c) c + 'a' - 'A'
-#define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
-#define CONSOLE 0
-#define GUI 1
-#define CHECK_COLOR(piece) (piece > 'Z')
-#define PIECE_NAME_LENGTH 6
 
-int min(int a,int b){
-	if(a<b){return a;}
-	else{return b;}
+int min(int a, int b) {
+    return a < b ? a : b;
 }
-
-int max(int a,int b){
-	if(a>b){return a;}
-		else{return b;}
-	}
-
-//int abs(int a){
-//	if(a>0){return a;}
-//	else{return -a;}
-//}
 
 unsigned char spChessGameGetDestinationPositionFromMove(unsigned int move) {
     move >>= 8;
@@ -58,13 +41,17 @@ SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file) {
     if (!game || !file) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
+
     char* difficulties[] = {"", "amateur", "easy", "moderate", "hard", "expert"};
+
     fprintf(file, "SETTINGS:\n");
     fprintf(file, "GAME_MODE: %d-player\n", game->gameMode);
+
     if (game->gameMode == 1) {
         fprintf(file, "DIFFICULTY: %s\n", difficulties[game->difficulty]);
         fprintf(file, "USER_COLOR: %s\n", game->userColor ? "white" : "black");
     }
+
     return SP_CHESS_GAME_SUCCESS;
 }
 
@@ -73,7 +60,7 @@ SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    FILE* filePointer = fopen(file, "w");
+    FILE* filePointer = fopen(file, "w"); // Overwrite any existing file of the same name
     if (!filePointer) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
@@ -87,6 +74,19 @@ SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
+SPCommand spGetCommand() {
+    char input[MAXIMUM_COMMAND_LENGTH + 1];
+    fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
+    return spParserParseLine(input);
+}
+
+/***
+ * Converts from string to int representation of colors.
+ * @param argument - String to convert to color.
+ * @return 1 if argument is "white"
+ *         0 if argument is "black"
+ *        -1 otherwise
+ */
 int spGetColor(const char* argument) {
     if (!argument) {
         return -1;
@@ -101,6 +101,13 @@ int spGetColor(const char* argument) {
     return -1;
 }
 
+/***
+ * Same as above, just for game mode
+ * @param argument - Same
+ * @return 1 if argument is "1-player"
+ *         2 if argument is "2-player"
+ *         0 otherwise
+ */
 int spGetGameMode(const char* argument) {
     if (!argument) {
         return 0;
@@ -116,6 +123,16 @@ int spGetGameMode(const char* argument) {
     return 0;
 }
 
+/***
+ * Converts difficulty name to int representing same difficulty level.
+ * @param argument - Same as above, sort of
+ * @return 1 if argument is "amateur"
+ *         2 if argument is "easy"
+ *         3 if argument is "moderate"
+ *         4 if argument is "hard"
+ *         5 if argument is "expert"
+ *         0 otherwise
+ */
 int spGetDifficulty(const char* argument) {
     if (!argument) {
         return 0;
@@ -140,6 +157,11 @@ int spGetDifficulty(const char* argument) {
     return 0;
 }
 
+/***
+ * Helper function, turns the first bufferLength bytes of buffer to 0.
+ * @param buffer - Buffer to clear
+ * @param bufferLength - How much of it to clear
+ */
 void clearBuffer(char* buffer, int bufferLength) {
     if (!buffer) {
         return;
@@ -160,13 +182,29 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
+    for (int i = 0; i < N_COLUMNS; i++) {
+        for (int j = 0; j < N_ROWS; j++) {
+            if (j < 4) {
+                game->locations[i + j * N_COLUMNS] = 0;
+            }
+            game->gameBoard[i][j] = 0;
+        }
+    }
+
+    while (!spArrayListIsEmpty(game->history)) {
+        if (spArrayListRemoveFirst(game->history) != SP_ARRAY_LIST_SUCCESS) {
+            return SP_CHESS_GAME_INVALID_ARGUMENT;
+        }
+    }
+
     char buffer[MAX_FILE_LINE_LENGTH + 1];
     char* argument;
     int row = 0;
     char location;
+    char piece;
     int finishedLoading = 0;
     while (!finishedLoading) {
-    	fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
+        fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
         if (!row) {
             argument = strtok(buffer, DELIMITERS);
             game->currentPlayer = spGetColor(argument);
@@ -193,7 +231,6 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
         }
 
         else if (row == 2) {
-            char piece;
             for (int i = 0; i < N_ROWS; i++) {
                 argument = strtok(buffer, DELIMITERS);
                 for (int j = 0; j < N_COLUMNS; j++) {
@@ -203,7 +240,7 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                 	location |= j;
                     argument = strtok(NULL, DELIMITERS);
                     piece = argument[0];
-                    game->gameBoard[i][j] = piece;
+                    game->gameBoard[i][j] = piece == BLANK ? '\0' : piece;
                     if (piece == PAWN(BLACK)) {
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
@@ -214,8 +251,8 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                     }
                     else if (piece == PAWN(WHITE)) {
                     	for (int i = 0; i < N_COLUMNS; i++) {
-                    		if (!game->locations[i + N_COLUMNS]) {
-                    			game->locations[i + N_COLUMNS] = location;
+                    		if (!game->locations[i + 2 * N_COLUMNS]) {
+                    			game->locations[i + 2 * N_COLUMNS] = location;
                     			break;
                     		}
                     	}
@@ -299,13 +336,7 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     }
 
     fclose(filePointer);
-    return SP_CHESS_GAME_SUCCESS;
-}
-
-SPCommand spGetCommand() {
-    char input[MAXIMUM_COMMAND_LENGTH + 1];
-    fgets(input, MAXIMUM_COMMAND_LENGTH, stdin);
-    return spParserParseLine(input);
+    return spChessCheckGameState(game, game->currentPlayer);
 }
 
 SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char position) {
@@ -383,4 +414,60 @@ char spChessGameGetPieceAtPosition(SPChessGame* game, char position) {
     }
 
     return game->gameBoard[row][column];
+}
+
+SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
+    if (!list) {
+        return SP_CHESS_GAME_INVALID_ARGUMENT;
+    }
+
+    int numOfMoves = spArrayListSize(list);
+    int step;
+    char location;
+    int row;
+    int column;
+
+    for (int i = 0 ; i < numOfMoves; i++) {
+        step = spArrayListGetAt(list, i);
+        location = spChessGameGetDestinationPositionFromMove(step);
+        row = spChessGameGetRowFromPosition(location);
+        column = spChessGameGetColumnFromPosition(location);
+        printf("<%d,%c>", 8 - row, 'A' + column);
+
+        if (spChessGameStepWillThreaten(step)) {
+            printf("*");
+        }
+        if (spChessGameStepWillCapture(step)) {
+            printf("^");
+        }
+        printf("\n");
+    }
+
+    return SP_CHESS_GAME_SUCCESS;
+}
+
+unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int currentColumn,unsigned int destinationRow, unsigned int destinationColumn) {
+    unsigned int move = spChessGameSetLocation(currentRow, currentColumn) << 8; // format is 8 bits current location, 8 bits destination location
+    move |= spChessGameSetLocation(destinationRow, destinationColumn);
+    return move;
+}
+
+int spChessGameStepWillThreaten(unsigned int step) {
+    return (step << 24) >> 28; //Get bits [4-7]
+}
+
+int spChessGameStepWillCapture(unsigned int step) {
+    return (step << 28) >> 28; //Get 4 right most bits
+}
+
+unsigned char spChessGameSetLocation(int row, int column) {
+    if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
+        return 0;
+    }
+
+    unsigned char location = 1 << 3;
+    location = (row | location) << 3;
+    location |= column;
+
+    return location;
 }
