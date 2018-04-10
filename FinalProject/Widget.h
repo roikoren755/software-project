@@ -39,6 +39,7 @@ Screen* createScreen(int width,int height,
 		int widgetsSize,
 		int shown,
 		int previousWindow,
+		int nextWindow,
 		void (*draw)(Screen*));
 // useful function for NULL-safe destroy
 void destroyWidget(Widget* src);

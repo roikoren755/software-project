@@ -5,12 +5,13 @@
 #include <SDL.h>
 #include <SDL_video.h>
 #include <stdio.h>
-#include "SPChessSettingsSdl.h"
+#include "SPChessMainSdl.h"
 #include "SPChessGameSdl.h"
 #include "SPChessParser.h"
 #include "Button.h"
 
-int mainSdl(SPChessGame* game ) ;
+int runSdl(SPChessGame* game );
+
 int min(int a,int b);
 
 /***

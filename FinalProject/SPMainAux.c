@@ -13,7 +13,7 @@ int min(int a, int b) {
     return a < b ? a : b;
 }
 
-int mainSdl(SPChessGame* game ) {
+int runSdl(SPChessGame* game ) {
 	//SP_BUFF_SET();
 
 	// initialize SDL2 for video

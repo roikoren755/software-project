@@ -251,7 +251,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if(1){
-		return mainSdl(game);
+		return runSdl(game);
 	}
 	spChessPrintGameTitle();
 

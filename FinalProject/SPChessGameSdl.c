@@ -14,6 +14,91 @@
 int var=0;
 
 
+Screen* SPGameCreateGameScreen(){
+	Screen* gameScreen = createScreen(900,660,
+			"Chess Game",
+			N_MAX_WIDGETS,
+			HIDE,
+			NONE,
+			NONE,
+			SPDrawGameScreen);
+		if (gameScreen == NULL){
+			return NULL;
+		}
+		SDL_Renderer* rend = gameScreen->renderer;
+
+
+//	SDL_SetRenderDrawBlendMode(rend, SDL_BLENDMODE_BLEND);
+
+//	SPDrawBoard(rend);
+
+	int color;
+	char tempString[30], colors[2][30] = {"black","white"};
+	for( color = 0; color<2; color++){
+
+		sprintf(tempString,"pics/%s_rook.bmp",colors[color]);
+		gameScreen->widgets[LEFT_ROOK_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+0*80,10+color*80*7,80,80,SHOWN);
+		gameScreen->widgets[RIGHT_ROOK_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+7*80,10+color*80*7,80,80,SHOWN);
+
+		sprintf(tempString,"pics/%s_knight.bmp",colors[color]);
+		gameScreen->widgets[LEFT_KNIGHT_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+1*80,10+color*80*7,80,80,SHOWN);
+		gameScreen->widgets[RIGHT_KNIGHT_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+6*80,10+color*80*7,80,80,SHOWN);
+
+
+		sprintf(tempString,"pics/%s_bishop.bmp",colors[color]);
+		gameScreen->widgets[LEFT_BISHOP_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+2*80,10+color*80*7,80,80,SHOWN);
+		gameScreen->widgets[RIGHT_BISHOP_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+5*80,10+color*80*7,80,80,SHOWN);
+
+		sprintf(tempString,"pics/%s_queen.bmp",colors[color]);
+		gameScreen->widgets[QUEEN_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+3*80,10+color*80*7,80,80,SHOWN);
+
+		sprintf(tempString,"pics/%s_king.bmp",colors[color]);
+		gameScreen->widgets[KING_LOC(color)] = createSticker(rend,
+				tempString,SPMovePiece,SPHighlightAllMoves,10+4*80,10+color*80*7,80,80,SHOWN);
+	}
+	int i;
+	for( i = 8; i<16; i++){
+		gameScreen->widgets[i] = createSticker(rend,
+				"pics/black_pawn.bmp",SPMovePiece,SPHighlightAllMoves,10+(i-8)*80,10+1*80,80,80,SHOWN);
+		gameScreen->widgets[i+N_COLUMNS] = createSticker(rend,
+				"pics/white_pawn.bmp",SPMovePiece,SPHighlightAllMoves,10+(i-8)*80,10+6*80,80,80,SHOWN);
+	}
+
+	gameScreen->widgets[GS_RESTART_GAME] = createButton(rend,
+								"pics/restart_game.bmp",SPRestartGame,672,25,210,50,SHOWN);
+	gameScreen->widgets[GS_SAVE_GAME] = createButton(rend,
+									"pics/save_game.bmp",SPOpenNextWindow,672,100,210,50,SHOWN);
+	gameScreen->widgets[GS_SAVED_GAME_INDICATOR] = createLable(rend,
+									"pics/saved_game_indicator.bmp",675,83,180,20,HIDE);
+	gameScreen->widgets[GS_LOAD_GAME] = createButton(rend,
+								"pics/load_game_gs.bmp",SPOpenNextWindow,672,175,210,50,SHOWN);
+	gameScreen->widgets[GS_MAIN_MENU] = createButton(rend,
+								"pics/main_menu_gs.bmp",SPOpenMainMenuWindow,672,250,210,50,SHOWN);
+	gameScreen->widgets[GS_QUIT] = createButton(rend,
+								"pics/quit_gs.bmp",SPQuit,672,325,210,50,SHOWN);
+
+	gameScreen->widgets[GS_UNDO] = createButton(rend,
+								"pics/gs_Undo.bmp",SPUndoMove,672,475,210,50,HIDE);
+	gameScreen->widgets[GS_GET_MOVES_LEGEND] = createLable(rend,
+								"pics/gs_GetMoves_legend.bmp",672,600,210,50,HIDE);
+	gameScreen->widgets[GS_CHECK] = createLable(rend,
+									"pics/gs_Check.bmp",672,540,210,50,HIDE);
+	gameScreen->widgets[GS_CHECK_MATE] = createLable(rend,
+									"pics/gs_Check-mate.bmp",672,540,210,50,HIDE);
+	gameScreen->widgets[GS_DRAW] = createLable(rend,
+									"pics/gs_Draw.bmp",672,540,210,50,HIDE);
+
+	return gameScreen;
+}
+
+
 int SPDrawBoard(SDL_Renderer* rend){
 	SDL_Rect frameRect = { .x = 5, .y = 5, .w = 650, .h = 650 };
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 0);  //draw black frame
@@ -74,22 +159,10 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game){
 		}
 
 	}
+
 	SPUpdateGameState(screens,game);
 
 	SDL_RenderPresent(rend);
-
-	if(game->gameMode==1 && game->currentPlayer != game->userColor){
-		int move = spMinimaxSuggestMove(game);
-		if (move == -1) {
-			printf("ERROR: Couldn't figure out computer move. Quitting...\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-										"ERROR: Couldn't figure out computer move. Quitting..", NULL);
-			SPOpenMainMenuWindow(screens,game,GAME_SCREEN ,GS_MAIN_MENU);
-		}
-		else {
-			spChessGameSetMove(game, move);
-		}
-	}
 
 	return PRESSED;
 }
@@ -118,35 +191,6 @@ void SPUpdateGameState(Screen** screens, SPChessGame* game){
 	}
 }
 
-
-void SPDrawWidgets(Screen* screen){
-	Widget * widget;
-	int i = 0;
-
-	for(i=0; i<screen->widgetsSize; i++){
-		widget = screen->widgets[i];
-		if(widget && widget->shown){
-			widget->draw(widget, screen->renderer);
-		}
-	}
-
-}
-
-void SPDefaultDrawScreen(Screen* screen){
-	if(screen==NULL){
-		return;
-	}
-	SDL_Renderer* rend = screen->renderer;
-	SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
-	SDL_RenderClear(rend);
-
-	SPDrawWidgets(screen);
-
-	SDL_Delay(10);
-	SDL_RenderPresent(rend);
-
-}
-
 void SPDrawGameScreen(Screen* screen){
 	if(screen==NULL){
 		return;
@@ -163,12 +207,6 @@ void SPDrawGameScreen(Screen* screen){
 
 }
 
-
-
-int SPOpenPreviousWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	return SPOpenWindow(screens,screens[screenIndex]->previousWindow);
-}
-
 int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
     spChessGameResetBoard(game);
 
@@ -180,50 +218,6 @@ int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widge
 
     SPUpdateBoard(screens,game);
 	return PRESSED;
-}
-
-int SPOpenSaveGameWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	screens[SAVE_GAME_WINDOW]->previousWindow = screenIndex; //update where to return
-	return SPOpenWindow(screens,SAVE_GAME_WINDOW);
-}
-int SPOpenLoadGameWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	screens[LOAD_GAME_WINDOW]->previousWindow = screenIndex; //update where to return
-	return SPOpenWindow(screens,LOAD_GAME_WINDOW);
-}
-
-int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	if((screenIndex == GAME_SCREEN)&&(!screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown)){
-		return SPShowSaveBeforeQuitMassage(screens , game, screenIndex , widgetIndex);
-	}
-
-	if(screenIndex == GAME_SCREEN){ //for case where game is saved
-	    //TODO reset settings
-		spChessGameResetGame(game);
-	}
-	printf("%d.opening main menu\n",var++);
-	return SPOpenWindow(screens,MAIN_MENU_WINDOW);
-}
-
-int SPOpenGetModeWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	printf("%d.opening get mode\n",var++);
-	spChessGameResetBoard(game);   //this function only called when the button 'new game' is pressed.
-	SPUpdateBoard(screens,game);
-	return SPOpenWindow(screens,GET_MODE_WINDOW);
-}
-
-int SPOpenGetDifficultyWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	printf("%d.opening GetDifficulty\n",var++);
-	return SPOpenWindow(screens,GET_DIFFICULTY_WINDOW);
-}
-
-int SPOpenGetColorWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	printf("%d.opening GetColorWindow\n",var++);
-	return SPOpenWindow(screens,GET_COLOR_WINDOW);
-}
-
-int SPOpenGameScreen(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	printf("%d.opening GameScreen\n",var++);
-	return SPOpenWindow(screens,GAME_SCREEN);
 }
 
 int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
@@ -268,7 +262,7 @@ int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIn
     	return SPOpenWindow(screens,MAIN_MENU_WINDOW);
     }
     else if(buttonid == YES){
-    	return SPOpenSaveGameWindow(screens , game, screenIndex , widgetIndex);
+    	return SPOpenNextWindow(screens , game, GAME_SCREEN , GS_SAVE_GAME);
     }
     else if(buttonid == NO){
     	return PRESSED;
@@ -277,12 +271,7 @@ int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIn
     return 0;
 }
 
-int SPQuit(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	if((screenIndex == GAME_SCREEN)&&(!screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown)){
-		return SPShowSaveBeforeQuitMassage(screens , game, screenIndex , widgetIndex);
-	}
-	return QUIT;
-}
+
 
 int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	spChessGameUndoMove(game);
@@ -305,40 +294,7 @@ int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIn
 	return PRESSED;
 }
 
-int SPSetGameMode(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	game->gameMode = widgetIndex;//the game mode is the same as the widget index
-	return SPOpenWindow(screens,widgetIndex==1?GET_DIFFICULTY_WINDOW:GAME_SCREEN);
-}
-int SPSetGameDifficulty(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	game->difficulty = widgetIndex; //the difficulty is the same as the widget position
-	printf("%d. diff-%d\n",var++,game->difficulty);
-	return SPOpenWindow(screens,GET_COLOR_WINDOW);
-}
 
-int SPSetGameColor(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-	game->userColor = widgetIndex; //the color is the same as the widget position
-	if(widgetIndex==BLACK){
-		SPUpdateBoard(screens,game);
-	}
-	return SPOpenWindow(screens,GAME_SCREEN);
-}
-
-
-int SPOpenWindow(Screen** screens,int window){
-	int i;
-	for(i = 0; i<NUM_SCREENS; i++){
-		if(i == window){
-			screens[i]->shown = SHOWN;
-			printf("%d.open window: %d\n",var++,i);
-			SDL_ShowWindow(screens[i]->window);
-		}
-		else{
-			screens[i]->shown = HIDE;
-			SDL_HideWindow(screens[i]->window);
-		}
-	}
-	return PRESSED;
-}
 SP_CHESS_GAME_MESSAGE spChessGameHandleMove(SPChessGame* game, int move) {
 	SP_CHESS_GAME_MESSAGE message = spChessGameIsValidMove(game, move);
 	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
@@ -500,54 +456,6 @@ int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* gam
 	return PRESSED;
 }
 
-int SPHighlightAllMoves(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* game){
-	Sticker * piece = (Sticker *)src->data;
-	SDL_Renderer* rend = screens[GAME_SCREEN]->renderer;
-	int i,done = 0;
-
-	screens[GAME_SCREEN]->widgets[GS_GET_MOVES_LEGEND]->draw(screens[GAME_SCREEN]->widgets[GS_GET_MOVES_LEGEND],
-																rend);
-
-	unsigned int raw =  SCREEN_TO_BOARD_LOCATION(piece->location.y);
-	unsigned int col =  SCREEN_TO_BOARD_LOCATION(piece->location.x);
-	unsigned char position  = spChessGameSetLocation(raw,col);
-	SPArrayList * list = spChessGameGetMoves(game,position);
-	if(list == NULL){
-		printf("%d.NULL.., raw-%d,col-%d,done-%d\n",var++,raw,col,done);
-		return -1;
-	}
-
-    int numOfMoves = spArrayListSize(list);
-	SDL_Event e = *event;
-
-	while (!done) {
-
-			switch (e.type) {
-				case SDL_MOUSEBUTTONDOWN:
-					printf("%d.highlighting, numOfMoves-%d done-%d\n",var++,numOfMoves,done);
-						for(i=0; i<numOfMoves; i++){
-							printf("%d.highlighting, i-%d done-%d\n",var++,i,done);
-							SPHighlightMove(rend,spArrayListGetAt(list, i));
-						}
-					break;
-				case SDL_MOUSEBUTTONUP:
-					done = 1;
-					break;
-			}
-
-		printf("%d.highlighting, done-%d\n",var++,done);
-		//SPDrawScreen(screens,GAME_SCREEN);
-		SDL_RenderPresent(rend);
-
-		//src->draw(src,screens[GAME_SCREEN]->renderer);
-		SDL_WaitEvent(&e);
-	}
-
-	free(list);
-
-	return PRESSED;
-
-}
 
 int SPHighlightMove(SDL_Renderer* rend , int step){
 	   char location = spChessGameGetDestinationPositionFromMove(step);
@@ -597,6 +505,56 @@ int SPHighlightMove(SDL_Renderer* rend , int step){
 	   	SDL_RenderCopy(rend, tex, NULL, &rect);
 
 	   	return PRESSED;
+
+}
+
+
+int SPHighlightAllMoves(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* game){
+	Sticker * piece = (Sticker *)src->data;
+	SDL_Renderer* rend = screens[GAME_SCREEN]->renderer;
+	int i,done = 0;
+
+	screens[GAME_SCREEN]->widgets[GS_GET_MOVES_LEGEND]->draw(screens[GAME_SCREEN]->widgets[GS_GET_MOVES_LEGEND],
+																rend);
+
+	unsigned int raw =  SCREEN_TO_BOARD_LOCATION(piece->location.y);
+	unsigned int col =  SCREEN_TO_BOARD_LOCATION(piece->location.x);
+	unsigned char position  = spChessGameSetLocation(raw,col);
+	SPArrayList * list = spChessGameGetMoves(game,position);
+	if(list == NULL){
+		printf("%d.NULL.., raw-%d,col-%d,done-%d\n",var++,raw,col,done);
+		return -1;
+	}
+
+    int numOfMoves = spArrayListSize(list);
+	SDL_Event e = *event;
+
+	while (!done) {
+
+			switch (e.type) {
+				case SDL_MOUSEBUTTONDOWN:
+					printf("%d.highlighting, numOfMoves-%d done-%d\n",var++,numOfMoves,done);
+						for(i=0; i<numOfMoves; i++){
+							printf("%d.highlighting, i-%d done-%d\n",var++,i,done);
+							SPHighlightMove(rend,spArrayListGetAt(list, i));
+						}
+					break;
+				case SDL_MOUSEBUTTONUP:
+					done = 1;
+					break;
+			}
+
+		printf("%d.highlighting, done-%d\n",var++,done);
+		//SPDrawScreen(screens,GAME_SCREEN);
+		SDL_RenderPresent(rend);
+
+		//src->draw(src,screens[GAME_SCREEN]->renderer);
+		SDL_WaitEvent(&e);
+	}
+
+	free(list);
+
+	return PRESSED;
 
 }
 

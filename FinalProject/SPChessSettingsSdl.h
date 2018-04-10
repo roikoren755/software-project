@@ -10,7 +10,7 @@
 #include "SPBufferset.h"
 #include "SPChessGame.h"
 #include "Button.h"
-#include "SPChessGameSdl.h"
+#include "SPChessMainSdl.h"
 
 #ifndef SPCHESSSDL_H_
 #define SPCHESSSDL_H_
@@ -33,5 +33,11 @@ Screen* SPCreateGetColorWindow();
 Screen* SPCreateLoadGameWindow();
 
 Screen* SPCreateLoadSaveGameWindow(char* screenName);
+
+int SPSetGameMode(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+
+int SPSetGameDifficulty(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+
+int SPSetGameColor(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
 #endif /* SPCHESSSDL_H_ */

@@ -17,6 +17,7 @@ Screen* SPCreateLoadSaveGameWindow(char* screenName){
 			NUM_SLOTS+NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS,
 			HIDE,
 			GAME_SCREEN,
+			NONE,
 			SPDrawLoadSaveScreen);
 		if (window == NULL){
 			return NULL;
@@ -24,31 +25,31 @@ Screen* SPCreateLoadSaveGameWindow(char* screenName){
 
 		SDL_Renderer* rend = window->renderer;
 
-		sprintf(temp_str,"lsg_select_game_to_%s.bmp",screenName);
+		sprintf(temp_str,"pics/lsg_select_game_to_%s.bmp",screenName);
 		window->widgets[LSG_MASSAGE] = createLable(rend,
 									temp_str,0,0,600,100,SHOWN);
 
 		window->widgets[LSG_BOTTOM_COVER] = createLable(rend,
-									"lg_bottom_cover.bmp",0,400,600,50,SHOWN);
+									"pics/lg_bottom_cover.bmp",0,400,600,50,SHOWN);
 		window->widgets[LSG_BACK] = createButton(rend,
-									"back.bmp",SPOpenPreviousWindow,50,450,250,50,SHOWN);
+									"pics/back.bmp",SPOpenPreviousWindow,50,450,250,50,SHOWN);
 		window->widgets[LSG_UP_ARRAW] = createButton(rend,
-									"up_arrow.bmp",SPMoveScrollbar,565,100,35,35,SHOWN);
+									"pics/up_arrow.bmp",SPMoveScrollbar,565,100,35,35,SHOWN);
 		window->widgets[LSG_DOWN_ARRAW] = createButton(rend,
-									"down_arrow.bmp",SPMoveScrollbar,565,400-35,35,35,SHOWN);
+									"pics/down_arrow.bmp",SPMoveScrollbar,565,400-35,35,35,SHOWN);
 
 		int i;
 		int (*action)(Screen**,SPChessGame*,int,int) =
 				(strcmp(screenName,"Load")==0)?SPLoadChosenGame:SPSaveChosenGame;
 		for(i=0; i<NUM_SLOTS; i++){
-			sprintf(temp_str,"lsg_slot%d.bmp",i+1);
+			sprintf(temp_str,"pics/lsg_slot%d.bmp",i+1);
 			window->widgets[LSG_SLOT(i+1)] = createButton(rend,
 										temp_str,action,157,NONE,250,50,SHOWN);
 		}
 
 		for(i=0; i<NUM_SLOTS; i++){
 			window->widgets[LSG_SLOT_INDICATOR(i+1)] = createLable(rend,
-									"lsg_indicator.bmp",200,NONE,50,30,HIDE);
+									"pics/lsg_indicator.bmp",200,NONE,50,30,HIDE);
 		}
 
 
@@ -141,7 +142,7 @@ int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 		return PRESSED;    //slot has no file
 	}
 	char fileName[30];
-	sprintf(fileName,"game_slot%d.txt",slotIndex);
+	sprintf(fileName,"games_saved/game_slot%d.txt",slotIndex);
 	SP_CHESS_GAME_MESSAGE massage = spChessLoadGame(game,fileName);
 	if(massage != SP_CHESS_GAME_SUCCESS){
 		printf("ERROR: could not load the game\n");
@@ -163,7 +164,7 @@ int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	int slotIndex = WIDGET_TO_SLOT_INDEX(widgetIndex);
 	char fileName[30];
-	sprintf(fileName,"game_slot%d.txt",slotIndex);
+	sprintf(fileName,"games_saved/game_slot%d.txt",slotIndex);
 	SP_CHESS_GAME_MESSAGE massage = spChessSaveGame(game,fileName);
 	if(massage != SP_CHESS_GAME_SUCCESS){
 		printf("ERROR: could not save the game\n");
@@ -183,7 +184,7 @@ void SPUpdateLoadSaveSlots(Screen** screens){
 	int i;
 	char fileName[30];
 	for(i=0; i<NUM_SLOTS; i++){
-		sprintf(fileName,"game_slot%d.txt",i+1);
+		sprintf(fileName,"games_saved/game_slot%d.txt",i+1);
 		int shown = (access(fileName,F_OK) != -1) ? SHOWN : HIDE;
 		screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(i+1)]->shown =  shown;
 		screens[SAVE_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(i+1)]->shown =  shown;

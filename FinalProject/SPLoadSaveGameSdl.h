@@ -8,7 +8,7 @@
 #ifndef SPLOADSAVEGAMESDL_H_
 #define SPLOADSAVEGAMESDL_H_
 
-#include "SPChessGameSdl.h"
+#include "SPChessMainSdl.h"
 
 Screen* SPCreateLoadSaveGameWindow(char* screenName);
 
