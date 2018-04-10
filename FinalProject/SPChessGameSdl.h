@@ -17,7 +17,11 @@
 #include <string.h>
 #include "SPChessParser.h"
 #include "SPMainAux.h"
+#include "SPMiniMax.h"
+
 #include <unistd.h>
+
+
 
 #define NUM_SCREENS 7
 
@@ -64,10 +68,12 @@
 #define GS_CHECK 39
 #define GS_CHECK_MATE 40
 #define GS_DRAW 41
+#define GS_SAVED_GAME_INDICATOR 42
+
 //#define OFFSET_FOR_STATES_WIDGETS_INDEX 38
 
-#define NUM_SLOTS 5
-#define SLOT_HEIGHT 60
+#define NUM_SLOTS 9
+#define SLOT_HEIGHT 70
 #define SCROLLBAR_MAX_POSITION (NUM_SLOTS*SLOT_HEIGHT-300)
 #define NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS 6
 #define LSG_MASSAGE 0
@@ -85,7 +91,6 @@
 #define ROUNDED_POSITION(x) (40+x-(x+30)%80)
 #define BOARD_TO_SCREEN_LOCATION(x) (10+80*x)
 #define SCREEN_TO_BOARD_LOCATION(x) ((x-10)/80)
-#define NONE 0
 
 void SPDefaultDrawScreen(Screen* screen);
 void SPDrawGameScreen(Screen* screen);
@@ -97,7 +102,7 @@ void SPShowGameState(Screen** screens, int state);
 
 int SPUpdateBoard(Screen** screens, SPChessGame* game);
 
-int SPUpdateGameState(Screen** screens, SPChessGame* game);
+void SPUpdateGameState(Screen** screens, SPChessGame* game);
 
 int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
@@ -114,6 +119,7 @@ int SPOpenGetColorWindow(Screen** screens ,SPChessGame* game,int screenIndex ,in
 int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 void SPUpdateLoadSaveSlots(Screen** screens);
+int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
 int SPQuit(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);

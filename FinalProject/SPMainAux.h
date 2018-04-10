@@ -2,7 +2,15 @@
 #define SPMAINAUX_H_
 #include "SPChessGame.h"
 #include "SPChessParser.h"
+#include <SDL.h>
+#include <SDL_video.h>
+#include <stdio.h>
+#include "SPChessSettingsSdl.h"
+#include "SPChessGameSdl.h"
+#include "SPChessParser.h"
+#include "Button.h"
 
+int mainSdl(SPChessGame* game ) ;
 int min(int a,int b);
 
 /***

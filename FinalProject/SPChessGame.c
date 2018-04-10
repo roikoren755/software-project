@@ -215,14 +215,7 @@ int spChessGameCheckKingThreat(SPChessGame* game, char targetLocation, char thre
     return 0; // Nope
 }
 
-/***
- * Undoes the last move made in game, and restores lastMove as the last (first entered) move
- * in game->history, if full
- * @param game - Pointer to game to change.
- * @param lastMove - Move to be restored as last move.
- * @return 0 if an error occurred during undoing or restoration.
- *         1 otherwise.
- */
+
 int spUndoAndRestoreHistory(SPChessGame* game, int lastMove) {
     int full = spArrayListIsFull(game->history);
     if (spChessGameUndoMove(game) == SP_CHESS_GAME_INVALID_ARGUMENT) {
@@ -618,6 +611,8 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* game) {
     }
 	
 	game->gameState = NORMAL; // Game starts as not check/checkmate/draw
+
+	game->currentPlayer = WHITE;
 
     return SP_CHESS_GAME_SUCCESS;
 }

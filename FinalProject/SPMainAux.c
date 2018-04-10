@@ -7,8 +7,75 @@
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
 
+int x=0;
+
 int min(int a, int b) {
     return a < b ? a : b;
+}
+
+int mainSdl(SPChessGame* game ) {
+	//SP_BUFF_SET();
+
+	// initialize SDL2 for video
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	int done = 0,feedback,i,j;
+
+	Screen* screens[NUM_SCREENS];
+	int success = SPGameCreateScreens(screens);
+	if(!success){
+		done = 1;
+	}
+	SPUpdateLoadSaveSlots(screens);
+	SDL_Event e;
+	printf("1\n");
+
+	while(!done){
+		SDL_WaitEvent(&e);
+		feedback = NONE; //
+			for(i=0; i<NUM_SCREENS; i++){
+				if(screens[i]->shown){
+					for(j=0; j<screens[i]->widgetsSize; j++){
+						if(screens[i]->widgets[j]&&screens[i]->widgets[j]->shown){
+							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j],
+									&e,screens,game,i,j);
+						}
+						if(feedback == PRESSED){
+							break;
+						}
+						if(feedback == QUIT){
+							done = 1;
+							break;
+						}
+					}
+					break;
+				}
+			}
+
+		for(i=0; i<NUM_SCREENS; i++){
+			if(screens[i]->shown){
+				printf("%d.screen %d shown\n",x++,i);
+				screens[i]->draw(screens[i]);
+				break;
+			}
+		}
+
+	}
+
+	spChessGameDestroy(game);
+
+	SPDestroyScreensArr(screens,NUM_SCREENS);
+	printf("%d\n",done);
+
+
+
+
+	SDL_Quit();
+	return 0;
+
 }
 
 unsigned char spChessGameGetDestinationPositionFromMove(unsigned int move) {

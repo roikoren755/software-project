@@ -105,7 +105,9 @@ Screen* SPGameCreateGameScreen(){
 	gameScreen->widgets[GS_RESTART_GAME] = createButton(rend,
 								"restart_game.bmp",SPRestartGame,672,25,210,50,SHOWN);
 	gameScreen->widgets[GS_SAVE_GAME] = createButton(rend,
-								"save_game.bmp",SPOpenSaveGameWindow,672,100,210,50,SHOWN);
+									"save_game.bmp",SPOpenSaveGameWindow,672,100,210,50,SHOWN);
+	gameScreen->widgets[GS_SAVED_GAME_INDICATOR] = createLable(rend,
+									"saved_game_indicator.bmp",675,83,180,20,HIDE);
 	gameScreen->widgets[GS_LOAD_GAME] = createButton(rend,
 								"load_game_gs.bmp",SPOpenLoadGameWindow,672,175,210,50,SHOWN);
 	gameScreen->widgets[GS_MAIN_MENU] = createButton(rend,
@@ -250,49 +252,3 @@ Screen* SPCreateGetColorWindow(){
 
 }
 
-Screen* SPCreateLoadSaveGameWindow(char* screenName){
-	char temp_str[30];
-	sprintf(temp_str,"%s Game",screenName);
-	Screen* window = createScreen(600,550,
-			temp_str,
-			NUM_SLOTS+NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS,
-			HIDE,
-			GAME_SCREEN,
-			SPDrawLoadSaveScreen);
-		if (window == NULL){
-			return NULL;
-		}
-
-		SDL_Renderer* rend = window->renderer;
-
-		sprintf(temp_str,"lsg_select_game_to_%s.bmp",screenName);
-		window->widgets[LSG_MASSAGE] = createLable(rend,
-									temp_str,0,0,600,100,SHOWN);
-
-		window->widgets[LSG_BOTTOM_COVER] = createLable(rend,
-									"lg_bottom_cover.bmp",0,400,600,50,SHOWN);
-		window->widgets[LSG_BACK] = createButton(rend,
-									"back.bmp",SPOpenPreviousWindow,50,450,250,50,SHOWN);
-		window->widgets[LSG_UP_ARRAW] = createButton(rend,
-									"up_arrow.bmp",SPMoveScrollbar,565,100,35,35,SHOWN);
-		window->widgets[LSG_DOWN_ARRAW] = createButton(rend,
-									"down_arrow.bmp",SPMoveScrollbar,565,400-35,35,35,SHOWN);
-
-		int i;
-		int (*action)(Screen**,SPChessGame*,int,int) =
-				(strcmp(screenName,"Load")==0)?SPLoadChosenGame:SPSaveChosenGame;
-		for(i=0; i<NUM_SLOTS; i++){
-			sprintf(temp_str,"lsg_slot%d.bmp",i+1);
-			window->widgets[LSG_SLOT(i+1)] = createButton(rend,
-										temp_str,action,175,NONE,250,50,SHOWN);
-		}
-
-		for(i=0; i<NUM_SLOTS; i++){
-			window->widgets[LSG_SLOT_INDICATOR(i+1)] = createLable(rend,
-									"lsg_indicator.bmp",200,NONE,50,30,HIDE);
-		}
-
-
-		return window;
-
-}

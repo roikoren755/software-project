@@ -184,4 +184,15 @@ SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game);
  */
 SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* game);
 
+/***
+ * Undoes the last move made in game, and restores lastMove as the last (first entered) move
+ * in game->history, if full
+ * @param game - Pointer to game to change.
+ * @param lastMove - Move to be restored as last move.
+ * @return 0 if an error occurred during undoing or restoration.
+ *         1 otherwise.
+ */
+int spUndoAndRestoreHistory(SPChessGame* game, int lastMove);
+
+
 #endif //SOFTWARE_PROJECT_SPCHESSGAME_H

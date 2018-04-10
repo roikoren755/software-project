@@ -250,6 +250,9 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	if(1){
+		return mainSdl(game);
+	}
 	spChessPrintGameTitle();
 
 	char* difficulties[] = {"", "amateur", "easy", "moderate", "hard", "expert"};

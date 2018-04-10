@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define QUIT 1
+#define PRESSED 2
+#define NONE 0
+
 typedef struct screen_t Screen;
 typedef struct button_t Button;
 struct button_t {

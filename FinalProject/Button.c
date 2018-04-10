@@ -71,11 +71,10 @@ int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
 		if (SDL_PointInRect(&point, &button->location)) {
 			printf("button pressed at <%d,%d>\n",button->location.x,button->location.y);
-			SDL_Delay(10); //TODO
 			return button->action(screens,game,  screenIndex , widgetIndex);
 		}
 	}
-	return 0;
+	return NONE;
 }
 
 void drawButton(Widget* src, SDL_Renderer* render)
@@ -142,7 +141,15 @@ void destroyLable(Widget* src){
 	free(src);
 }
 int handleLableEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int screenIndex ,int widgetIndex){
-	return 0;
+	if (e->type == SDL_MOUSEBUTTONUP) {
+		Lable* lable = (Lable*) src->data;
+		SDL_Point point = { .x = e->button.x, .y = e->button.y };
+		if (SDL_PointInRect(&point, &lable->location)) {
+			printf("lable pressed at <%d,%d>\n",lable->location.x,lable->location.y);
+			return PRESSED;
+		}
+	}
+	return NONE;
 }
 void drawLable(Widget* src, SDL_Renderer* rend){
 	Lable* lable = (Lable*) src->data;
@@ -223,7 +230,7 @@ int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens,
 			}
 		}
 	}
-	return 0;
+	return NONE;
 }
 void drawSticker(Widget* src, SDL_Renderer* rend){
 	Sticker* sticker = (Sticker*) src->data;
