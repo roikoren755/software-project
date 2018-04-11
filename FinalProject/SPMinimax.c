@@ -230,7 +230,7 @@ int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
 	}
 
 	int bestScore = INT_MAX; // Initializations
-	int bestMove = -1;
+	int bestMove = 0;
 	char bestStartingPosition = -1;
 	char bestDestinationPosition = -1;
 	int bestStartingColumn;
@@ -329,7 +329,7 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
 	}
 
 	int bestScore = INT_MIN;
-	int bestMove = -1;
+	int bestMove = 0;
 	char bestStartingPosition = -1;
 	char bestDestinationPosition = -1;
 	int bestStartingColumn;
