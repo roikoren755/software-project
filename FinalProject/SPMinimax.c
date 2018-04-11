@@ -222,6 +222,7 @@ int alphaBetaPruning(SPChessGame* game, int depth, int alpha, int beta) {
  * @param difficulty - How many moves forward to check in the minimax algorithm
  * @return
  * -1 if game is NULL, or an error occurred
+ * 0 if there are no moves available
  * An integer representation of the move that will lead to the lowest score, otherwise.
  */
 int spMinimaxGetLowestScoringMove(SPChessGame* game, int difficulty) {
@@ -422,6 +423,7 @@ int spMinimaxGetHighestScoringMove(SPChessGame* game, int difficulty) { // SAME 
  * @param game - Game to get best move for current player for
  * @return
  * -1 if game is NULL, or an error occurred
+ * 0 if there are no moves possible
  * An integer representing the best move, otherwise
  */
 int spMinimaxGetBestMove(SPChessGame* game) {
