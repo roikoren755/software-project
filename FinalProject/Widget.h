@@ -10,7 +10,7 @@
 #define N_MAX_WIDGETS 45
 #define N_MAX_SONS 5
 typedef struct screen_t Screen;
-typedef struct button_t Button;
+
 
 typedef struct widget_t Widget;
 struct widget_t {
@@ -18,7 +18,7 @@ struct widget_t {
 	void (*draw)(Widget*, SDL_Renderer*);
 	int (*handleEvent)(Widget*, SDL_Event*,Screen**,SPChessGame*,int,int);
 	void (*destroy)(Widget*);
-	Button* data;
+	void* data;
 };
 
 //typedef struct screen_t Screen;

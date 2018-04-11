@@ -32,7 +32,7 @@ Screen* SPCreateGetColorWindow();
 
 Screen* SPCreateLoadGameWindow();
 
-Screen* SPCreateLoadSaveGameWindow(char* screenName);
+Screen* SPCreateLoadSaveGameWindow(int screenIndex);
 
 int SPSetGameMode(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 

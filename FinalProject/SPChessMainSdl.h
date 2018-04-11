@@ -13,7 +13,7 @@
 #include <string.h>
 #include "SPChessParser.h"
 #include "SPMainAux.h"
-#include "SPMiniMax.h"
+#include "SPMinimax.h"
 
 #include <unistd.h>
 

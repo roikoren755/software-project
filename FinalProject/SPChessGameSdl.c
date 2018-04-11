@@ -123,6 +123,32 @@ int SPDrawBoard(SDL_Renderer* rend){
 	return PRESSED;
 }
 
+
+void SPShowGameState(Screen** screens, int state){
+	int i;
+	for(i=GS_CHECK; i<GS_CHECK+3; i++){
+		screens[GAME_SCREEN]->widgets[i]->shown = (i==state)?SHOWN:HIDE;
+	}
+}
+
+void SPUpdateGameState(Screen** screens, SPChessGame* game){
+	switch(game->gameState){
+		case NORMAL:
+			SPShowGameState(screens,NONE);
+			break;
+		case CHECK:
+			SPShowGameState(screens,GS_CHECK);
+			break;
+		case CHECKMATE:
+			SPShowGameState(screens,GS_CHECK_MATE);
+			break;
+		case DRAW:
+			SPShowGameState(screens,GS_DRAW);
+			break;
+	}
+}
+
+
 int SPUpdateBoard(Screen** screens, SPChessGame* game){
 	SDL_Renderer* rend = screens[0]->renderer;
 	SDL_RenderClear(rend);
@@ -167,29 +193,6 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game){
 	return PRESSED;
 }
 
-void SPShowGameState(Screen** screens, int state){
-	int i;
-	for(i=GS_CHECK; i<GS_CHECK+3; i++){
-		screens[GAME_SCREEN]->widgets[i]->shown = (i==state)?SHOWN:HIDE;
-	}
-}
-
-void SPUpdateGameState(Screen** screens, SPChessGame* game){
-	switch(game->gameState){
-		case NORMAL:
-			SPShowGameState(screens,NONE);
-			break;
-		case CHECK:
-			SPShowGameState(screens,GS_CHECK);
-			break;
-		case CHECKMATE:
-			SPShowGameState(screens,GS_CHECK_MATE);
-			break;
-		case DRAW:
-			SPShowGameState(screens,GS_DRAW);
-			break;
-	}
-}
 
 void SPDrawGameScreen(Screen* screen){
 	if(screen==NULL){
@@ -208,6 +211,10 @@ void SPDrawGameScreen(Screen* screen){
 }
 
 int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	if(screenIndex!=GAME_SCREEN || widgetIndex!=GS_RESTART_GAME ) {
+		return NONE;
+		}    
+    
     spChessGameResetBoard(game);
 
     //clear undo history
@@ -262,7 +269,7 @@ int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIn
     	return SPOpenWindow(screens,MAIN_MENU_WINDOW);
     }
     else if(buttonid == YES){
-    	return SPOpenNextWindow(screens , game, GAME_SCREEN , GS_SAVE_GAME);
+    	return SPOpenNextWindow(screens , game, screenIndex , GS_SAVE_GAME);
     }
     else if(buttonid == NO){
     	return PRESSED;
@@ -281,7 +288,7 @@ int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIn
 	}
 
 	//update undo button availability
-	screens[GAME_SCREEN]->widgets[GS_UNDO]->shown = (spArrayListIsEmpty(game->history))?HIDE:SHOWN;
+	screens[screenIndex]->widgets[widgetIndex]->shown = (spArrayListIsEmpty(game->history))?HIDE:SHOWN;
 
 	if (spChessCheckGameState(game,game->currentPlayer) == SP_CHESS_GAME_INVALID_ARGUMENT){
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
@@ -561,7 +568,8 @@ int SPHighlightAllMoves(Widget* src, SDL_Event* event,Screen** screens, SPChessG
 
 void printLocations(SPChessGame* game){
 	printf("%d.",var++);
-	for(int i=0;i<32;i++){
+	int i;	
+	for(i=0;i<32;i++){
 		printf("<%d,%d>\n",
 					spChessGameGetRowFromPosition(game->locations[i]),
 					spChessGameGetColumnFromPosition(game->locations[i]));

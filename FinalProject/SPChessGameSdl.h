@@ -4,10 +4,10 @@
  *  Created on: 19 במרס 2018
  *      Author: user
  */
-#include "SPChessMainSdl.h"
 #ifndef SPCHESSGAMESDL_H_
 #define SPCHESSGAMESDL_H_
 
+#include "SPChessMainSdl.h"
 
 Screen* SPGameCreateGameScreen();
 

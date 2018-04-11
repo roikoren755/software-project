@@ -38,6 +38,9 @@ int SPGameCreateScreens(Screen** screens){
 	if(!screens[SAVE_GAME_WINDOW]){
 		return 0;
 	}
+	
+	SPUpdateLoadSaveSlots(screens);
+
 	return 1;
 }
 
@@ -61,7 +64,8 @@ Screen* SPGameCreateMainMenuWindow(){
 									"pics/load_game.bmp",SPOpenNextWindow,100,175,250,50,SHOWN);
 		mainMenuWindow->widgets[MM_QUIT] = createButton(rend,
 									"pics/quit_mm.bmp",SPQuit,100,250,250,50,SHOWN);
-
+		
+//TODO widgets check
 	return mainMenuWindow;
 }
 
@@ -73,9 +77,9 @@ Screen* SPGameCreateGetModeWindow(){
 			MAIN_MENU_WINDOW,
 			GET_DIFFICULTY_WINDOW,
 			SPDefaultDrawScreen);
-		if (getModeWindow == NULL){
+	if (getModeWindow == NULL){
 			return NULL;
-		}
+	}
 
 	SDL_Renderer* rend = getModeWindow->renderer;
 
@@ -166,7 +170,9 @@ void SPDefaultDrawScreen(Screen* screen){
 	SPDrawWidgets(screen);
 
 	SDL_Delay(10);
+
 	SDL_RenderPresent(rend);
+
 
 }
 
@@ -178,6 +184,7 @@ void SPDrawWidgets(Screen* screen){
 	for(i=0; i<screen->widgetsSize; i++){
 		widget = screen->widgets[i];
 		if(widget && widget->shown){
+
 			widget->draw(widget, screen->renderer);
 		}
 	}
@@ -189,9 +196,12 @@ int SPOpenWindow(Screen** screens,int window){
 	for(i = 0; i<NUM_SCREENS; i++){
 		if(i == window){
 			screens[i]->shown = SHOWN;
+								printf("showing window %d\n",i);
 			SDL_ShowWindow(screens[i]->window);
 		}
 		else{
+			
+								printf("hiding window %d\n",i);
 			screens[i]->shown = HIDE;
 			SDL_HideWindow(screens[i]->window);
 		}
@@ -239,6 +249,7 @@ int SPOpenNextWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 }
 
 int SPOpenPreviousWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+	game->locations[32+widgetIndex-widgetIndex] = '\0'; //TODO		
 	return SPOpenWindow(screens,screens[screenIndex]->previousWindow);
 }
 
@@ -250,6 +261,7 @@ int SPQuit(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex)
 }
 
 int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
+
 	if((screenIndex == GAME_SCREEN)&&(!screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown)){
 		return SPShowSaveBeforeQuitMassage(screens , game, screenIndex , widgetIndex);
 	}
@@ -257,6 +269,8 @@ int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,in
 	if(screenIndex == GAME_SCREEN){ //for case where game is saved
 		spChessGameResetGame(game);
 	}
+	
+		printf("Why???\n");
 	return SPOpenWindow(screens,MAIN_MENU_WINDOW);
 }
 

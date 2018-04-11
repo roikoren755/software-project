@@ -31,28 +31,33 @@ Screen* createScreen(int width,int height,
 						SDL_WINDOWPOS_CENTERED,
 						width,
 						height,
-						SDL_WINDOW_OPENGL);
+						//SDL_WINDOW_OPENGL);
+						SDL_WINDOW_SHOWN);
 
 
 	if (window == NULL ) {
 		printf("ERROR: unable to create window: %s\n", SDL_GetError());
-		SPDestroyScreen(screen);
+		free(screen);
 		return NULL;
+	}
+	
+	printf("window for %s created\n",screenName);
+
+
+	// create a renderer for the window
+	SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+	if (rend == NULL) {
+		printf("%s-", screenName);
+		printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
+		SDL_DestroyWindow(window);	
+		free(screen);
+		return 0;
 	}
 
 	screen->shown = shown;
 	if(!shown){
 		SDL_HideWindow(window);
 	}
-
-	// create a renderer for the window
-	SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (rend == NULL) {
-		printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-		SPDestroyScreen(screen);
-		return 0;
-	}
-
 	screen->window = window;
 	screen->renderer = rend;
 	screen->draw = draw;
@@ -67,12 +72,18 @@ Screen* createScreen(int width,int height,
 void SPDestroyScreen(Screen* src){
 	if(src!= NULL){
 
-		SDL_DestroyRenderer(src->renderer);
-		SDL_DestroyWindow(src->window);
+		if(src->renderer != NULL){
+			SDL_DestroyRenderer(src->renderer);	
+		}
+		if(src->window != NULL){
+			SDL_DestroyWindow(src->window);
+		}
+
 		int i;
 		for( i = 0; i<src->widgetsSize; i++){
 			destroyWidget(src->widgets[i]);
 		}
+
 
 		free(src);
 	}

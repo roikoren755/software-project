@@ -56,7 +56,7 @@ Widget* createButton(
 	res->destroy = destroyButton;
 	res->draw = drawButton;
 	res->handleEvent = handleButtonEvent;
-	res->data = data;
+	res->data = (void *)data;
 	res->shown =  shown;
 
 	return res;
@@ -73,6 +73,9 @@ void destroyButton(Widget* src)
 int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
 		SPChessGame* game,int screenIndex ,int widgetIndex)
 {
+	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
+		return NONE;
+	}
 	if (e->type == SDL_MOUSEBUTTONUP) {
 		Button* button = (Button*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
@@ -120,7 +123,7 @@ Widget* createLable(
 	res->destroy = destroyLable;
 	res->draw = drawLable;
 	res->handleEvent = handleLableEvent;
-	res->data = data;
+	res->data = (void *)data;
 	res->shown = shown;
 
 	return res;
@@ -132,7 +135,12 @@ void destroyLable(Widget* src){
 	free(lable);
 	free(src);
 }
-int handleLableEvent(Widget* src, SDL_Event* e,Screen** screen, SPChessGame* game,int screenIndex ,int widgetIndex){
+
+int handleLableEvent(Widget* src, SDL_Event* e,Screen** screens, SPChessGame* game,int screenIndex ,int widgetIndex){
+	game->locations[32] = '\0'; //TODO	
+	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
+		return NONE;
+	}
 	if (e->type == SDL_MOUSEBUTTONUP) {
 		Lable* lable = (Lable*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
@@ -182,7 +190,7 @@ Widget* createSticker(
 		res->destroy = destroySticker;
 		res->draw = drawSticker;
 		res->handleEvent = handleStickerEvent;
-		res->data = data;
+		res->data = (void *)data;
 		res->shown = shown;
 		return res;
 
@@ -195,6 +203,9 @@ void destroySticker(Widget* src){
 }
 int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens,
 		SPChessGame* game,int screenIndex ,int widgetIndex){
+	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
+		return NONE;
+	}
 	if (e->type == SDL_MOUSEBUTTONDOWN) {
 		Sticker* sticker = (Sticker*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };

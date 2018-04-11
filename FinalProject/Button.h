@@ -12,7 +12,7 @@
 #define PRESSED 2
 #define NONE 0
 
-typedef struct screen_t Screen;
+
 typedef struct button_t Button;
 struct button_t {
 	SDL_Renderer* render;

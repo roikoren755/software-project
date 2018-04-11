@@ -40,7 +40,8 @@ SPArrayList* spArrayListCopy(SPArrayList* src) {
 		free(list);
 		return NULL;
 	}
-	for (int i = 0; i < list->maxSize; i++) {
+	int i;
+	for (i = 0; i < list->maxSize; i++) {
 		list->elements[i] = src->elements[i];
 	}
 	return list;
@@ -71,7 +72,8 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddAt(SPArrayList* src, int elem, int index) {
 		return SP_ARRAY_LIST_FULL;
 	}
 
-	for (int i = src->actualSize; i > index; i--) {
+	int i;
+	for (i = src->actualSize; i > index; i--) {
 		src->elements[i] = src->elements[i - 1];
 	}
 	src->elements[index] = elem;
@@ -86,7 +88,8 @@ SP_ARRAY_LIST_MESSAGE spArrayListAddFirst(SPArrayList* src, int elem) {
 	if (src->maxSize == src->actualSize) {
 		return SP_ARRAY_LIST_FULL;
 	}
-	for (int i = src->actualSize; i > 0; i--) {
+	int i;
+	for (i = src->actualSize; i > 0; i--) {
 		src->elements[i] = src->elements[i - 1];
 	}
 	src->elements[0] = elem;
@@ -113,7 +116,8 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveAt(SPArrayList* src, int index) {
 	if (!src->actualSize) {
 		return SP_ARRAY_LIST_EMPTY;
 	}
-	for (int i = index; i < src->actualSize - 1; i++) {
+	int i;
+	for (i = index; i < src->actualSize - 1; i++) {
 		src->elements[i] = src->elements[i + 1];
 	}
 	src->actualSize--;
@@ -127,7 +131,8 @@ SP_ARRAY_LIST_MESSAGE spArrayListRemoveFirst(SPArrayList* src) {
 	if (!src->actualSize) {
 		return SP_ARRAY_LIST_EMPTY;
 	}
-	for (int i = 0; i < src->actualSize - 1; i++) {
+	int i;
+	for (i = 0; i < src->actualSize - 1; i++) {
 		src->elements[i] = src->elements[i + 1];
 	}
 	src->actualSize--;

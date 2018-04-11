@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "SPChessMainSdl.h"
 #include "SPChessGameSdl.h"
+#include "SPLoadSaveGameSdl.h"
 #include "SPChessParser.h"
 #include "Button.h"
 

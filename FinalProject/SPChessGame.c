@@ -74,7 +74,8 @@ int spChessGameCheckDiagonalMove(SPChessGame* game, char targetLocation, char th
         int columnDirection = threatColumn > targetColumn ? LEFT : RIGHT; // Where are we going?
         int rowDirection = threatRow > targetRow ? UP : DOWN; // And now?
         char temp;
-        for (int i = 1; i < distance; i++) {
+        int i;
+    	for (i = 1; i < distance; i++) {
             temp = game->gameBoard[threatRow + i * rowDirection][threatColumn + i * columnDirection];
             if (temp) { // There's something blocking the way!
                 return 0;
@@ -123,7 +124,9 @@ int spChessGameCheckStraightLineMove(SPChessGame* game, char targetLocation, cha
 
     if (targetColumn != threatColumn && targetRow == threatRow) { // Horizontal move
         direction = threatColumn > targetColumn ? LEFT : RIGHT;
-        for (int i = 1; i < abs(targetColumn - threatColumn); i++) {
+
+    	int i;
+    	for (i = 1; i < abs(targetColumn - threatColumn); i++) {
             temp = game->gameBoard[threatRow][threatColumn + i * direction];
             if (temp) { // Blocked
                 return 0;
@@ -135,7 +138,9 @@ int spChessGameCheckStraightLineMove(SPChessGame* game, char targetLocation, cha
 
     if (targetRow != threatRow && targetColumn == threatColumn) { // Vertical move
         direction = threatRow > targetRow ? UP : DOWN;
-        for (int i = 1; i < abs(targetRow - threatRow); i++) {
+
+    	int i;
+    	for (i = 1; i < abs(targetRow - threatRow); i++) {
             temp = game->gameBoard[threatRow + i * direction][threatColumn];
             if (temp) { // Blockage
                 return 0;
@@ -439,7 +444,8 @@ SP_CHESS_GAME_MESSAGE spChessGameAddStepsToList(SPChessGame* game, SPArrayList* 
         return SP_CHESS_GAME_SUCCESS;
     }
 
-    for (int i = 1; i < min(availbleRows, availbleColumns); i++) {
+	int i;
+	for (i = 1; i < min(availbleRows, availbleColumns); i++) {
         destinationRow = currentRow + i * verticalDirection;
         destinationColumn = currentColumn + i * horizontalDirection;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn); // One step further
@@ -474,8 +480,9 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKnightStepsToList(SPChessGame* game, SPArray
     int destinationRow;
     int destinationColumn;
 
-    for (int i = -1; i < 2; i += 2) {
-        for (int j = -1; j < 2; j += 2) {
+	int i,j;
+	for (i = -1; i < 2; i += 2) {
+        for (j = -1; j < 2; j += 2) {
             destinationRow = currentRow + i;
             destinationColumn = currentColumn + 2 * j; // One knight move
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
@@ -522,8 +529,9 @@ SP_CHESS_GAME_MESSAGE spChessGameAddKingStepsToList(SPChessGame* game, SPArrayLi
     int destinationColumn;
     int destinationRow;
 
-    for (int i = -1; i < 2; i++) {
-        for (int j = -1; j < 2; j++) {
+	int i,j;
+	for (i = -1; i < 2; i++) {
+        for ( j = -1; j < 2; j++) {
             destinationColumn = currentColumn + j;
             destinationRow = currentRow + i; // One step in one direction
             move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
@@ -561,7 +569,8 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* game, SPArrayLi
     int destinationRow;
     int destinationColumn;
 
-    for (int i = 1; i < 3; i++) { // Can move one or two steps in direction
+	int i;
+	for (i = 1; i < 3; i++) { // Can move one or two steps in direction
         destinationRow = currentRow + i * direction;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, currentColumn);
 
@@ -573,7 +582,8 @@ SP_CHESS_GAME_MESSAGE spChessGameAddPawnStepsToList(SPChessGame* game, SPArrayLi
     }
 
     destinationRow = currentRow + direction;
-    for (int i = -1; i < 2; i += 2) { // Check possible capturing moves
+
+	for (i = -1; i < 2; i += 2) { // Check possible capturing moves
         destinationColumn = currentColumn + i;
         move = setMoveCoordinatesToInt(currentRow, currentColumn, destinationRow, destinationColumn);
 
@@ -594,13 +604,14 @@ SP_CHESS_GAME_MESSAGE spChessGameResetBoard(SPChessGame* game) {
 
     char* starting_row = STARTING_ROW;
 
-    for (int i = 0; i < N_COLUMNS; i++) {
+	int i,j;
+	for (i = 0; i < N_COLUMNS; i++) {
         game->gameBoard[1][i] = PAWN(BLACK); // Put black pawns on the board
         game->gameBoard[6][i] = PAWN(WHITE); // Put white pawns on the board
         game->gameBoard[0][i] = starting_row[i]; // Put other pieces on the board
         game->gameBoard[7][i] = CAPITAL_TO_LOW(starting_row[i]); // For whitey too
 
-        for (int j = 0; j < N_ROWS - 4; j++) {
+        for (j = 0; j < N_ROWS - 4; j++) {
             game->gameBoard[j + 2][i] = '\0'; // Everything else is empty
         }
 
@@ -656,8 +667,9 @@ SPChessGame* spChessGameCopy(SPChessGame* game) {
     ret->gameMode = game->gameMode;
     ret->gameState = game->gameMode;
 
-    for (int i = 0; i < N_ROWS; i++) {
-        for (int j = 0; j < N_COLUMNS; j++) {
+	int i,j;
+	for (i = 0; i < N_ROWS; i++) {
+        for ( j = 0; j < N_COLUMNS; j++) {
             if (j < 4) {
                 ret->locations[i + j * N_COLUMNS] = game->locations[i + j * N_COLUMNS]; // Copy locations
             }
@@ -691,7 +703,8 @@ SP_CHESS_GAME_MESSAGE spChessCheckGameState(SPChessGame* game , int color) {
     int gameOver = 1;
     int index;
 
-    for (int i = 0; i < 2 * N_COLUMNS; i++) {
+	int i;
+	for (i = 0; i < 2 * N_COLUMNS; i++) {
         index = i + color * 2 * N_COLUMNS;
 
         if (game->locations[index]) {
@@ -926,7 +939,8 @@ SP_CHESS_GAME_MESSAGE spChessGameSetMove(SPChessGame* game, int move) {
     int color = CHECK_COLOR(game->gameBoard[currentRow][currentColumn]);
     int opponentColor = color ? BLACK : WHITE;
 
-    for (int i = 0; i < N_COLUMNS * 2; i++) {
+	int i;
+	for (i = 0; i < N_COLUMNS * 2; i++) {
         if (captured && game->locations[i + (opponentColor) * 2 * N_COLUMNS] == destinationPosition) { // Change captured piece's location
             game->locations[i + (opponentColor) * 2 * N_COLUMNS] = 0;
         }
@@ -972,7 +986,8 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* game) {
     game->currentPlayer = game->currentPlayer ? BLACK : WHITE; // And current player
     int currentPlayer = !(game->currentPlayer);
 
-    for (int i = 0; i < N_COLUMNS * 4; i++) { // Update location for moved piece
+	int i;
+	for (i = 0; i < N_COLUMNS * 4; i++) { // Update location for moved piece
         if (game->locations[i] == destinationPosition) {
             game->locations[i] = currentPosition;
         }
@@ -981,7 +996,7 @@ SP_CHESS_GAME_MESSAGE spChessGameUndoMove(SPChessGame* game) {
     int index = -1;
     if (captured == PAWN(currentPlayer)) { // Update location if pawn was captured
         int startIndex = currentPlayer ? 2 * N_COLUMNS : N_COLUMNS; // Pawn locations by color
-        for (int i = 0; i < N_COLUMNS; i++) {
+        for ( i = 0; i < N_COLUMNS; i++) {
             if (!game->locations[i + startIndex]) {
                 game->locations[i + startIndex] = destinationPosition;
                 break;
@@ -1035,7 +1050,8 @@ SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file) {
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    for (int i = 0; i < N_ROWS; i++) {
+	int i;
+	for (i = 0; i < N_ROWS; i++) {
         fprintf(file, "%d|", N_ROWS - i); // Print row number
         for (int j = 0; j < N_COLUMNS; j++) {
             char currChar = game->gameBoard[i][j];
@@ -1046,13 +1062,13 @@ SP_CHESS_GAME_MESSAGE spChessGameFprintBoard(SPChessGame* game, FILE* file) {
 
     fprintf(file, "  "); // Some spaces
 
-    for (int i = 0; i < 2 * N_COLUMNS + 1; i++) {
+    for ( i = 0; i < 2 * N_COLUMNS + 1; i++) {
         fprintf(file, "%c", SEPARATOR); // Close the board at the bottom
     }
 
     fprintf(file, "\n  "); // WHITE SPACE
 
-    for (int i = 0; i < N_COLUMNS; i++) {
+    for ( i = 0; i < N_COLUMNS; i++) {
         fprintf(file, " %c", FIRST_COLUMN + i); // Column letters
     }
 

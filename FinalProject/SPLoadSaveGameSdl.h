@@ -10,7 +10,7 @@
 
 #include "SPChessMainSdl.h"
 
-Screen* SPCreateLoadSaveGameWindow(char* screenName);
+Screen* SPCreateLoadSaveGameWindow(int screenIndex);
 
 void SPDrawLoadSaveScreen(Screen* screen);
 

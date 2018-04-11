@@ -24,22 +24,24 @@ int runSdl(SPChessGame* game ) {
 
 	int done = 0,feedback,i,j;
 
-	Screen* screens[NUM_SCREENS];
+	Screen* screens[NUM_SCREENS] = {NULL};
 	int success = SPGameCreateScreens(screens);
 	if(!success){
 		done = 1;
 	}
-	SPUpdateLoadSaveSlots(screens);
+
 	SDL_Event e;
 	printf("1\n");
-
 	while(!done){
+							printf("here333333??");
 		SDL_WaitEvent(&e);
+					printf("here444444444??");
 		feedback = NONE; //
 			for(i=0; i<NUM_SCREENS; i++){
 				if(screens[i]->shown){
 					for(j=0; j<screens[i]->widgetsSize; j++){
-						if(screens[i]->widgets[j]&&screens[i]->widgets[j]->shown){
+						printf("%d.<%d,%d>\n",x++,i,j);
+						if(screens[i]->widgets[j]){
 							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j],
 									&e,screens,game,i,j);
 						}
@@ -62,13 +64,13 @@ int runSdl(SPChessGame* game ) {
 				break;
 			}
 		}
-
 	}
 
 	spChessGameDestroy(game);
 
 	SPDestroyScreensArr(screens,NUM_SCREENS);
-	printf("%d\n",done);
+	
+	printf("done is %d\n",done);
 
 
 
