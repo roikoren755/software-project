@@ -79,11 +79,14 @@ Widget* createButton(SDL_Renderer* renderer, const char* image,
 	return res;
 }
 
-void destroyButton(Widget* src) {
-	if (src) {
+void destroyButton(Widget* src)
+{
+	if(src!=NULL){
 		Button* button = (Button*) src->data;
-		SDL_DestroyTexture(button->texture);
-		free(button);
+		if(button!=NULL){
+			SDL_DestroyTexture(button->texture);
+			free(button);
+		}
 		free(src);
 	}
 }
@@ -111,10 +114,16 @@ void drawButton(Widget* src, SDL_Renderer* renderer) {
 	if (!src || !renderer) {
 		printf("ERROR: Could not draw button\n");
 		return;
-	}
-
+	}	
 	Button* button = (Button*) src->data;
-	SDL_RenderCopy(renderer, button->texture, NULL, &button->location);
+	if(button == NULL){   //safety
+		printf("ERROR: an attempt was made to paint a widget that did not exist\n");
+		return;
+	}
+	int success = SDL_RenderCopy(renderer, button->texture, NULL, &button->location);
+	if(success == -1){
+		printf("unable to draw Button: %s\n",SDL_GetError());
+	}
 }
 
 Widget* createLabel(SDL_Renderer* renderer, const char* image, int x, int y, int w, int h, int shown) {
@@ -158,11 +167,13 @@ Widget* createLabel(SDL_Renderer* renderer, const char* image, int x, int y, int
 	return res;
 }
 
-void destroyLabel(Widget* src) {
-	if (src) {
-		Label* label = (Label*) src->data;
-		SDL_DestroyTexture(label->texture);
-		free(label);
+void destroyLable(Widget* src){
+	if(src!=NULL){
+		Label* lable = (Label*) src->data;
+		if(lable!=NULL){
+			SDL_DestroyTexture(lable->texture);
+			free(lable);
+		}
 		free(src);
 	}
 }
@@ -192,14 +203,21 @@ int handleLabelEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* g
 	return NONE;
 }
 
-void drawLabel(Widget* src, SDL_Renderer* renderer) {
-	if (!src || !renderer) {
+
+void drawLable(Widget* src, SDL_Renderer* rend){
+	if (!src || !rend) {
 		printf("ERROR: Could not draw label\n");
 		return;
 	}
-
 	Label* label = (Label*) src->data;
-	SDL_RenderCopy(renderer, label->texture, NULL, &label->location);
+	if(label == NULL){
+		printf("ERROR: an attempt was made to paint a widget that did not exist\n");
+		return;
+	}
+	int success = SDL_RenderCopy(rend, label->texture, NULL, &label->location);
+	if(success == -1){
+		printf("unable to draw lable: %s\n",SDL_GetError());
+	}
 }
 
 Widget* createSticker(SDL_Renderer* renderer, const char* image,
@@ -248,14 +266,17 @@ Widget* createSticker(SDL_Renderer* renderer, const char* image,
 
 }
 
-void destroySticker(Widget* src) {
-	if (src) {
+void destroySticker(Widget* src){
+	if(src!=NULL){
 		Sticker* piece = (Sticker*) src->data;
-		SDL_DestroyTexture(piece->texture);
-		free(piece);
+		if(piece!=NULL){
+			SDL_DestroyTexture(piece->texture);
+			free(piece);
+		}
 		free(src);
 	}
 }
+
 
 int handleStickerEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* game, int screenIndex,
 					   int widgetIndex) {
@@ -281,11 +302,19 @@ int handleStickerEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame*
 	return NONE;
 }
 
-void drawSticker(Widget* src, SDL_Renderer* renderer){
-	if (!src || !renderer) {
+
+void drawSticker(Widget* src, SDL_Renderer* rend){
+	if(src == NULL || rend == NULL){   //safety
 		printf("ERROR: Could not draw sticker\n");
 		return;
 	}
 	Sticker* sticker = (Sticker*) src->data;
-	SDL_RenderCopy(renderer, sticker->texture, NULL, &sticker->location);
+	if(sticker == NULL){   //safety
+		printf("ERROR: an attempt was made to paint a widget that did not exist\n");
+		return;
+	}
+	int success = SDL_RenderCopy(rend, sticker->texture, NULL, &sticker->location);
+	if(success == -1){
+		printf("unable to draw Button: %s\n",SDL_GetError());
+	}
 }

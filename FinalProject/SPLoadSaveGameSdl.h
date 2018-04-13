@@ -9,6 +9,8 @@
 #define SPLOADSAVEGAMESDL_H_
 
 #include "SPChessMainSdl.h"
+#include <unistd.h>
+
 #define NUM_SLOTS 5
 #define SLOT_HEIGHT 70
 #define SCROLLBAR_MAX_POSITION (NUM_SLOTS*SLOT_HEIGHT-300)

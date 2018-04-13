@@ -42,18 +42,16 @@ Screen* SPGameCreateGameScreen();
 
 /**
 *  Update's the game's screen's board to be corresponding with the game state.
-*  @return		QUIT signal if an error occurred.
+*  @return		QUIT signal if fatal error occurred.
 *  				CONTINUE signal , if otherwise.
 */
 int SPUpdateBoard(Screen** screens, SPChessGame* game);
 
 /**
 *  Draws a 8x8 board to the renderer.
-*  @param renderer - pointer to an SDL_Renderer.
-*  @return CONTINUE signal on success.
-*  		   -1 if an error accrued
+*  @param rend - pointer to an SDL_Renderer.
 */
-int SPDrawBoard(SDL_Renderer* renderer);
+void SPDrawBoard(SDL_Renderer* rend);
 
 /**
 *  NOTE:

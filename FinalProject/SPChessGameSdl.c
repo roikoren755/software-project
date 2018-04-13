@@ -23,7 +23,7 @@ Screen* SPGameCreateGameScreen() {
 	//Allocate screen's widgets, starting with the board's pieces in their starting location
 	int color;
 	char tempString[30];
-	char colors[2] = {"black","white"};
+	char* colors[2] = {"black","white"};
 	for (color = 0; color < 2; color++) {
 		sprintf(tempString, "pics/%s_rook.bmp", colors[color]);
 		gameScreen->widgets[LEFT_ROOK_LOC(color)] = createSticker(renderer, tempString, SPMovePiece,
@@ -112,60 +112,51 @@ Screen* SPGameCreateGameScreen() {
 	return gameScreen;
 }
 
-/**
-*  Draws a 8x8 board to the renderer.
-*  @param renderer - pointer to an SDL_Renderer.
-*  @return CONTINUE signal on success.
-*  		   -1 if an error accrued
-*/
-int SPDrawBoard(SDL_Renderer* renderer) {
+
+
+void SPDrawBoard(SDL_Renderer* rend){
 	int success;
 
-	// draw black frame
-	success = SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	if (success == -1) {
-		return -1;
-	}
-
+	//draw black frame
 	SDL_Rect frameRect = { .x = 5, .y = 5, .w = 650, .h = 650 };
-
-	success = SDL_RenderFillRect(renderer, &frameRect);
-	if (success == -1) {
-		return -1;
+	success = SDL_SetRenderDrawColor(rend, 0, 0, 0, 0);
+	if(success == -1){
+		printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
 	}
 
-	// draw yellow within the frame
-	success = SDL_SetRenderDrawColor(renderer, CHESS_YELLOW_COLOR);
-	if (success == -1) {
-		return -1;
+	success = SDL_RenderFillRect (rend, & frameRect);
+	if(success == -1){
+		printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
 	}
 
-	frameRect.x += 5;
-	frameRect.y += 5;
-	frameRect.h -= (5 * 2);
-	frameRect.w -= (5 * 2);
-	success = SDL_RenderFillRect(renderer, &frameRect);
-	if (success == -1) {
-		return -1;
+	//draw yellow within the frame
+	frameRect.x+=5;
+	frameRect.y+=5;
+	frameRect.h-=(5*2);
+	frameRect.w-=(5*2);
+	success = SDL_SetRenderDrawColor (rend, CHESS_YELLOW_COLOR);
+	if(success == -1){
+		printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
+	}
+	success = SDL_RenderFillRect (rend, & frameRect);
+	if(success == -1){
+		printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
 	}
 
 	int i,j;
-	for (i = 0; i < 8; i++) { //Draw 32 brown squares inside the board, in the appropriate location
-		for (j = 10 + (1 - i % 2) * SQUARE_WIDTH; j < BOARD_WIDTH; j += (SQUARE_WIDTH * 2)) {
-			SDL_Rect rect = { .x = j, .y = 10 + i * SQUARE_HEIGHT, .w = SQUARE_WIDTH, .h = SQUARE_HEIGHT };
-			success = SDL_SetRenderDrawColor(renderer, CHESS_BROWN_COLOR);
-			if (success == -1) {
-				return -1;
-			}
-
-			success = SDL_RenderFillRect(renderer, &rect);
-			if (success == -1) {
-				return -1;
+	for( i = 0; i<8; i++){ //Draw 32 brown squares inside the board, in the appropriate location
+			for( j = 10+(1-i%2)*SQUARE_WIDTH ; j<BOARD_WIDTH; j+=(SQUARE_WIDTH*2)){
+				SDL_Rect rect = { .x = j, .y = 10+i*SQUARE_HEIGHT, .w = SQUARE_WIDTH, .h = SQUARE_HEIGHT };
+				success = SDL_SetRenderDrawColor(rend, CHESS_BROWN_COLOR);
+				if(success == -1){
+					printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
+				}
+				success = SDL_RenderFillRect(rend, &rect);
+				if(success == -1){
+					printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
+				}
 			}
 		}
-	}
-
-	return CONTINUE;
 }
 
 /**
@@ -213,17 +204,15 @@ void SPUpdateGameState(Screen** screens, SPChessGame* game) {
 
 int SPUpdateBoard(Screen** screens, SPChessGame* game){
 	if (!screens || !screens[GAME_SCREEN] || !game) {
-		return -1;
+		return QUIT;
 	}
 
 	SDL_Renderer* renderer = screens[GAME_SCREEN]->renderer;
-	SDL_RenderClear(renderer);
-
-	int success = SPDrawBoard(renderer);
-	if (!success) {
-		SPShowDrawError();
-		return QUIT;
+	int success = SDL_RenderClear(renderer); //clear, this is for safety, no need to check,failure won't effect
+	if(success == -1){
+		printf("ERROR: unable to clear renderer for screen: %s\n",SDL_GetError());
 	}
+	SPDrawBoard(renderer);
 
 	if (game->gameMode == 1 && game->currentPlayer != game->userColor) { // when game starts, its time to perform computer move
 		int move = spMinimaxSuggestMove(game);
@@ -325,7 +314,7 @@ int SPShowSaveBeforeQuitMassage(Screen** screens, SPChessGame* game, int screenI
     	}
     	else { // user requested main menu
 			spChessGameResetGame(game);
-			SPUpdateBoard(screens, game);
+			if(SPUpdateBoard(screens, game) == QUIT){return QUIT;};
 			return SPOpenWindow(screens,MAIN_MENU_WINDOW);
 		}
     }
@@ -490,11 +479,7 @@ int SPMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 				break;
 		}
 
-		success = screens[GAME_SCREEN]->draw(screens[GAME_SCREEN], GAME_SCREEN); // draw the game screen
-		if (!success) {
-			SPShowDrawError();
-			return QUIT;
-		}
+		screens[GAME_SCREEN]->draw(screens[GAME_SCREEN], GAME_SCREEN); // draw the game screen
 
 		SDL_WaitEvent(event);
 	}
@@ -576,7 +561,11 @@ int SPHighlightMove(SDL_Renderer* renderer, int step) {
 	}
 
 	SDL_FreeSurface(surface); // surface not needed anymore
-	SDL_RenderCopy(renderer, texture, NULL, &rect); // draw the texture to the rect
+	int success = SDL_RenderCopy(renderer, texture, NULL, &rect); // draw the texture to the rect
+	if (success == -1) {
+		printf("ERROR: unable to create texture: %s\n", SDL_GetError());
+		return -1;
+	}
 	SDL_DestroyTexture(texture);// texture done his job
 
 	return 0;
@@ -614,7 +603,7 @@ int SPHighlightAllMoves(Widget* src, SDL_Event* event, Screen** screens, SPChess
 		switch (event->type) {
 			case SDL_MOUSEBUTTONDOWN:
 				for(i = 0; i < numOfMoves; i++) {
-					success += SPHighlightMove(rendererspArrayListGetAt(list, i));
+					success += SPHighlightMove(renderer,spArrayListGetAt(list, i));
 				}
 
 				if (success < 0) { //if some highlighting has failed

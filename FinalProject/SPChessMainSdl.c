@@ -220,26 +220,25 @@ int SPDrawScreen(Screen* screen,int screenIndex){
 		return QUIT;
 	}
 
-	SDL_Renderer* renderer = screen->renderer;
-	int success = SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR); //set the right color
+	SDL_Renderer* rend = screen->renderer;
+	rend  = NULL;
+	int success = SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR); //set the right color
 	if(success == -1){
-		SPShowDrawError();
-		return QUIT;
+		printf("ERROR: unable to draw background for screen: %s\n",SDL_GetError());
 	}
-	SDL_RenderClear(renderer); //clear, this is for safety, no need to check,failure won't effect
-
+	success = SDL_RenderClear(rend); //clear, this is for safety, no need to check,failure won't effect
+	if(success == -1){
+		printf("ERROR: unable to clear renderer for screen: %s\n",SDL_GetError());
+	}
 	if(screenIndex==GAME_SCREEN){
-		success = SPDrawBoard(renderer);
-		if(success == -1){
-			SPShowDrawError();
-			return QUIT;
-		}
+		SPDrawBoard(rend);
 	}
+
 	SPDrawWidgets(screen);
 
 	SDL_Delay(10);
 
-	SDL_RenderPresent(renderer);
+	SDL_RenderPresent(rend);
 
 	return CONTINUE;
 
