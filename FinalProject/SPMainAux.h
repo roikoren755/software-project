@@ -21,9 +21,22 @@
  * @param game - pointer to the game's struct
  * @return 0 when exited successfully and all resources freed
  */
-int runSdl(SPChessGame* game );
+int runSdl(SPChessGame* game);
 
-int min(int a,int b);
+/***
+ * Runs the console version of the game.
+ * @param game - Game to run
+ * @return 0, after freeing all used memory, including game.
+ */
+int runConsole(SPChessGame* game);
+
+/***
+ * Returns the lower of the two. Duh.
+ * @param a
+ * @param b
+ * @return min(a, b)
+ */
+int min(int a, int b);
 
 /***
  * Get destination position from int representing a move.
@@ -249,7 +262,5 @@ void spChessGetMoves(SPChessGame* game, SPCommand* command);
  * 		   SP_CHESS_GAME_SUCCESS otherwise
  */
 SP_CHESS_GAME_MESSAGE spChessGameUndo(SPChessGame* game);
-
-
 
 #endif
