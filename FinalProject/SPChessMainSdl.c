@@ -1,13 +1,11 @@
 /*
  * SPChessMainSdl.c
  *
- *  Created on: 10 áàôø 2018
+ *  Created on: 10 ï¿½ï¿½ï¿½ï¿½ 2018
  *      Author: user
  */
 #include "SPChessMainSdl.h"
 #include "SPChessGameSdl.h"
-
-
 
 int SPGameCreateScreens(Screen** screens){
 	screens[GAME_SCREEN] = SPGameCreateGameScreen();
@@ -70,14 +68,14 @@ Screen* SPGameCreateMainMenuWindow(){
 		if (mainMenuWindow == NULL){
 			return NULL;
 		}
-		SDL_Renderer* rend = mainMenuWindow->renderer;
+		SDL_Renderer* renderer = mainMenuWindow->renderer;
 
 		//Allocate screen's widgets
-		mainMenuWindow->widgets[MM_NEW_GAME] = createButton(rend,
+		mainMenuWindow->widgets[MM_NEW_GAME] = createButton(renderer,
 									"pics/new_game.bmp",SPOpenNextWindow,100,100,250,50,SHOWN);
-		mainMenuWindow->widgets[MM_LOAD_GAME] = createButton(rend,
+		mainMenuWindow->widgets[MM_LOAD_GAME] = createButton(renderer,
 									"pics/load_game.bmp",SPOpenNextWindow,100,175,250,50,SHOWN);
-		mainMenuWindow->widgets[MM_QUIT] = createButton(rend,
+		mainMenuWindow->widgets[MM_QUIT] = createButton(renderer,
 									"pics/quit_mm.bmp",SPQuit,100,250,250,50,SHOWN);
 		
 		//check if widgets were created successfully
@@ -102,16 +100,16 @@ Screen* SPGameCreateGetModeWindow(){
 			return NULL;
 	}
 
-	SDL_Renderer* rend = getModeWindow->renderer;
+	SDL_Renderer* renderer = getModeWindow->renderer;
 
 	//Allocate screen's widgets
-		getModeWindow->widgets[GM_MASSAGE] = createLable(rend,
+		getModeWindow->widgets[GM_MASSAGE] = createLabel(renderer,
 									"pics/gm_select_game_mode.bmp",100,62,400,50,SHOWN);
-		getModeWindow->widgets[GM_1PLAYER] = createButton(rend,
+		getModeWindow->widgets[GM_1PLAYER] = createButton(renderer,
 									"pics/gm_1_player.bmp",SPOpenNextWindow,175,137,250,50,SHOWN);
-		getModeWindow->widgets[GM_2PLAYER] = createButton(rend,
+		getModeWindow->widgets[GM_2PLAYER] = createButton(renderer,
 									"pics/gm_2_player.bmp",SPOpenNextWindow,175,212,250,50,SHOWN);
-		getModeWindow->widgets[GM_BACK_TO_MM] = createButton(rend,
+		getModeWindow->widgets[GM_BACK_TO_MM] = createButton(renderer,
 									"pics/back_to_main_menu.bmp",SPOpenMainMenuWindow,300,287,250,50,SHOWN);
 
 		//check if widgets were created successfully
@@ -136,22 +134,22 @@ Screen* SPCreateGetDifficultyWindow(){
 			return NULL;
 		}
 
-	SDL_Renderer* rend = getDifficultyWindow->renderer;
+	SDL_Renderer* renderer = getDifficultyWindow->renderer;
 
 	//Allocate screen's widgets
-		getDifficultyWindow->widgets[GD_MASSAGE] = createLable(rend,
+		getDifficultyWindow->widgets[GD_MASSAGE] = createLabel(renderer,
 									"pics/gd_select_game_difficulty.bmp",100,25,400,50,SHOWN);
 
 		char * difficulties[5] = {"pics/gd_amateur.bmp","pics/gd_easy.bmp",
 				"pics/gd_moderate.bmp","pics/gd_hard.bmp","pics/gd_expert.bmp"};
 		int i;
 		for(i=0; i<5; i++){
-			getDifficultyWindow->widgets[GD_DIFFICULTY(i+1)] = createButton(rend,
+			getDifficultyWindow->widgets[GD_DIFFICULTY(i+1)] = createButton(renderer,
 					difficulties[i],SPOpenNextWindow,175,100+i*60,250,50,SHOWN);
 		}
-		getDifficultyWindow->widgets[GD_BACK] = createButton(rend,
+		getDifficultyWindow->widgets[GD_BACK] = createButton(renderer,
 									"pics/back.bmp",SPOpenPreviousWindow,50,415,250,50,SHOWN);
-		getDifficultyWindow->widgets[GD_BACK_TO_MM] = createButton(rend,
+		getDifficultyWindow->widgets[GD_BACK_TO_MM] = createButton(renderer,
 									"pics/back_to_main_menu.bmp",SPOpenMainMenuWindow,300,415,250,50,SHOWN);
 
 
@@ -179,18 +177,18 @@ Screen* SPCreateGetColorWindow(){
 			return NULL;
 		}
 
-		SDL_Renderer* rend = getColorWindow->renderer;
+		SDL_Renderer* renderer = getColorWindow->renderer;
 
 		//Allocate screen's widgets
-		getColorWindow->widgets[GC_MASSAGE] = createLable(rend,
+		getColorWindow->widgets[GC_MASSAGE] = createLabel(renderer,
 									"pics/gc_select_user_color.bmp",100,62,400,50,SHOWN);
-		getColorWindow->widgets[GC_WHITE] = createButton(rend,
+		getColorWindow->widgets[GC_WHITE] = createButton(renderer,
 									"pics/gc_white.bmp",SPOpenNextWindow,175,137,250,50,SHOWN);
-		getColorWindow->widgets[GC_BLACK] = createButton(rend,
+		getColorWindow->widgets[GC_BLACK] = createButton(renderer,
 									"pics/gc_black.bmp",SPOpenNextWindow,175,212,250,50,SHOWN);
-		getColorWindow->widgets[GC_BACK] = createButton(rend,
+		getColorWindow->widgets[GC_BACK] = createButton(renderer,
 									"pics/back.bmp",SPOpenPreviousWindow,50,287,250,50,SHOWN);
-		getColorWindow->widgets[GC_BACK_TO_MM] = createButton(rend,
+		getColorWindow->widgets[GC_BACK_TO_MM] = createButton(renderer,
 									"pics/back_to_main_menu.bmp",SPOpenMainMenuWindow,300,287,250,50,SHOWN);
 
 		//check if widgets were created successfully
@@ -222,16 +220,16 @@ int SPDrawScreen(Screen* screen,int screenIndex){
 		return QUIT;
 	}
 
-	SDL_Renderer* rend = screen->renderer;
-	int success = SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR); //set the right color
+	SDL_Renderer* renderer = screen->renderer;
+	int success = SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR); //set the right color
 	if(success == -1){
 		SPShowDrawError();
 		return QUIT;
 	}
-	SDL_RenderClear(rend); //clear, this is for safety, no need to check,failure won't effect
+	SDL_RenderClear(renderer); //clear, this is for safety, no need to check,failure won't effect
 
 	if(screenIndex==GAME_SCREEN){
-		success = SPDrawBoard(rend);
+		success = SPDrawBoard(renderer);
 		if(success == -1){
 			SPShowDrawError();
 			return QUIT;
@@ -241,7 +239,7 @@ int SPDrawScreen(Screen* screen,int screenIndex){
 
 	SDL_Delay(10);
 
-	SDL_RenderPresent(rend);
+	SDL_RenderPresent(renderer);
 
 	return CONTINUE;
 

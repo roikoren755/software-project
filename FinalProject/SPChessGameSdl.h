@@ -1,7 +1,7 @@
 /*
  * SPChessGameSdl.h
  *
- *  Created on: 19 áîøñ 2018
+ *  Created on: 19 ï¿½ï¿½ï¿½ï¿½ 2018
  *      Author: user
  */
 #ifndef SPCHESSGAMESDL_H_
@@ -49,16 +49,16 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game);
 
 /**
 *  Draws a 8x8 board to the renderer.
-*  @param rend - pointer to an SDL_Renderer.
+*  @param renderer - pointer to an SDL_Renderer.
 *  @return CONTINUE signal on success.
 *  		   -1 if an error accrued
 */
-int SPDrawBoard(SDL_Renderer* rend);
+int SPDrawBoard(SDL_Renderer* renderer);
 
 /**
 *  NOTE:
-*  The signing of the following functions is
-*  to match them to the signing suitable to the button/sticker struct
+*  The signatures of the following functions is
+*  to match them to the signature suitable to the button/sticker struct
 */
 
 /**
@@ -69,7 +69,7 @@ int SPDrawBoard(SDL_Renderer* rend);
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+int SPRestartGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 
 /**
 *  Opens a massage box asking the user if he wants to save the game before quitting.
@@ -82,7 +82,7 @@ int SPRestartGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widge
 *  		   otherwise, PRESSED signal, indicating a widget was pressed in order to call this action.
 *
 */
-int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+int SPShowSaveBeforeQuitMassage(Screen** screens,SPChessGame* game, int screenIndex, int widgetIndex);
 
 /**
 *  Undo-ing the last move (or last two moves if necessary) and updates the screen and the undo
@@ -93,7 +93,7 @@ int SPShowSaveBeforeQuitMassage(Screen** screens ,SPChessGame* game,int screenIn
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+int SPUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 
 /**
 *  Moves a piece dragged by the user.
@@ -108,7 +108,7 @@ int SPUndoMove(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIn
 *  @return QUIT signal if drawing error occurred
 *  		   PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* game);
+int SPMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* game);
 
 /**
 *  Highilghts all possible moves of a piece (calles when piece is left clicked).
@@ -125,7 +125,6 @@ int SPMovePiece(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* gam
 *  @param game - the game's struct
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPHighlightAllMoves(Widget* src, SDL_Event* event,Screen** screens, SPChessGame* game);
-
+int SPHighlightAllMoves(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* game);
 
 #endif /* SPCHESSGAMESDL_H_ */

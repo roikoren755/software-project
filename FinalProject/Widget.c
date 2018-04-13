@@ -69,8 +69,8 @@ Screen* createScreen(int width,int height,
 
 
 	// create a renderer for the window
-	SDL_Renderer* rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (rend == NULL) {
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
 		printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
 							"ERROR: unable to create renderer", NULL);

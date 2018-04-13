@@ -1,7 +1,7 @@
 /*
  * SPLoadSaveGameSdl.c
  *
- *  Created on: 10 áàôø 2018
+ *  Created on: 10 ï¿½ï¿½ï¿½ï¿½ 2018
  *      Author: user
  */
 
@@ -31,20 +31,20 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 			return NULL;
 		}
 
-		SDL_Renderer* rend = window->renderer;
+		SDL_Renderer* renderer = window->renderer;
 
 		//Allocate screen's widgets
 		sprintf(temp_str,"pics/lsg_select_game_to_%s.bmp",screenName);
-		window->widgets[LSG_MASSAGE] = createLable(rend,
+		window->widgets[LSG_MASSAGE] = createLabel(renderer,
 									temp_str,0,0,600,100,SHOWN);
 
-		window->widgets[LSG_BOTTOM_COVER] = createLable(rend,
+		window->widgets[LSG_BOTTOM_COVER] = createLabel(renderer,
 									"pics/lg_bottom_cover.bmp",0,400,600,50,SHOWN);
-		window->widgets[LSG_BACK] = createButton(rend,
+		window->widgets[LSG_BACK] = createButton(renderer,
 									"pics/back.bmp",SPOpenPreviousWindow,50,450,250,50,SHOWN);
-		window->widgets[LSG_UP_ARRAW] = createButton(rend,
+		window->widgets[LSG_UP_ARRAW] = createButton(renderer,
 									"pics/up_arrow.bmp",SPMoveScrollbar,565,100,35,35,SHOWN);
-		window->widgets[LSG_DOWN_ARRAW] = createButton(rend,
+		window->widgets[LSG_DOWN_ARRAW] = createButton(renderer,
 									"pics/down_arrow.bmp",SPMoveScrollbar,565,400-35,35,35,SHOWN);
 
 		int i;
@@ -52,12 +52,12 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 				(strcmp(screenName,"Load")==0)?SPLoadChosenGame:SPSaveChosenGame;
 		for(i=0; i<NUM_SLOTS; i++){
 			sprintf(temp_str,"pics/lsg_slot%d.bmp",i+1);
-			window->widgets[LSG_SLOT(i+1)] = createButton(rend,
+			window->widgets[LSG_SLOT(i+1)] = createButton(renderer,
 										temp_str,action,157,NONE,250,50,SHOWN);
 		}
 
 		for(i=0; i<NUM_SLOTS; i++){
-			window->widgets[LSG_SLOT_INDICATOR(i+1)] = createLable(rend,
+			window->widgets[LSG_SLOT_INDICATOR(i+1)] = createLabel(renderer,
 									"pics/lsg_indicator.bmp",200,NONE,50,30,HIDE);
 		}
 
@@ -79,13 +79,13 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 		return QUIT;
 	}
 
-	SDL_Renderer* rend = screen->renderer;
-	int success = SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
+	SDL_Renderer* renderer = screen->renderer;
+	int success = SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
 	if(success == -1){
 		SPShowDrawError();
 		return QUIT;
 	}
-	success = SDL_RenderClear(rend);
+	success = SDL_RenderClear(renderer);
 	if(success == -1){
 		SPShowDrawError();
 		return QUIT;
@@ -95,12 +95,12 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 	int i,j;
 
 	SDL_Rect scrollRect = { .x = 0, .y = 100, .w = 600, .h = 300 }; // draw a yellow rect to contain the slots
-	SDL_SetRenderDrawColor(rend, CHESS_YELLOW_COLOR);
-	SDL_RenderFillRect (rend, & scrollRect);
+	SDL_SetRenderDrawColor(renderer, CHESS_YELLOW_COLOR);
+	SDL_RenderFillRect (renderer, &scrollRect);
 
 	SDL_Rect scrollbar = { .x = 565, .y = 135, .w = 35, .h = 300 };
-	SDL_SetRenderDrawColor(rend, 224,224,224,0); //draw scrollbar in gray
-	SDL_RenderFillRect (rend, & scrollbar);
+	SDL_SetRenderDrawColor(renderer, 224,224,224,0); //draw scrollbar in gray
+	SDL_RenderFillRect (renderer, &scrollbar);
 
 	float scrollbarIndicatorPos,scrollbarMaxPos = SCROLLBAR_MAX_POSITION;
 	if(scrollbarMaxPos==0){
@@ -110,8 +110,8 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 		scrollbarIndicatorPos = 135+screen->scrollBarPosition*(180/scrollbarMaxPos);
 	}
 	SDL_Rect scrollbarIndicator = { .x = 565, .y = (int)scrollbarIndicatorPos, .w = 35, .h = 50 };
-	SDL_SetRenderDrawColor(rend, 160,160,160,0); // darker gray
-	SDL_RenderFillRect (rend, &scrollbarIndicator); //draw the indicator
+	SDL_SetRenderDrawColor(renderer, 160,160,160,0); // darker gray
+	SDL_RenderFillRect (renderer, &scrollbarIndicator); //draw the indicator
 
 	//find the right spot for the highest slot
 	int firstShownSlotIndex = screen->scrollBarPosition/SLOT_HEIGHT+1;
@@ -119,19 +119,19 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 
 	//update location for the buttons and the 'used' labels, indicating wether the slot is used or not
 	Button* slotButton;
-	Lable * slotIndicatorLable;
+	Label * slotIndicatorLabel;
 	for(j=0,i=firstShownSlotIndex; i<=firstShownSlotIndex+300/SLOT_HEIGHT; j++,i++){
 		widget = screen->widgets[LSG_SLOT(i)];
 		if(widget){
 			slotButton = (Button *)widget->data;
 			slotButton->location.y = firstShownSlotPosition+SLOT_HEIGHT*j;
-			widget->draw(widget, rend);
+			widget->draw(widget, renderer);
 		}
 		widget = screen->widgets[LSG_SLOT_INDICATOR(i)];
 		if(widget&&widget->shown){
-			slotIndicatorLable = (Lable *)widget->data;
-			slotIndicatorLable->location.y = firstShownSlotPosition+SLOT_HEIGHT*j+10;
-			widget->draw(widget, rend);
+			slotIndicatorLabel = (Label *)widget->data;
+			slotIndicatorLabel->location.y = firstShownSlotPosition+SLOT_HEIGHT*j+10;
+			widget->draw(widget, renderer);
 		}
 
 	}
@@ -140,12 +140,12 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 	for(i=0; i<NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS; i++){//draw other widgets
 		widget = screen->widgets[i];
 		if(widget && widget->shown){
-			widget->draw(widget, rend);
+			widget->draw(widget, renderer);
 		}
 	}
 
 	SDL_Delay(10);
-	SDL_RenderPresent(rend);
+	SDL_RenderPresent(renderer);
 
 	return CONTINUE;
 }

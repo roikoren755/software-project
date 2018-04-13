@@ -72,28 +72,67 @@ SP_CHESS_GAME_MESSAGE spFprintSettings(SPChessGame* game, FILE* file);
 SP_CHESS_GAME_MESSAGE spChessSaveGame(SPChessGame* game, const char* file);
 
 /***
- *
- * @return
+ * Gets a line of input from stdin, parses it using SPChessParser's spParserParseLine, and returns
+ * the resulting SPCommand.
+ * @return SPCommand representing the user's input.
  */
 SPCommand spGetCommand();
 
+/***
+ * Loads saved game from file (file) into game. Assumes file is correctly formatted.
+ * @param game - Game to load unto
+ * @param file - Full or relative path to file to load from
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or file are NULL, or if an error occurred while opening
+ * 										  file, clearing history or checking game state after loading.
+ * 		   SP_CHESS_GAME_CHECKMATE if loaded game is over due to checkmate.
+ * 		   SP_CHESS_GAME_DRAW if loaded game finished with a draw.
+ * 		   SP_CHESS_GAME_CHECK if current state in game, after loading, is check.
+ * 		   SP_CHESS_GAME_SUCCESS otherwise.
+ */
 SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file);
 
+/***
+ * Verifies that position is a valid representation of a board location, and that it contains a piece, at least
+ * in game's game board.
+ * @param game - Game to check in.
+ * @param position - Position to verify
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game is NULL.
+ * 		   SP_CHESS_GAME_INVALID_POSITION if position is out of bounds.
+ * 		   SP_CHESS_GAME_NO_PIECE_IN_POSITION if there is no piece at position.
+ * 		   SP_CHESS_GAME_SUCCESS otherwise.
+ */
 SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char position);
 
+/***
+ * Prints move as an undone move for color's player, in the format described in the assignment. Assumes both arguments
+ * are valid.
+ * @param move - Move to print.
+ * @param color - Player who made the move.
+ */
 void spPrintUndoneMove(int move, int color);
 
+/***
+ * Prints computer's made move, as per assignment format, with move indicating the move and piece being the moved piece.
+ * Both arguments are assumed to be valid.
+ * @param piece - Piece that made the move.
+ * @param move - Move made by the computer.
+ */
 void spPrintComputerMove(char piece, int move);
 
+/***
+ * Returns the piece at location on game's game board.
+ * @param game - Game to get piece from.
+ * @param position - Position to get piece at.
+ * @return '\0' if game is NULL, position isn't valid, or there's no piece at position.
+ * 		   A char representing the piece at position, otherwise.
+ */
 char spChessGameGetPieceAtPosition(SPChessGame* game, char position);
 
-/**
- * given a list, prints all possible moves listed.
- *
- * @param list - The source list
- * @return
- * SP_CHESS_GAME_SUCCESS  - if the the moves were successfully printed
- * false - otherwise.
+/***
+ * Prints all the moves at list, according to the format given in the assignment.
+ * @param list - SPArrayList containing int representations of moves.
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if list is NULL.
+ * 		   SP_CHESS_GAME_SUCCESS otherwise.
  */
 SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list);
 
@@ -133,5 +172,84 @@ int spChessGameStepWillThreaten(unsigned int step);
  *         A char representing the location, otherwise.
  */
 unsigned char spChessGameSetLocation(int row, int column);
+
+/***
+ * Print " Chess\n" and an underline beneath it. Yeah, I know!
+ */
+void spChessPrintGameTitle();
+
+/***
+ * Sets game mode to the one requested by command, if it is a legal game mode.
+ * @param game - Game to set game mode in.
+ * @param command - Command to set game mode.
+ */
+void spChessGameSetGameMode(SPChessGame* game, SPCommand* command);
+
+/***
+ * Sets game difficulty to that chosen in command. Also prints difficulty's name to the screen in the required
+ * format.
+ * @param game - Game to set difficulty in.
+ * @param command - Command to set difficulty.
+ * @param difficulties - Array of char* difficulty names => difficulties[i] === name of 1-based i-th lowest difficulty.
+ */
+void spChessGameSetDifficulty(SPChessGame* game, SPCommand* command, char** difficulties);
+
+/***
+ * Sets game's user color.
+ * @param game - Game to set user color in.
+ * @param command - Command to do so.
+ */
+void spChessGameSetUserColor(SPChessGame* game, SPCommand* command);
+
+/***
+ * Loads save game pointed at by command->arguments, into game.
+ * @param game - Game to load in
+ * @param command - Command to load game
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or command are null, command->cmd isn't SP_LOAD, or an error occurred
+ * 										  while loading game.
+ * 		   SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameLoadGame(SPChessGame* game, SPCommand* command);
+
+/***
+ * Resets game's settings to the default ones.
+ * @param game - Game to reset settings in.
+ */
+void spChessGameResetSettings(SPChessGame* game);
+
+/***
+ * Makes the move asked for by command, and if needed makes the following computer move, as well.
+ * @param game - Game to make move in
+ * @param command - Command to make move.
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game or command are NULL, or an error occurred.
+ * 		   SP_CHESS_GAME_INVALID_POSITION if one of the positions in the move command are out of bounds
+ * 		   SP_CHESS_GAME_NO_PIECE_IN_POSITION if there is no player piece at move's starting position
+ * 		   SP_CHESS_GAME_ILLEGAL_MOVE if move isn't a legal one
+ * 		   SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED if move is "legal", but king remains threatened after it
+ * 		   SP_CHESS_GAME_ILLEGAL_MOVE_KING_BECOMES_THREATENED if move is "legal" but king would become threatened after it
+ * 		   SP_CHESS_GAME_CHECKMATE if game state is checkmate after making all moves
+ * 		   SP_CHESS_GAME_DRAW if game state is draw after making all moves
+ * 		   SP_CHESS_GAME_CHECK if game state is check after making all moves
+ * 		   SP_CHESS_GAME_SUCCESS otherwise.
+ */
+SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command);
+
+/***
+ * Prints all possible moves for piece asked for by command
+ * @param game - Game to print moves at
+ * @param command - Command to print moves.
+ */
+void spChessGetMoves(SPChessGame* game, SPCommand* command);
+
+/***
+ * Undoes the last 2 moves (or 1 if only 1 is available to undo), and prints resulting game board.
+ * @param game - Game to undo moves in.
+ * @return SP_CHESS_GAME_INVALID_ARGUMENT if game is NULL, or an error occurred undoing a move
+ * 		   SP_CHESS_GAME_NO_HISTORY if there are less than 2 moves to undo
+ * 		   SP_CHESS_GAME_SUCCESS otherwise
+ */
+SP_CHESS_GAME_MESSAGE spChessGameUndo(SPChessGame* game);
+
+
 
 #endif

@@ -1,13 +1,12 @@
 /*
  * SPChessMainSdl.h
  *
- *  Created on: 10 באפר 2018
+ *  Created on: 10 March 2018
  *      Author: user
  */
 #include <SDL.h>
 #include <SDL_video.h>
 #include <stdio.h>
-#include "SPBufferset.h"
 #include "SPChessGame.h"
 #include "Button.h"
 #include <string.h>

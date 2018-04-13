@@ -9,6 +9,98 @@
 
 int x=0;
 
+/***
+ * Converts from string to int representation of colors.
+ * @param argument - String to convert to color.
+ * @return 1 if argument is "white"
+ *         0 if argument is "black"
+ *        -1 otherwise
+ */
+int spGetColor(const char* argument) {
+	if (!argument) {
+		return -1;
+	}
+
+	if (!strcmp(argument, "white")) {
+		return 1;
+	}
+	if (!strcmp(argument, "black")) {
+		return 0;
+	}
+	return -1;
+}
+
+/***
+ * Same as above, just for game mode
+ * @param argument - Same
+ * @return 1 if argument is "1-player"
+ *         2 if argument is "2-player"
+ *         0 otherwise
+ */
+int spGetGameMode(const char* argument) {
+	if (!argument) {
+		return 0;
+	}
+
+	if (!strcmp(argument, "1-player")) {
+		return 1;
+	}
+	if (!strcmp(argument, "2-player")) {
+		return 2;
+	}
+
+	return 0;
+}
+
+/***
+ * Converts difficulty name to int representing same difficulty level.
+ * @param argument - Same as above, sort of
+ * @return 1 if argument is "amateur"
+ *         2 if argument is "easy"
+ *         3 if argument is "moderate"
+ *         4 if argument is "hard"
+ *         5 if argument is "expert"
+ *         0 otherwise
+ */
+int spGetDifficulty(const char* argument) {
+	if (!argument) {
+		return 0;
+	}
+
+	if (!strcmp(argument, "amateur")) {
+		return 1;
+	}
+	if (!strcmp(argument, "easy")) {
+		return 2;
+	}
+	if (!strcmp(argument, "moderate")) {
+		return 3;
+	}
+	if (!strcmp(argument, "hard")) {
+		return 4;
+	}
+	if (!strcmp(argument, "expert")) {
+		return 5;
+	}
+
+	return 0;
+}
+
+/***
+ * Helper function, turns the first bufferLength bytes of buffer to 0.
+ * @param buffer - Buffer to clear
+ * @param bufferLength - How much of it to clear
+ */
+void clearBuffer(char* buffer, int bufferLength) {
+	if (!buffer) {
+		return;
+	}
+
+	for (int i = 0; i < bufferLength; i++) {
+		buffer[i] = '\0';
+	}
+}
+
 int min(int a, int b) {
     return a < b ? a : b;
 }
@@ -144,109 +236,17 @@ SPCommand spGetCommand() {
     return spParserParseLine(input);
 }
 
-/***
- * Converts from string to int representation of colors.
- * @param argument - String to convert to color.
- * @return 1 if argument is "white"
- *         0 if argument is "black"
- *        -1 otherwise
- */
-int spGetColor(const char* argument) {
-    if (!argument) {
-        return -1;
-    }
-
-    if (!strcmp(argument, "white")) {
-        return 1;
-    }
-    if (!strcmp(argument, "black")) {
-        return 0;
-    }
-    return -1;
-}
-
-/***
- * Same as above, just for game mode
- * @param argument - Same
- * @return 1 if argument is "1-player"
- *         2 if argument is "2-player"
- *         0 otherwise
- */
-int spGetGameMode(const char* argument) {
-    if (!argument) {
-        return 0;
-    }
-
-    if (!strcmp(argument, "1-player")) {
-        return 1;
-    }
-    if (!strcmp(argument, "2-player")) {
-        return 2;
-    }
-
-    return 0;
-}
-
-/***
- * Converts difficulty name to int representing same difficulty level.
- * @param argument - Same as above, sort of
- * @return 1 if argument is "amateur"
- *         2 if argument is "easy"
- *         3 if argument is "moderate"
- *         4 if argument is "hard"
- *         5 if argument is "expert"
- *         0 otherwise
- */
-int spGetDifficulty(const char* argument) {
-    if (!argument) {
-        return 0;
-    }
-
-    if (!strcmp(argument, "amateur")) {
-        return 1;
-    }
-    if (!strcmp(argument, "easy")) {
-        return 2;
-    }
-    if (!strcmp(argument, "moderate")) {
-        return 3;
-    }
-    if (!strcmp(argument, "hard")) {
-        return 4;
-    }
-    if (!strcmp(argument, "expert")) {
-        return 5;
-    }
-
-    return 0;
-}
-
-/***
- * Helper function, turns the first bufferLength bytes of buffer to 0.
- * @param buffer - Buffer to clear
- * @param bufferLength - How much of it to clear
- */
-void clearBuffer(char* buffer, int bufferLength) {
-    if (!buffer) {
-        return;
-    }
-
-    for (int i = 0; i < bufferLength; i++) {
-        buffer[i] = '\0';
-    }
-}
-
 SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
-    if (!game || !file) {
+    if (!game || !file) { // Oops
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     FILE* filePointer = fopen(file, "r");
-    if (!filePointer) {
+    if (!filePointer) { // Oops
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
-    for (int i = 0; i < N_COLUMNS; i++) {
+    for (int i = 0; i < N_COLUMNS; i++) { // Clear board and locations
         for (int j = 0; j < N_ROWS; j++) {
             if (j < 4) {
                 game->locations[i + j * N_COLUMNS] = 0;
@@ -255,13 +255,17 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
         }
     }
 
-    while (!spArrayListIsEmpty(game->history)) {
+    while (!spArrayListIsEmpty(game->history)) { // Clear history
         if (spArrayListRemoveFirst(game->history) != SP_ARRAY_LIST_SUCCESS) {
             return SP_CHESS_GAME_INVALID_ARGUMENT;
         }
     }
 
-    char buffer[MAX_FILE_LINE_LENGTH + 1];
+	game->userColor = WHITE; // Reset settings to default, to start with.
+	game->gameMode = 1;
+	game->difficulty = 2;
+
+    char buffer[MAX_FILE_LINE_LENGTH + 1]; // Preparations
     char* argument;
     int row = 0;
     char location;
@@ -269,43 +273,43 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     int finishedLoading = 0;
     while (!finishedLoading) {
         fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
-        if (!row) {
+        if (!row) { // First section
             argument = strtok(buffer, DELIMITERS);
-            game->currentPlayer = spGetColor(argument);
+            game->currentPlayer = spGetColor(argument); // Set current player
             clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
             fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
         }
 
-        else if (row == 1) {
+        else if (row == 1) { // Settings section
             argument = strtok(buffer, DELIMITERS);
             argument = strtok(NULL, DELIMITERS);
-            game->gameMode = spGetGameMode(argument);
-            if (game->gameMode == 1) {
+            game->gameMode = spGetGameMode(argument); // Game mode
+            if (game->gameMode == 1) { // Single player?
                 clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
                 fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
                 argument = strtok(buffer, DELIMITERS);
                 argument = strtok(NULL, DELIMITERS);
-                game->difficulty = spGetDifficulty(argument);
+                game->difficulty = spGetDifficulty(argument); // Set difficulty
                 clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
                 fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
                 argument = strtok(buffer, DELIMITERS);
                 argument = strtok(NULL, DELIMITERS);
-                game->userColor = spGetColor(argument);
+                game->userColor = spGetColor(argument); // User color
             }
         }
 
-        else if (row == 2) {
+        else if (row == 2) { // Board section
             for (int i = 0; i < N_ROWS; i++) {
                 argument = strtok(buffer, DELIMITERS);
                 for (int j = 0; j < N_COLUMNS; j++) {
                 	location = 1 << 3;
                 	location |= i;
                 	location <<= 3;
-                	location |= j;
+                	location |= j; // Prepare location for game->locations
                     argument = strtok(NULL, DELIMITERS);
                     piece = argument[0];
-                    game->gameBoard[i][j] = piece == BLANK ? '\0' : piece;
-                    if (piece == PAWN(BLACK)) {
+                    game->gameBoard[i][j] = piece == BLANK ? '\0' : piece; // Set piece on board
+                    if (piece == PAWN(BLACK)) { // Find correct piece and put location in game->locations
                     	for (int i = 0; i < N_COLUMNS; i++) {
                     		if (!game->locations[i + N_COLUMNS]) {
                     			game->locations[i + N_COLUMNS] = location;
@@ -392,7 +396,7 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
                 fgets(buffer, MAX_FILE_LINE_LENGTH, filePointer);
             }
 
-            finishedLoading = 1;
+            finishedLoading = 1; // Finished
         }
 
         clearBuffer(buffer, MAX_FILE_LINE_LENGTH + 1);
@@ -400,38 +404,39 @@ SP_CHESS_GAME_MESSAGE spChessLoadGame(SPChessGame* game, char* file) {
     }
 
     fclose(filePointer);
-    return spChessCheckGameState(game, game->currentPlayer);
+    return spChessCheckGameState(game, game->currentPlayer); // Update game state
 }
 
 SP_CHESS_GAME_MESSAGE spChessVerifyPositionAndPiece(SPChessGame* game, char position) {
-    if (!game) {
+    if (!game) { // Oops
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
     int row = spChessGameGetRowFromPosition(position);
     int column = spChessGameGetColumnFromPosition(position);
-    if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
+    if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) { // Out of bounds?
         return SP_CHESS_GAME_INVALID_POSITION;
     }
 
     char piece = game->gameBoard[row][column];
-    return piece ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION;
+    return piece ? SP_CHESS_GAME_SUCCESS : SP_CHESS_GAME_NO_PIECE_IN_POSITION; // Is there a piece there?
 }
 
 void spPrintUndoneMove(int move, int color) {
     move <<= 8;
-    char startingPosition = spChessGameGetCurrentPositionFromMove(move);
+    char startingPosition = spChessGameGetCurrentPositionFromMove(move); // User-friendly display of locations
     int startingRow = 8 - spChessGameGetRowFromPosition(startingPosition);
     char startingColumn = 'A' + spChessGameGetColumnFromPosition(startingPosition);
 
     char finishPosition = spChessGameGetDestinationPositionFromMove(move);
     int finishRow = 8 - spChessGameGetRowFromPosition(finishPosition);
     char finishColumn = 'A' + spChessGameGetColumnFromPosition(finishPosition);
-    printf("Undo move for %s player: <%d,%c> -> <%d,%c>\n", color ? "white" : "black", finishRow, finishColumn, startingRow, startingColumn);
+    printf("Undo move for %s player: <%d,%c> -> <%d,%c>\n", color ? "white" : "black", finishRow, finishColumn,
+		   startingRow, startingColumn);
 }
 
 void spPrintComputerMove(char piece, int move) {
-    move <<= 8;
+    move <<= 8; // Pretty print computer's move
     char startingPosition = spChessGameGetCurrentPositionFromMove(move);
     int startingRow = 8 - spChessGameGetRowFromPosition(startingPosition);
     char startingColumn = 'A' + spChessGameGetColumnFromPosition(startingPosition);
@@ -440,48 +445,54 @@ void spPrintComputerMove(char piece, int move) {
     char finishColumn = 'A' + spChessGameGetColumnFromPosition(finishPosition);
 
     printf("Computer: move ");
-
-    if (piece == PAWN(BLACK) || piece == PAWN(WHITE)) {
-        printf("pawn");
-    }
-    else if (piece == BISHOP(BLACK) || piece == BISHOP(WHITE)) {
-        printf("bishop");
-    }
-    else if (piece == KNIGHT(BLACK) || piece == KNIGHT(WHITE)) {
-        printf("knight");
-    }
-    else if (piece == ROOK(BLACK) || piece == ROOK(WHITE)) {
-        printf("rook");
-    }
-    else if (piece == QUEEN(BLACK) || piece == QUEEN(WHITE)) {
-        printf("queen");
-    }
-    else if (piece == KING(BLACK) || piece == KING(WHITE)) {
-        printf("king");
-    }
-    else {
-        printf("___");
+    switch (piece) {
+		case PAWN(BLACK):
+		case PAWN(WHITE):
+			printf("pawn");
+			break;
+		case BISHOP(BLACK):
+		case BISHOP(WHITE):
+			printf("bishop");
+			break;
+		case KNIGHT(BLACK):
+		case KNIGHT(WHITE):
+			printf("knight");
+			break;
+		case ROOK(BLACK):
+		case ROOK(WHITE):
+			printf("rook");
+			break;
+		case QUEEN(BLACK):
+		case QUEEN(WHITE):
+			printf("queen");
+			break;
+		case KING(BLACK):
+		case KING(WHITE):
+			printf("king");
+			break;
+		default:
+			printf("___");
     }
 
     printf(" at <%d,%c> to <%d,%c>\n", startingRow, startingColumn, finishRow, finishColumn);
 }
 
 char spChessGameGetPieceAtPosition(SPChessGame* game, char position) {
-    if (!game) {
+    if (!game) { // Oops
         return '\0';
     }
 
     int row = spChessGameGetRowFromPosition(position);
     int column = spChessGameGetColumnFromPosition(position);
     if (row < 0 || row >= N_ROWS || column < 0 || column >= N_COLUMNS) {
-        return '\0';
+        return '\0'; // Oops
     }
 
-    return game->gameBoard[row][column];
+    return game->gameBoard[row][column]; // Oops?
 }
 
 SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
-    if (!list) {
+    if (!list) { // Nope
         return SP_CHESS_GAME_INVALID_ARGUMENT;
     }
 
@@ -496,7 +507,7 @@ SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
         location = spChessGameGetDestinationPositionFromMove(step);
         row = spChessGameGetRowFromPosition(location);
         column = spChessGameGetColumnFromPosition(location);
-        printf("<%d,%c>", 8 - row, 'A' + column);
+        printf("<%d,%c>", 8 - row, 'A' + column); // Print each move in the correct format.
 
         if (spChessGameStepWillThreaten(step)) {
             printf("*");
@@ -510,7 +521,8 @@ SP_CHESS_GAME_MESSAGE spChessPrintMoves(SPArrayList* list) {
     return SP_CHESS_GAME_SUCCESS;
 }
 
-unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int currentColumn,unsigned int destinationRow, unsigned int destinationColumn) {
+unsigned int setMoveCoordinatesToInt(unsigned int currentRow,unsigned int currentColumn,unsigned int destinationRow,
+									 unsigned int destinationColumn) {
     unsigned int move = spChessGameSetLocation(currentRow, currentColumn) << 8; // format is 8 bits current location, 8 bits destination location
     move |= spChessGameSetLocation(destinationRow, destinationColumn);
     return move;
@@ -534,4 +546,208 @@ unsigned char spChessGameSetLocation(int row, int column) {
     location |= column;
 
     return location;
+}
+
+void spChessPrintGameTitle() {
+	printf(" Chess\n");
+	for (int i = 0; i < 7; i++) {
+		printf("-");
+	}
+	printf("\n");
+}
+
+void spChessGameSetGameMode(SPChessGame* game, SPCommand* command) {
+	if (!game || !command || command->cmd != SP_GAME_MODE) {
+		printf("ERROR: Could not set game mode.\n");
+		return;
+	}
+
+	int gameMode = spParserGetNonNegativeInt(command);
+	switch (gameMode) {
+		case 1:
+		case 2:
+			game->gameMode = gameMode;
+			printf("Game mode is set to %d-player\n", gameMode);
+			break;
+		default:
+			printf("Wrong game mode\n");
+	}
+}
+
+void spChessGameSetDifficulty(SPChessGame* game, SPCommand* command, char** difficulties) {
+	if (!game || !command || command->cmd != SP_DIFFICULTY || !difficulties) {
+		printf("ERROR: Could not set difficulty.\n");
+		return;
+	}
+
+	int difficulty = spParserGetNonNegativeInt(command);
+	if (difficulty >= 1 && difficulty <= 5) {
+		game->difficulty = difficulty;
+		printf("Difficulty level is set to %s\n", difficulties[difficulty]);
+	}
+	else {
+		printf("Wrong difficulty level. The value should be between 1 to 5\n");
+	}
+}
+
+void spChessGameSetUserColor(SPChessGame* game, SPCommand* command) {
+	if (!game || !command || command->cmd != SP_USER_COLOR) {
+		printf("ERROR: Couldn't set user color.\n");
+		return;
+	}
+
+	int userColor = spParserGetNonNegativeInt(command);
+	switch (userColor) {
+		case 0:
+		case 1:
+			game->userColor = userColor;
+			printf("User color is set to %s\n", GET_COLOR(userColor));
+			break;
+		default:
+			printf("Wrong user color. The value should be 0 or 1\n");
+	}
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameLoadGame(SPChessGame* game, SPCommand* command) {
+	if (!game || !command || command->cmd != SP_LOAD) {
+		printf("Error: Could not find game to load to, or the command to do so! Quitting...\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	SP_CHESS_GAME_MESSAGE message = spChessLoadGame(game, command->arguments);
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+		printf("Error: File doesn't exist or cannot be opened\n");
+	}
+
+	return message;
+}
+
+void spChessGameResetSettings(SPChessGame* game) {
+	if (!game) {
+		printf("ERROR: Could not reset game settings.\n");
+		return;
+	}
+
+	game->userColor = WHITE;
+	game->gameMode = 1;
+	game->difficulty = 2;
+	printf("All settings reset to default\n");
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command) {
+	if (!game || !command || command->cmd != SP_MOVE) {
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+
+	int move = spParserGetMove(command); // Get move
+	SP_CHESS_GAME_MESSAGE message = spChessGameIsValidMove(game, move); // Check validity
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+		printf("ERROR: Something went wrong!\n");
+	}
+	else if (message == SP_CHESS_GAME_INVALID_POSITION) {
+		printf("Invalid position on the board\n");
+	}
+	else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
+		printf("The specified position does not contain your piece\n");
+	}
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE) {
+		printf("Illegal move\n");
+	}
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_REMAINS_THREATENED) {
+		printf("Illegal move: king is still threatened\n");
+	}
+	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE_KING_BECOMES_THREATENED) {
+		printf("Illegal move: king will be threatened\n");
+	}
+	else { // Legal move
+		message = spChessGameSetMove(game, move); // Make it
+		if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+			printf("ERROR: OOPS... something went wrong while setting up a move!\n");
+		}
+		else { // Great success
+			message = spChessCheckGameState(game, game->currentPlayer); // Check if game is over
+			switch (message) {
+				case SP_CHESS_GAME_CHECK: // Check
+					printf("Check: %s king is threatened\n", GET_COLOR(game->currentPlayer));
+				case SP_CHESS_GAME_SUCCESS: // Or normal - get and make computer move
+					if (game->gameMode == 1) {
+						move = spMinimaxSuggestMove(game);
+						if (move < 1) {
+							printf("ERROR: Couldn't figure out computer move.\n");
+							return SP_CHESS_GAME_INVALID_ARGUMENT;
+						}
+						else {
+							char piece = spChessGameGetPieceAtPosition(game, spChessGameGetCurrentPositionFromMove(move << 8));
+							spPrintComputerMove(piece, move);
+							spChessGameSetMove(game, move);
+							message = spChessCheckGameState(game, game->currentPlayer);
+						}
+					}
+					break;
+				case SP_CHESS_GAME_CHECKMATE: // Checkmate! Take THAT!
+					printf("Checkmate! %s player wins the game\n", GET_COLOR(!game->currentPlayer));
+					break;
+				case SP_CHESS_GAME_DRAW: // The best man won. Wait, what?
+					printf("The game ends in a draw\n");
+					break;
+				default:
+					printf("ERROR: Something went wrong while checking game state.\n");
+					break;
+			}
+		}
+	}
+
+	return message;
+}
+
+void spChessGetMoves(SPChessGame* game, SPCommand* command) {
+	if (!game || !command || command->cmd != SP_GET_MOVES) {
+		printf("ERROR: Could not find game (or command) to get moves!\n");
+		return;
+	}
+	char location = spParserGetLocation(command);
+	SP_CHESS_GAME_MESSAGE message = spChessVerifyPositionAndPiece(game, location); // Check position validity
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
+		printf("ERROR: Couldn't verify position and piece.\n");
+	}
+	else if (message == SP_CHESS_GAME_INVALID_POSITION) {
+		printf("Invalid position on the board\n");
+	}
+	else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
+		printf("The specified position does not contain a player piece\n");
+	}
+	else {
+		SPArrayList* possibleMoves = spChessGameGetMoves(game, location); // Get moves
+		message = spChessPrintMoves(possibleMoves); // Print 'em all
+		spArrayListDestroy(possibleMoves); // Bye bye
+	}
+}
+
+SP_CHESS_GAME_MESSAGE spChessGameUndo(SPChessGame* game) {
+	if (!game) {
+		printf("ERROR: No game passed to undo move in!\n");
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
+	int move = spChessGameGetLastMovePlayed(game); // Get last move
+	SP_CHESS_GAME_MESSAGE message = spChessGameUndoMove(game); // Undo it
+	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) { // Oops
+		printf("ERROR: Something went wrong while trying to undo move.\n");
+	}
+	else if (message == SP_CHESS_GAME_NO_HISTORY) { // What move?
+		printf("Empty history, no move to undo\n");
+	}
+	else {
+		spPrintUndoneMove(move, game->currentPlayer); // Print move
+		move = spChessGameGetLastMovePlayed(game); // 2 undo's!
+		message = spChessGameUndoMove(game);
+		if (message == SP_CHESS_GAME_INVALID_ARGUMENT) { // Oops
+			printf("ERROR: Couldn't undo second move!\n");
+		}
+		else if (message == SP_CHESS_GAME_SUCCESS) { // Was there a move?
+			spPrintUndoneMove(move, game->currentPlayer);
+		}
+		spChessGamePrintBoard(game);
+	}
+
+	return message;
 }

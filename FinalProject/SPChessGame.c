@@ -220,20 +220,6 @@ int spChessGameCheckKingThreat(SPChessGame* game, char targetLocation, char thre
     return 0; // Nope
 }
 
-
-int spUndoAndRestoreHistory(SPChessGame* game, int lastMove) {
-    int full = spArrayListIsFull(game->history);
-    if (spChessGameUndoMove(game) == SP_CHESS_GAME_INVALID_ARGUMENT) {
-        return 0;
-    }
-
-    if (full && spArrayListAddLast(game->history, lastMove) != SP_ARRAY_LIST_SUCCESS) {
-        return 0;
-    }
-
-    return 1;
-}
-
 /**
  * Checks if a piece is threatened by an opponent.
  *
@@ -1103,4 +1089,17 @@ SP_CHESS_GAME_MESSAGE spChessGameResetGame(SPChessGame* game) {
     }
 
     return SP_CHESS_GAME_SUCCESS;
+}
+
+int spUndoAndRestoreHistory(SPChessGame* game, int lastMove) {
+    int full = spArrayListIsFull(game->history);
+    if (spChessGameUndoMove(game) == SP_CHESS_GAME_INVALID_ARGUMENT) {
+        return 0;
+    }
+
+    if (full && spArrayListAddLast(game->history, lastMove) != SP_ARRAY_LIST_SUCCESS) {
+        return 0;
+    }
+
+    return 1;
 }
