@@ -35,79 +35,194 @@
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
 #define MM_QUIT 2
+#define MAIN_MENU_N_WIDGETS 3
 
 #define GM_MASSAGE 0
 #define GM_1PLAYER 1
 #define GM_2PLAYER 2
 #define GM_BACK_TO_MM 3
+#define GET_MODE_N_WIDGETS 4
 
 #define GD_MASSAGE 0
 #define GD_DIFFICULTY(i) i
 #define GD_BACK 6
 #define GD_BACK_TO_MM 7
+#define GET_DIFFICULTY_N_WIDGETS 8
 
 #define GC_MASSAGE 2
 #define GC_WHITE 1
 #define GC_BLACK 0
 #define GC_BACK 3
 #define GC_BACK_TO_MM 4
+#define GET_COLOR_N_WIDGETS 5
 
-#define GS_RESTART_GAME 32
-#define GS_SAVE_GAME 33
-#define GS_LOAD_GAME 34
-#define GS_MAIN_MENU 35
-#define GS_QUIT 36
-#define GS_UNDO 37
-#define GS_GET_MOVES_LEGEND 38
-#define GS_CHECK 39
-#define GS_CHECK_MATE 40
-#define GS_DRAW 41
-#define GS_SAVED_GAME_INDICATOR 42
-
-//#define OFFSET_FOR_STATES_WIDGETS_INDEX 38
-
-#define NUM_SLOTS 9
-#define SLOT_HEIGHT 70
-#define SCROLLBAR_MAX_POSITION (NUM_SLOTS*SLOT_HEIGHT-300)
-#define NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS 6
-#define LSG_MASSAGE 0
-#define LSG_BOTTOM_COVER 1
-#define LSG_BACK 2
-#define LSG_NO_SLOTS 3
-#define LSG_UP_ARRAW 4
-#define LSG_DOWN_ARRAW 5
-#define LSG_SLOT(i) (i+5)
-#define LSG_SLOT_INDICATOR(i) (i+5+NUM_SLOTS)
-#define WIDGET_TO_SLOT_INDEX(i) (i-5)
-
+#define CONTINUE 1
 #define SHOWN 1
 #define HIDE 0
 #define ROUNDED_POSITION(x) (40+x-(x+30)%80)
 #define BOARD_TO_SCREEN_LOCATION(x) (10+80*x)
 #define SCREEN_TO_BOARD_LOCATION(x) ((x-10)/80)
 
+
+/**
+ * SPChessMainSdl summary:
+ *
+ * Contains the main functions for the GUI mode: the creating of the settings windows and
+ * functions used by only them or by them and the game and load/save windows.
+ *
+ * SPGameCreateScreens     		  - Creates all the relevant screens for the chess game into
+ * 								    a given array.
+ * SPGameCreateMainMenuWindow     - Creates the main menu.
+ * SPGameCreateGetModeWindow      - Creates the get mode window.
+ * SPCreateGetDifficultyWindow    - Creates the get difficulty window.
+ * SPGameCreateGetModeWindow      - Creates the get mode window.
+ * SPCreateGetColorWindow         - Creates the get color window.
+ * SPCheckWidgetsInit             - after a screen is created, checks if
+ * 									all widgets allocated successfully         	  .
+ * SPDrawScreen              	  - Draws a screen and the widgets contained in it.
+ * SPDrawWidgets                  - Draws all widgets in a window
+ * SPOpenWindow         	      - Shows a window and hides all the others
+ * SPOpenLoadSaveGameWindow       - Opens load/save window
+ * SPOpenNextWindow               - Opens the next window of the one shown
+ * SPOpenPreviousWindow           - Opens the next window of the one shown
+ * SPQuit					      - Quits the game
+ * SPOpenMainMenuWindow           - Opens the main menu window
+
+ */
+
+/**
+ *  Creates all the relevant screens for the chess game into
+ * 	a given array.
+ *  @param screens - pointer to an array of screens.
+ *  @return 0 if an error occurred.
+ *  		1 on success.
+ */
 int SPGameCreateScreens(Screen** screens);
 
+ /**
+ *  Creates the main menu. this is the only window shown when initialized
+ *  @return		NULL, if an error occurred.
+ *  			Otherwise An instant of a screen with content corresponding to the main menu .
+ */
 Screen* SPGameCreateMainMenuWindow();
 
+/**
+*  Creates Creates the get mode window.
+*  @return		NULL, if an error occurred.
+*  				Otherwise An instant of a screen with content corresponding to the get mode window.
+*/
 Screen* SPGameCreateGetModeWindow();
 
+/**
+*  Creates Creates the get difficulty window.
+*  @return		NULL, if an error occurred.
+*  				Otherwise An instant of a screen with content corresponding to the get difficulty window.
+*/
 Screen* SPCreateGetDifficultyWindow();
 
+/**
+*  Creates Creates the get color window.
+*  @return		NULL, if an error occurred.
+*  				Otherwise An instant of a screen with content corresponding to the get color window.
+*/
 Screen* SPCreateGetColorWindow();
 
-void SPDefaultDrawScreen(Screen* screen);
+/**
+*  after a screen is created, checks if
+*  all widgets allocated successfully
+*  @param screen - pointer to a screen.
+*
+*  @return 0 if one or more of the widgets soes not exist.
+*  		   1 on success.
+*/
+int SPCheckWidgetsInit(Screen* screen);
 
-int SPOpenWindow(Screen** screens,int window);
+void SPShowDrawError();
 
+/**
+*  Draws a screen and the widgets contained in it, and presents the changes to user.
+*  if the screen is the game's screen, draws the board first.
+*  @param screen - pointer to a screen.
+*  @param screenIndex - the index of the screen to be drawn.
+*  @return QUIT signal if an error occurred.
+*          CONTINUE signal on success.
+*
+*/
+int SPDrawScreen(Screen* screen,int screenIndex);
+
+/**
+*  Draws the widgets contained in a screen( this function is used by the other drawing functions).
+*  @param screen - pointer to a screen.
+*/
 void SPDrawWidgets(Screen* screen);
 
+/**
+*  Shows a window and hides all the others in the given array.
+*  @param screens - pointer to the game's array of screens.
+*  		  screenIndex - the index of the screen to be shown.
+*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*
+*/
+int SPOpenWindow(Screen** screens,int screenIndex);
+
+/**
+*  Shows the load/save window.
+*  @param screens - pointer to the game's array of screens.
+*  @param screenIndex - the index of the screen: load or save.
+*  @param previousScreen - the index of the screen currently opened, needed
+		  because we need to know where to return
+*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*/
 int SPOpenLoadSaveGameWindow(Screen** screens ,int screenIndex , int previousScreen);
 
+
+/**
+*  NOTE:
+*  The signing of the following functions is
+*  to match them to the signing suitable to the button struct
+*/
+
+/**
+*  Opens the next window of the one shown at the moment
+*  @param screens - pointer to the game's array of screens.
+*  @param game - the game's struct
+*  @param screenIndex - the index of the screen shown at the moment.
+*  @param widgetIndex - the Index of the widget within the screen's widgets array
+*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*/
 int SPOpenNextWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
+/**
+*  Opens the next window of the one shown at the moment
+*  @param screens - pointer to the game's array of screens.
+*  @param game - the game's struct
+*  @param screenIndex - the index of the screen shown at the moment.
+*  @param widgetIndex - the Index of the widget within the screen's widgets array
+*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*/
 int SPOpenPreviousWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
+/**
+*  Quits the game
+*  @param screens - pointer to the game's array of screens.
+*  @param game - the game's struct
+*  @param screenIndex - the index of the screen shown at the moment.
+*  @param widgetIndex - the Index of the widget within the screen's widgets array
+*  @return QUIT signal, indicating the user requested to quit.
+*/
 int SPQuit(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
 
+/**
+*  Opens the main menu window.
+*  if the user requested from the game's screen, and current game is unsaved, calls
+*  the function: SPShowSaveBeforeQuitMassage (see documentation in SPChessGameSdl.h).
+*  if the user requested from the game's screen, and current game is saved, resets the
+*  current game before opening the main menu.
+*
+*  @param screens - pointer to the game's array of screens.
+*  @param game - the game's struct
+*  @param screenIndex - the index of the screen shown at the moment.
+*  @param widgetIndex - the Index of the widget used to call this action within the screen's widgets array
+*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*/
 int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);

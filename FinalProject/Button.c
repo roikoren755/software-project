@@ -1,6 +1,12 @@
 #include "Button.h"
 
-
+/**
+ * creates a texture from an image's given path, and relates it to a renderer.
+*  @param image - a path to an image.
+*  @param renderer - a pointer to a renderer
+ * @return NULL if an error occurred.
+ *         a pointer to the created texture, otherwise
+ */
 SDL_Texture* createTexture(const char* image,SDL_Renderer* renderer){
 
 	SDL_Surface* surface = SDL_LoadBMP(image);
@@ -76,11 +82,10 @@ int handleButtonEvent(Widget* src, SDL_Event* e,Screen** screens,
 	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
 		return NONE;
 	}
-	if (e->type == SDL_MOUSEBUTTONUP) {
+	if (e->type == SDL_MOUSEBUTTONUP) {  //check if button was pressed
 		Button* button = (Button*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
 		if (SDL_PointInRect(&point, &button->location)) {
-			printf("button pressed at <%d,%d>\n",button->location.x,button->location.y);
 			return button->action(screens,game,  screenIndex , widgetIndex);
 		}
 	}
@@ -97,7 +102,7 @@ Widget* createLable(
 	SDL_Renderer* renderer,
 	const char* image,
 	int x, int y, int w, int h,int shown){
-	// allocate data
+
 	Widget* res = (Widget*) malloc(sizeof(Widget));
 	if (res == NULL)
 		return NULL;
@@ -137,15 +142,21 @@ void destroyLable(Widget* src){
 }
 
 int handleLableEvent(Widget* src, SDL_Event* e,Screen** screens, SPChessGame* game,int screenIndex ,int widgetIndex){
-	game->locations[32] = '\0'; //TODO	
+	if(!game){  //sanity check
+		printf("ERROR, Resources for game were lost. quitting..\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
+							"ERROR, Resources for game were lost. quitting", NULL);
+		return QUIT;
+	}
+
 	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
 		return NONE;
 	}
+
 	if (e->type == SDL_MOUSEBUTTONUP) {
 		Lable* lable = (Lable*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
 		if (SDL_PointInRect(&point, &lable->location)) {
-			printf("lable pressed at <%d,%d>\n",lable->location.x,lable->location.y);
 			return PRESSED;
 		}
 	}
@@ -206,11 +217,11 @@ int handleStickerEvent(Widget* src, SDL_Event* e,Screen** screens,
 	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
 		return NONE;
 	}
-	if (e->type == SDL_MOUSEBUTTONDOWN) {
+	if (e->type == SDL_MOUSEBUTTONDOWN) {   //check if pressed
 		Sticker* sticker = (Sticker*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
 		if (SDL_PointInRect(&point, &sticker->location)) {
-			if(e->button.button == SDL_BUTTON_LEFT){
+			if(e->button.button == SDL_BUTTON_LEFT){   //check if right clicked or left clicked
 				return sticker->leftAction(src,e,screens,game);
 			}
 			if(e->button.button == SDL_BUTTON_RIGHT){

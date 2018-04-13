@@ -8,20 +8,21 @@
 #include "SPLoadSaveGameSdl.h"
 
 
-
 Screen* SPCreateLoadSaveGameWindow(int screenIndex){
-	char screenName[10];
+	//set right string
+	char screenName[5];
 	if(screenIndex==LOAD_GAME_WINDOW ) {strcpy(screenName,"Load");
 	}
 	else if(screenIndex==SAVE_GAME_WINDOW ) {strcpy(screenName,"Save");
 	}
-		
-//	char screenName[] = (screenIndex==LOAD_GAME_WINDOW ? "Load" : "Save");
-	char temp_str[30];
+
+	char temp_str[35];
 	sprintf(temp_str,"%s Game",screenName);
+
+	//Allocate screen struct
 	Screen* window = createScreen(600,550,
 			temp_str,
-			NUM_SLOTS+NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS,
+			LOAD_SAVE_N_WIDGETS,
 			HIDE,
 			GAME_SCREEN,
 			NONE,
@@ -32,6 +33,7 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 
 		SDL_Renderer* rend = window->renderer;
 
+		//Allocate screen's widgets
 		sprintf(temp_str,"pics/lsg_select_game_to_%s.bmp",screenName);
 		window->widgets[LSG_MASSAGE] = createLable(rend,
 									temp_str,0,0,600,100,SHOWN);
@@ -59,20 +61,40 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 									"pics/lsg_indicator.bmp",200,NONE,50,30,HIDE);
 		}
 
+		//check if widgets were created successfully
+		int success = SPCheckWidgetsInit(window);
+		if(!success){
+			return NULL;
+		}
 
 		return window;
 
 }
 
-void SPDrawLoadSaveScreen(Screen* screen){
+int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
+	if(!screen || screenIndex<LOAD_GAME_WINDOW){
+		printf("ERROR: unable to draw, screen resources lost\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
+										"ERROR: unable to draw, screen resources lost", NULL);
+		return QUIT;
+	}
+
 	SDL_Renderer* rend = screen->renderer;
-	SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
-	SDL_RenderClear(rend);
+	int success = SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR);
+	if(success == -1){
+		SPShowDrawError();
+		return QUIT;
+	}
+	success = SDL_RenderClear(rend);
+	if(success == -1){
+		SPShowDrawError();
+		return QUIT;
+	}
 
 	Widget * widget;
 	int i,j;
 
-	SDL_Rect scrollRect = { .x = 0, .y = 100, .w = 600, .h = 300 };
+	SDL_Rect scrollRect = { .x = 0, .y = 100, .w = 600, .h = 300 }; // draw a yellow rect to contain the slots
 	SDL_SetRenderDrawColor(rend, CHESS_YELLOW_COLOR);
 	SDL_RenderFillRect (rend, & scrollRect);
 
@@ -89,12 +111,13 @@ void SPDrawLoadSaveScreen(Screen* screen){
 	}
 	SDL_Rect scrollbarIndicator = { .x = 565, .y = (int)scrollbarIndicatorPos, .w = 35, .h = 50 };
 	SDL_SetRenderDrawColor(rend, 160,160,160,0); // darker gray
-	SDL_RenderFillRect (rend, &scrollbarIndicator);
+	SDL_RenderFillRect (rend, &scrollbarIndicator); //draw the indicator
 
-
+	//find the right spot for the highest slot
 	int firstShownSlotIndex = screen->scrollBarPosition/SLOT_HEIGHT+1;
 	int firstShownSlotPosition = 100-screen->scrollBarPosition%SLOT_HEIGHT;
 
+	//update location for the buttons and the 'used' labels, indicating wether the slot is used or not
 	Button* slotButton;
 	Lable * slotIndicatorLable;
 	for(j=0,i=firstShownSlotIndex; i<=firstShownSlotIndex+300/SLOT_HEIGHT; j++,i++){
@@ -124,11 +147,18 @@ void SPDrawLoadSaveScreen(Screen* screen){
 	SDL_Delay(10);
 	SDL_RenderPresent(rend);
 
+	return CONTINUE;
 }
 
 int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
-		game->locations[32] = '\0'; //TODO
-		
+	if(!game){  //sanity check
+		printf("Erorr, Resources for game were lost. quitting..\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
+							"Erorr, Resources for game were lost. quitting", NULL);
+		return QUIT;
+	}
+
+		//move the scrollbar position
 		if(widgetIndex == LSG_UP_ARRAW){
 				screens[screenIndex]->scrollBarPosition -= 7;
 		}
@@ -142,9 +172,8 @@ int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int wid
 		if(screens[screenIndex]->scrollBarPosition >= SCROLLBAR_MAX_POSITION){
 					screens[screenIndex]->scrollBarPosition = SCROLLBAR_MAX_POSITION;
 		}
-		SPDrawLoadSaveScreen(screens[screenIndex]);
-
-	return PRESSED;
+		//draw the window
+		return SPDrawLoadSaveScreen(screens[screenIndex],screenIndex);
 }
 
 
@@ -156,7 +185,7 @@ int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 	}
 	
 	char fileName[30];
-	sprintf(fileName,"games_saved/game_slot%d.txt",slotIndex);
+	sprintf(fileName,"games_saved/game_slot%d.txt",slotIndex); //load the game
 	SP_CHESS_GAME_MESSAGE massage = spChessLoadGame(game,fileName);
 	if(massage != SP_CHESS_GAME_SUCCESS){
 		printf("ERROR: could not load the game\n");
@@ -169,7 +198,9 @@ int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 									"Game Loaded Successfully", NULL);
 
 	SPUpdateLoadSaveSlots(screens);
+	//show the game saved indicator
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN;
+	//update the board
 	SPUpdateBoard(screens, game);
 	return 	SPOpenWindow(screens,GAME_SCREEN);
 
@@ -190,9 +221,10 @@ int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Save Game",
 									"Game Saved Successfully", NULL);
 
+	//update slots indicators
 	screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[screenIndex]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
-	
+	//show the game saved indicator
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN;
 	return PRESSED;
 }
@@ -200,7 +232,7 @@ int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 void SPUpdateLoadSaveSlots(Screen** screens){
 	int i;
 	char fileName[30];
-	for(i=0; i<NUM_SLOTS; i++){
+	for(i=0; i<NUM_SLOTS; i++){  //for every file name, check if exist
 		sprintf(fileName,"games_saved/game_slot%d.txt",i+1);
 		int shown = (access(fileName,F_OK) != -1) ? SHOWN : HIDE;
 		screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(i+1)]->shown =  shown;

@@ -31,16 +31,13 @@ int runSdl(SPChessGame* game ) {
 	}
 
 	SDL_Event e;
-	printf("1\n");
 	while(!done){
-							printf("here333333??");
 		SDL_WaitEvent(&e);
-					printf("here444444444??");
 		feedback = NONE; //
 			for(i=0; i<NUM_SCREENS; i++){
 				if(screens[i]->shown){
 					for(j=0; j<screens[i]->widgetsSize; j++){
-						printf("%d.<%d,%d>\n",x++,i,j);
+
 						if(screens[i]->widgets[j]){
 							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j],
 									&e,screens,game,i,j);
@@ -48,6 +45,7 @@ int runSdl(SPChessGame* game ) {
 						if(feedback == PRESSED){
 							break;
 						}
+
 						if(feedback == QUIT){
 							done = 1;
 							break;
@@ -57,10 +55,12 @@ int runSdl(SPChessGame* game ) {
 				}
 			}
 
-		for(i=0; i<NUM_SCREENS; i++){
+		for(i=0 ; i<NUM_SCREENS; i++){
 			if(screens[i]->shown){
-				printf("%d.screen %d shown\n",x++,i);
-				screens[i]->draw(screens[i]);
+				feedback = screens[i]->draw(screens[i],i);
+				if(feedback == QUIT){
+					done = 1;
+				}
 				break;
 			}
 		}
@@ -70,11 +70,6 @@ int runSdl(SPChessGame* game ) {
 
 	SPDestroyScreensArr(screens,NUM_SCREENS);
 	
-	printf("done is %d\n",done);
-
-
-
-
 	SDL_Quit();
 	return 0;
 

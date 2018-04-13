@@ -11,6 +11,16 @@
 #include "SPChessParser.h"
 #include "Button.h"
 
+
+/***
+ * runs the GUI mode display.
+ * creates an array of the relavent screens,
+ * and loops the currently shown screen (only one
+ * screen is shown at any time)
+ * and its widgets to see if one is pressed.
+ * @param game - pointer to the game's struct
+ * @return 0 when exited successfully and all resources freed
+ */
 int runSdl(SPChessGame* game );
 
 int min(int a,int b);
