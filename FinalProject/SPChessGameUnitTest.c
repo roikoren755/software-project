@@ -263,7 +263,7 @@ static int spChessGameTestCheckGameState() {
 	return 1;
 }
 
-int main() {
+int main2() {
 	RUN_TEST(spChessGameBasicTest);
 	RUN_TEST(spChessGameTestIsValidMove);
 	RUN_TEST(spChessGameTestGetMoves);

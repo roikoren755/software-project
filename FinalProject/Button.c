@@ -93,16 +93,20 @@ void destroyButton(Widget* src)
 
 int handleButtonEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* game, int screenIndex,
 					  int widgetIndex) {
-	if (!src || !e || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
-		!screens[screenIndex]->widgets[widgetIndex] || !screens[screenIndex]->widgets[widgetIndex]->shown) {
-		printf("ERROR: Something went wrong while handling button event\n");
+	if (!src || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
+			!screens[screenIndex]->widgets[widgetIndex]) {
+			printf("ERROR: Something went wrong while handling button event\n");
+	}
+	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
 		return NONE;
 	}
+
 
 	if (e->type == SDL_MOUSEBUTTONUP) {  //check if button was pressed
 		Button* button = (Button*) src->data;
 		SDL_Point point = { .x = e->button.x, .y = e->button.y };
 		if (SDL_PointInRect(&point, &button->location)) {
+			printf("button preesed <%d,%d>\n",button->location.x,button->location.y);
 			return button->action(screens, game, screenIndex, widgetIndex);
 		}
 	}
@@ -122,7 +126,7 @@ void drawButton(Widget* src, SDL_Renderer* renderer) {
 	}
 	int success = SDL_RenderCopy(renderer, button->texture, NULL, &button->location);
 	if(success == -1){
-		printf("unable to draw Button: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw Button: %s\n",SDL_GetError());
 	}
 }
 
@@ -167,7 +171,7 @@ Widget* createLabel(SDL_Renderer* renderer, const char* image, int x, int y, int
 	return res;
 }
 
-void destroyLable(Widget* src){
+void destroyLabel(Widget* src){
 	if(src!=NULL){
 		Label* lable = (Label*) src->data;
 		if(lable!=NULL){
@@ -187,8 +191,12 @@ int handleLabelEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* g
 	}
 
 	if (!src || !e || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
-	   !screens[screenIndex]->widgets[widgetIndex] || !screens[screenIndex]->widgets[widgetIndex]->shown) {
+	   !screens[screenIndex]->widgets[widgetIndex]) {
 		printf("ERROR: Could not handle label event\n");
+		return NONE;
+	}
+
+	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
 		return NONE;
 	}
 
@@ -204,7 +212,7 @@ int handleLabelEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* g
 }
 
 
-void drawLable(Widget* src, SDL_Renderer* rend){
+void drawLabel(Widget* src, SDL_Renderer* rend){
 	if (!src || !rend) {
 		printf("ERROR: Could not draw label\n");
 		return;
@@ -310,11 +318,11 @@ void drawSticker(Widget* src, SDL_Renderer* rend){
 	}
 	Sticker* sticker = (Sticker*) src->data;
 	if(sticker == NULL){   //safety
-		printf("ERROR: an attempt was made to paint a widget that did not exist\n");
+		printf("ERROR: an attempt was made to draw a widget that did not exist\n");
 		return;
 	}
 	int success = SDL_RenderCopy(rend, sticker->texture, NULL, &sticker->location);
 	if(success == -1){
-		printf("unable to draw Button: %s\n",SDL_GetError());
+		printf("unable to draw widget: %s\n",SDL_GetError());
 	}
 }

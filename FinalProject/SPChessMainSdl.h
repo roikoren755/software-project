@@ -14,7 +14,6 @@
 #include "SPMainAux.h"
 #include "SPMinimax.h"
 
-#include <unistd.h>
 
 #define NUM_SCREENS 7
 
@@ -136,18 +135,23 @@ Screen* SPCreateGetColorWindow();
 */
 int SPCheckWidgetsInit(Screen* screen);
 
-void SPShowDrawError();
 
+/**
+*  NOTE:
+*  in drawing errors, no massage box show up.
+*  Drawing is done in loops, can't 'overflow' the user with massages.
+*  Moreover, in some cases drawing errors will not have a great effect, and the game
+*  is still playable.
+*/
 /**
 *  Draws a screen and the widgets contained in it, and presents the changes to user.
 *  if the screen is the game's screen, draws the board first.
 *  @param screen - pointer to a screen.
 *  @param screenIndex - the index of the screen to be drawn.
-*  @return QUIT signal if an error occurred.
-*          CONTINUE signal on success.
+
 *
 */
-int SPDrawScreen(Screen* screen,int screenIndex);
+void SPDrawScreen(Screen* screen,int screenIndex);
 
 /**
 *  Draws the widgets contained in a screen( this function is used by the other drawing functions).

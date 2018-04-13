@@ -64,6 +64,7 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 		//check if widgets were created successfully
 		int success = SPCheckWidgetsInit(window);
 		if(!success){
+			SPDestroyScreen(window);
 			return NULL;
 		}
 
@@ -71,36 +72,49 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex){
 
 }
 
-int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
+void SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 	if(!screen || screenIndex<LOAD_GAME_WINDOW){
 		printf("ERROR: unable to draw, screen resources lost\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
 										"ERROR: unable to draw, screen resources lost", NULL);
-		return QUIT;
 	}
 
 	SDL_Renderer* renderer = screen->renderer;
 	int success = SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR);
 	if(success == -1){
-		SPShowDrawError();
-		return QUIT;
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
 	success = SDL_RenderClear(renderer);
 	if(success == -1){
-		SPShowDrawError();
-		return QUIT;
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
 	}
 
 	Widget * widget;
 	int i,j;
 
 	SDL_Rect scrollRect = { .x = 0, .y = 100, .w = 600, .h = 300 }; // draw a yellow rect to contain the slots
-	SDL_SetRenderDrawColor(renderer, CHESS_YELLOW_COLOR);
+	success = SDL_SetRenderDrawColor(renderer, CHESS_YELLOW_COLOR);
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
+	}
 	SDL_RenderFillRect (renderer, &scrollRect);
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+	}
 
 	SDL_Rect scrollbar = { .x = 565, .y = 135, .w = 35, .h = 300 };
 	SDL_SetRenderDrawColor(renderer, 224,224,224,0); //draw scrollbar in gray
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
+	}
 	SDL_RenderFillRect (renderer, &scrollbar);
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
+	}
 
 	float scrollbarIndicatorPos,scrollbarMaxPos = SCROLLBAR_MAX_POSITION;
 	if(scrollbarMaxPos==0){
@@ -111,7 +125,14 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 	}
 	SDL_Rect scrollbarIndicator = { .x = 565, .y = (int)scrollbarIndicatorPos, .w = 35, .h = 50 };
 	SDL_SetRenderDrawColor(renderer, 160,160,160,0); // darker gray
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
+	}
 	SDL_RenderFillRect (renderer, &scrollbarIndicator); //draw the indicator
+	if(success == -1){
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+	}
 
 	//find the right spot for the highest slot
 	int firstShownSlotIndex = screen->scrollBarPosition/SLOT_HEIGHT+1;
@@ -147,14 +168,13 @@ int SPDrawLoadSaveScreen(Screen* screen, int screenIndex){
 	SDL_Delay(10);
 	SDL_RenderPresent(renderer);
 
-	return CONTINUE;
 }
 
 int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	if(!game){  //sanity check
-		printf("Erorr, Resources for game were lost. quitting..\n");
+		printf("ERROR, Resources for game were lost. quitting..\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-							"Erorr, Resources for game were lost. quitting", NULL);
+							"ERROR, Resources for game were lost. quitting", NULL);
 		return QUIT;
 	}
 
@@ -173,7 +193,8 @@ int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int wid
 					screens[screenIndex]->scrollBarPosition = SCROLLBAR_MAX_POSITION;
 		}
 		//draw the window
-		return SPDrawLoadSaveScreen(screens[screenIndex],screenIndex);
+		SPDrawLoadSaveScreen(screens[screenIndex],screenIndex);
+		return PRESSED;
 }
 
 

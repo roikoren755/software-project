@@ -8,7 +8,7 @@
 #define DELIMITERS " \t\r\n"
 #define GET_COLOR(color) color ? "white" : "black"
 
-int x=0;
+int y=0;
 
 /***
  * Converts from string to int representation of colors.
@@ -114,28 +114,28 @@ int runSdl(SPChessGame* game) {
 	int i;
 	int j;
 
+	//create screens
 	Screen* screens[NUM_SCREENS] = { NULL };
 	int success = SPGameCreateScreens(screens);
 	if (!success) {
 		done = 1;
 	}
 
-	SDL_Event* event;
+	SDL_Event event;
 	while (!done) {
-		SDL_WaitEvent(event);
+		SDL_WaitEvent(&event);
 		feedback = NONE;
+			//loop over the shown screen's widgets
 			for(i = 0; i < NUM_SCREENS; i++) {
 				if (screens[i]->shown) {
 					for(j = 0; j < screens[i]->widgetsSize; j++) {
 						if (screens[i]->widgets[j]) {
-							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], event, screens, game,
+							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], &event, screens, game,
 																		   i, j);
 						}
-
 						if (feedback == PRESSED) {
 							break;
 						}
-
 						if (feedback == QUIT) {
 							done = 1;
 							break;

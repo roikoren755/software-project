@@ -9,7 +9,7 @@
 #include "SPChessGameSdl.h"
 #include "SPLoadSaveGameSdl.h"
 #include "SPChessParser.h"
-#include "Button.h"
+//#include "Button.h"
 
 
 /***

@@ -66,7 +66,7 @@ Screen* createScreen(int width,int height,
 		int shown,
 		int previousWindow,
 		int nextWindow,
-		int (*draw)(Screen*,int));
+		void (*draw)(Screen*,int));
 
 /***
  * Destroy's screen, freeing all used memory

@@ -26,7 +26,7 @@ Screen* createScreen(int width,int height,
 		int shown,
 		int previousWindow,
 		int nextWindow,
-		int (*draw)(Screen*,int))
+		void (*draw)(Screen*,int))
 	{
 
 	Screen* screen = (Screen*) malloc(sizeof(Screen));
@@ -80,7 +80,7 @@ Screen* createScreen(int width,int height,
 	}
 
 	screen->window = window;
-	screen->renderer = rend;
+	screen->renderer = renderer;
 	screen->draw = draw;
 	screen->scrollBarPosition = 0;
 	screen->previousWindow = previousWindow;

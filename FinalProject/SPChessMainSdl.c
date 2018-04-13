@@ -81,6 +81,7 @@ Screen* SPGameCreateMainMenuWindow(){
 		//check if widgets were created successfully
 		int success = SPCheckWidgetsInit(mainMenuWindow);
 		if(!success){
+			SPDestroyScreen(mainMenuWindow);
 			return NULL;
 		}
 
@@ -115,6 +116,7 @@ Screen* SPGameCreateGetModeWindow(){
 		//check if widgets were created successfully
 		int success = SPCheckWidgetsInit(getModeWindow);
 		if(!success){
+			SPDestroyScreen(getModeWindow);
 			return NULL;
 		}
 
@@ -156,6 +158,7 @@ Screen* SPCreateGetDifficultyWindow(){
 		//check if widgets were created successfully
 		int success = SPCheckWidgetsInit(getDifficultyWindow);
 		if(!success){
+			SPDestroyScreen(getDifficultyWindow);
 			return NULL;
 		}
 
@@ -194,6 +197,7 @@ Screen* SPCreateGetColorWindow(){
 		//check if widgets were created successfully
 		int success = SPCheckWidgetsInit(getColorWindow);
 		if(!success){
+			SPDestroyScreen(getColorWindow);
 			return NULL;
 		}
 
@@ -202,35 +206,25 @@ Screen* SPCreateGetColorWindow(){
 
 }
 
-/**
- * Display a massage informing there is a drawing error
-*/
-void SPShowDrawError(){
-	printf("ERROR: unable to draw screen. Quitting..\n");
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
-									"ERROR: unable to draw screen. Quitting..", NULL);
 
-}
 
-int SPDrawScreen(Screen* screen,int screenIndex){
+void SPDrawScreen(Screen* screen,int screenIndex){
 	if(screen==NULL){
 		printf("ERROR: unable to draw, screen resources lost\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move",
 										"ERROR: unable to draw, screen resources lost", NULL);
-		return QUIT;
 	}
 
 	SDL_Renderer* rend = screen->renderer;
-	rend  = NULL;
 	int success = SDL_SetRenderDrawColor(rend, BACKGROUND_COLOR); //set the right color
 	if(success == -1){
-		printf("ERROR: unable to draw background for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
 	success = SDL_RenderClear(rend); //clear, this is for safety, no need to check,failure won't effect
 	if(success == -1){
-		printf("ERROR: unable to clear renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
-	if(screenIndex==GAME_SCREEN){
+	if(screenIndex==GAME_SCREEN){ //need to draw the board
 		SPDrawBoard(rend);
 	}
 
@@ -240,7 +234,6 @@ int SPDrawScreen(Screen* screen,int screenIndex){
 
 	SDL_RenderPresent(rend);
 
-	return CONTINUE;
 
 }
 
@@ -296,7 +289,8 @@ int SPOpenNextWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 
 	if(screenIndex == GET_MODE_WINDOW){
 		game->gameMode = widgetIndex;//the game mode is the same as the widget index
-		//if game mode is 2 players need to jump to game screen
+		//if game mode is 2 players need to update board and jump to game screen
+		SPUpdateBoard(screens,game);
 		screens[screenIndex]->nextWindow = (widgetIndex==1?GET_DIFFICULTY_WINDOW:GAME_SCREEN); //if game mode is 2 players need to jump to game screen
 	}
 
@@ -316,9 +310,9 @@ int SPOpenNextWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int wi
 
 int SPOpenPreviousWindow(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex){
 	if(!game || widgetIndex > N_MAX_WIDGETS){  //sanity check
-		printf("Erorr, Resources for game were lost. quitting..\n");
+		printf("ERROR, Resources for game were lost. quitting..\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-							"Erorr, Resources for game were lost. quitting", NULL);
+							"ERROR, Resources for game were lost. quitting", NULL);
 
 		return QUIT;
 	}
@@ -344,7 +338,6 @@ int SPOpenMainMenuWindow(Screen** screens ,SPChessGame* game,int screenIndex ,in
 	if(screenIndex == GAME_SCREEN){ //for case where game is saved
 		spChessGameResetGame(game);
     	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = HIDE; //game will not be save anymore
-		SPUpdateBoard(screens,game);
 	}
 	
 	return SPOpenWindow(screens,MAIN_MENU_WINDOW);

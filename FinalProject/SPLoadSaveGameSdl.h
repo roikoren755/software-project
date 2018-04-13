@@ -49,10 +49,8 @@ Screen* SPCreateLoadSaveGameWindow(int screenIndex);
 *  Draws the load/save given screen.
 *  @param screen - pointer to a screen.
 *  @param screenIndex - the index of the screen to be drawn.
-*  @return QUIT signal if an error occurred.
-*          CONTINUE signal on success.
 */
-int SPDrawLoadSaveScreen(Screen* screen, int screenIndex);
+void SPDrawLoadSaveScreen(Screen* screen, int screenIndex);
 
 /**
 *  Checks if there are saved game available for the file names corresponding the slots.

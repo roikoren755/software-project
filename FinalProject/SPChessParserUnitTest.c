@@ -126,7 +126,7 @@ static int spParserCheckGetMove() {
 	return 1;
 }
 
-int main() {
+int main1() {
 	RUN_TEST(spParserCheckGetNonNegativeInt);
 	RUN_TEST(spParserCheckParseLine);
 	RUN_TEST(spParserCheckGetLocation);

@@ -106,6 +106,7 @@ Screen* SPGameCreateGameScreen() {
 
 	int success = SPCheckWidgetsInit(gameScreen); // check if widgets were created successfully
 	if (!success) {
+		SPDestroyScreen(gameScreen);
 		return NULL;
 	}
 
@@ -121,12 +122,12 @@ void SPDrawBoard(SDL_Renderer* rend){
 	SDL_Rect frameRect = { .x = 5, .y = 5, .w = 650, .h = 650 };
 	success = SDL_SetRenderDrawColor(rend, 0, 0, 0, 0);
 	if(success == -1){
-		printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
 
 	success = SDL_RenderFillRect (rend, & frameRect);
 	if(success == -1){
-		printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
 
 	//draw yellow within the frame
@@ -136,11 +137,12 @@ void SPDrawBoard(SDL_Renderer* rend){
 	frameRect.w-=(5*2);
 	success = SDL_SetRenderDrawColor (rend, CHESS_YELLOW_COLOR);
 	if(success == -1){
-		printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
+
 	}
 	success = SDL_RenderFillRect (rend, & frameRect);
 	if(success == -1){
-		printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 	}
 
 	int i,j;
@@ -149,11 +151,11 @@ void SPDrawBoard(SDL_Renderer* rend){
 				SDL_Rect rect = { .x = j, .y = 10+i*SQUARE_HEIGHT, .w = SQUARE_WIDTH, .h = SQUARE_HEIGHT };
 				success = SDL_SetRenderDrawColor(rend, CHESS_BROWN_COLOR);
 				if(success == -1){
-					printf("ERROR: unable to set color for renderer for screen: %s\n",SDL_GetError());
+					printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 				}
 				success = SDL_RenderFillRect(rend, &rect);
 				if(success == -1){
-					printf("ERROR: unable to draw color for renderer for screen: %s\n",SDL_GetError());
+					printf("ERROR: unable to draw screen: %s\n",SDL_GetError());
 				}
 			}
 		}
@@ -210,9 +212,10 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game){
 	SDL_Renderer* renderer = screens[GAME_SCREEN]->renderer;
 	int success = SDL_RenderClear(renderer); //clear, this is for safety, no need to check,failure won't effect
 	if(success == -1){
-		printf("ERROR: unable to clear renderer for screen: %s\n",SDL_GetError());
+		printf("ERROR: unable to draw screen: %s. Quitting..\n",SDL_GetError());
 	}
 	SPDrawBoard(renderer);
+
 
 	if (game->gameMode == 1 && game->currentPlayer != game->userColor) { // when game starts, its time to perform computer move
 		int move = spMinimaxSuggestMove(game);
@@ -314,7 +317,6 @@ int SPShowSaveBeforeQuitMassage(Screen** screens, SPChessGame* game, int screenI
     	}
     	else { // user requested main menu
 			spChessGameResetGame(game);
-			if(SPUpdateBoard(screens, game) == QUIT){return QUIT;};
 			return SPOpenWindow(screens,MAIN_MENU_WINDOW);
 		}
     }
@@ -333,6 +335,7 @@ int SPUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 	unsigned int userMove = 0;
 
 	spChessGameUndoMove(game);
+
 
 	if (!spArrayListIsEmpty(game->history)) { // undo another move
 		userMove = spArrayListGetFirst(game->history);
@@ -354,6 +357,15 @@ int SPUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 	}
 
 	return SPUpdateBoard(screens, game);
+}
+
+int SPShowEventErrorAndQuit(){
+	printf("ERROR: an error occurred while waiting for an event: %s\n",SDL_GetError());
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
+							 "ERROR:  an error occurred while waiting for an event. Quitting..",
+							 NULL);
+	return QUIT;
+
 }
 
 /**
@@ -481,7 +493,10 @@ int SPMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 
 		screens[GAME_SCREEN]->draw(screens[GAME_SCREEN], GAME_SCREEN); // draw the game screen
 
-		SDL_WaitEvent(event);
+		success = SDL_WaitEvent(event);
+		if(success == -1){
+			return SPShowEventErrorAndQuit();
+		}
 	}
 
 	// loop ended, get the new location
@@ -620,7 +635,10 @@ int SPHighlightAllMoves(Widget* src, SDL_Event* event, Screen** screens, SPChess
 		}
 
 		SDL_RenderPresent(renderer);
-		SDL_WaitEvent(event);
+		success = SDL_WaitEvent(event);
+		if(success == -1){
+			return SPShowEventErrorAndQuit();
+		}
 	}
 
 	spArrayListDestroy(list);

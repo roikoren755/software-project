@@ -49,7 +49,7 @@ int SPUpdateBoard(Screen** screens, SPChessGame* game);
 
 /**
 *  Draws a 8x8 board to the renderer.
-*  @param rend - pointer to an SDL_Renderer.
+*  @param renderer - pointer to an SDL_Renderer.
 */
 void SPDrawBoard(SDL_Renderer* rend);
 
@@ -92,6 +92,14 @@ int SPShowSaveBeforeQuitMassage(Screen** screens,SPChessGame* game, int screenIn
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
 int SPUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
+
+/**
+ * Displays a massage informing an error occurred while waiting for an event
+ * and returns QUIT signal (if there is a problem with getting events the user
+ * will not be able to quit, quitting from the console unavailable).
+ * @return QUIT signal.
+*/
+int SPShowEventErrorAndQuit();
 
 /**
 *  Moves a piece dragged by the user.
