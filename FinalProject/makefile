@@ -1,6 +1,6 @@
 CC = gcc
-OBJS = Widget.o Button.o main.o SPArrayList.o SPChessGame.o SPChessGameSdl.o SPChessMainSdl.o SPLoadSaveGameSdl.o SPMinimax.o SPMainAux.o SPChessParser.o
- 
+OBJS = Button.o main.o SPArrayList.o SPChessGame.o SPChessGameSdl.o SPChessMainSdl.o SPChessParser.o SPLoadSaveGameSdl.o SPMainAux.o SPMinimax.o Widget.o
+
 EXEC = chessprog
 CCC_COMP_FLAG = -std=c99 -Wall -Wextra -Werror -pedantic-errors
 SDL_COMP_FLAG = -I/usr/local/lib/sdl_2.0.5/include/SDL2 -D_REENTRANT
@@ -8,7 +8,7 @@ SDL_LIB = -L/usr/local/lib/sdl_2.0.5/lib -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(SDL_LIB) -o $@
-main.o: main.c Widget.h Button.h SPChessGame.h 
+main.o: main.c Widget.h Button.h SPChessGame.h
 	$(CC) $(CCC_COMP_FLAG) $(SDL_COMP_FLAG) -c $*.c
 SPChessParser.o: SPChessParser.c SPChessParser.h
 	$(CC) $(CCC_COMP_FLAG) $(SDL_COMP_FLAG) -c $*.c

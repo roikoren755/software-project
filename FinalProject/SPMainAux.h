@@ -1,16 +1,11 @@
 #ifndef SPMAINAUX_H_
 #define SPMAINAUX_H_
-#include "SPChessGame.h"
-#include "SPChessParser.h"
+
 #include <SDL.h>
 #include <SDL_video.h>
 #include <stdio.h>
-#include "SPChessMainSdl.h"
-#include "SPChessGameSdl.h"
-#include "SPLoadSaveGameSdl.h"
+#include "SPChessGame.h"
 #include "SPChessParser.h"
-//#include "Button.h"
-
 
 /***
  * runs the GUI mode display.

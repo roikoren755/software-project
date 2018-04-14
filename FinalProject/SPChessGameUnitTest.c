@@ -1,6 +1,6 @@
-#include "unit_test_util.h"
-#include "SPChessGame.h"
 #include <string.h>
+#include "SPChessGame.h"
+#include "unit_test_util.h"
 
 static int spChessGameBasicTest() {
 	SPChessGame* game = spChessGameCreate();

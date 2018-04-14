@@ -2,13 +2,14 @@
 // Created by Roi Koren on 28/12/2017.
 #include "SPMainAux.h"
 #include <string.h>
+#include "SPChessGameSdl.h"
+#include "SPChessMainSdl.h"
+#include "SPLoadSaveGameSdl.h"
 
 #define MAXIMUM_COMMAND_LENGTH 1024
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
 #define GET_COLOR(color) color ? "white" : "black"
-
-int y=0;
 
 /***
  * Converts from string to int representation of colors.
@@ -114,28 +115,30 @@ int runSdl(SPChessGame* game) {
 	int i;
 	int j;
 
-	//create screens
+	// create screens
 	Screen* screens[NUM_SCREENS] = { NULL };
-	int success = SPGameCreateScreens(screens);
+	int success = spGameCreateScreens(screens);
 	if (!success) {
 		done = 1;
 	}
 
-	SDL_Event event;
+	SDL_Event* event;
 	while (!done) {
-		SDL_WaitEvent(&event);
+		SDL_WaitEvent(event);
 		feedback = NONE;
-			//loop over the shown screen's widgets
+			// loop over the shown screen's widgets
 			for(i = 0; i < NUM_SCREENS; i++) {
 				if (screens[i]->shown) {
 					for(j = 0; j < screens[i]->widgetsSize; j++) {
 						if (screens[i]->widgets[j]) {
-							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], &event, screens, game,
+							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], event, screens, game,
 																		   i, j);
 						}
+
 						if (feedback == PRESSED) {
 							break;
 						}
+
 						if (feedback == QUIT) {
 							done = 1;
 							break;
@@ -157,7 +160,7 @@ int runSdl(SPChessGame* game) {
 	}
 
 	spChessGameDestroy(game);
-	SPDestroyScreensArr(screens, NUM_SCREENS);
+	spDestroyScreensArr(screens, NUM_SCREENS);
 	SDL_Quit();
 
 	return 0;
@@ -254,7 +257,7 @@ int runConsole(SPChessGame* game) {
 					moveMade = 1;
 				}
 			}
-			else if (game->gameState == CHECKMATE) {
+			if (game->gameState == CHECKMATE) {
 				printf("Checkmate! %s player wins the game\n", GET_COLOR(!game->currentPlayer));
 				quit = 1;
 			}
@@ -262,7 +265,7 @@ int runConsole(SPChessGame* game) {
 				printf("The game ends in a draw\n");
 				quit = 1;
 			}
-			else if (!gameStarted) {
+			if (!gameStarted) {
 				gameStarted = 1;
 				spChessGamePrintBoard(game);
 			}
@@ -272,7 +275,9 @@ int runConsole(SPChessGame* game) {
 				moveMade = 0;
 			}
 			printf("Enter your move (%s player):\n", GET_COLOR(game->currentPlayer));
-			command = spGetCommand();
+			if (!quit) {
+				command = spGetCommand();
+			}
 
 			if (command.cmd == SP_MOVE) {
 				message = spChessGameMove(game, &command);
@@ -863,6 +868,21 @@ SP_CHESS_GAME_MESSAGE spChessGameMove(SPChessGame* game, SPCommand* command) {
 							spPrintComputerMove(piece, move);
 							spChessGameSetMove(game, move);
 							message = spChessCheckGameState(game, game->currentPlayer);
+							switch (message) {
+								case SP_CHESS_GAME_CHECKMATE:
+									printf("Checkmate! %s player wins the game\n", GET_COLOR(!game->currentPlayer));
+									break;
+								case SP_CHESS_GAME_DRAW:
+									printf("The game ends in a draw\n");
+									break;
+								case SP_CHESS_GAME_CHECK:
+									printf("Check: %s king is threatened\n", GET_COLOR(game->currentPlayer));
+									break;
+								case SP_CHESS_GAME_INVALID_ARGUMENT:
+									printf("ERROR: Something went wrong while checking game state.\n");
+								default:
+									break;
+							}
 						}
 					}
 					break;

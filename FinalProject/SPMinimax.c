@@ -5,9 +5,9 @@
  *      Author: user
  */
 #include "SPMinimax.h"
-#include "SPMainAux.h"
 #include <limits.h>
 #include <stdlib.h>
+#include "SPMainAux.h"
 
 #define PAWN_SCORE 1
 #define KNIGHT_SCORE 3

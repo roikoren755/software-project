@@ -1,10 +1,10 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-#include "SPChessGame.h"
-#include "Widget.h"
 #include <SDL.h>
 #include <SDL_video.h>
+#include "SPChessGame.h"
+#include "Widget.h"
 
 #define QUIT 2
 #define PRESSED 1
@@ -20,7 +20,6 @@ typedef struct button_t {
 	SDL_Rect location;
 	int (*action)(Screen** screen, SPChessGame* game, int screenIndex ,int widgetIndex);
 } Button;
-
 
 /**
 * A label struct, containing texture, location, pointer to a renderer,
@@ -108,7 +107,6 @@ void drawButton(Widget* src, SDL_Renderer* renderer);
  */
 Widget* createLabel(SDL_Renderer* renderer, const char* image, int x, int y, int w, int h, int shown);
 
-
 /***
  * Destroys label, freeing all used memory
  * @param src - Pointer to Widget containing the label to destroy
@@ -161,7 +159,6 @@ Widget* createSticker(SDL_Renderer* renderer, const char* image,
 					  int (*leftAction)(Widget* src, SDL_Event* e, Screen** screen, SPChessGame* game),
 					  int (*rightAction)(Widget* src, SDL_Event* e, Screen** screen, SPChessGame* game),
 					  int x, int y, int w, int h, int shown);
-
 
 /***
  * Destroys sticker, freeing all used memory

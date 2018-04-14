@@ -1,79 +1,45 @@
 #include "Widget.h"
 
-void destroyWidget(Widget* src)
-{
-	if (src != NULL)
+void destroyWidget(Widget* src) {
+	if (src) {
 		src->destroy(src);
+	}
 }
 
-/***
- * Create a new instance of screen, with the given parameters
- * @param screenName - the title of the screen.
- * @param widgetsSize - the number of widgets the screen needs
- * @param action - a function for the button to call for if pressed.
- * @param x - the x coordinate for the button to be placed within the renderer.
- * @param y - the y coordinate for the button to be placed within the renderer.
- * @param w - the width of the button.
- * @param h - the height of the button.
- * @param shown - indicates whether the button is shown or not when initialized (using the defines SHOWN/HIDE).
- *
- * @return NULL if an allocation error occurred.
- *         a pointer to the created widget, otherwise
- */
-Screen* createScreen(int width,int height,
-		char* screenName,
-		int widgetsSize,
-		int shown,
-		int previousWindow,
-		int nextWindow,
-		void (*draw)(Screen*,int))
-	{
+Screen* createScreen(int width, int height, char* screenName, int widgetsSize, int shown, int previousWindow,
+					 int nextWindow, void (*draw)(Screen*, int)) {
 
 	Screen* screen = (Screen*) malloc(sizeof(Screen));
-	if (screen == NULL){
+	if (!screen) {
 		printf("ERROR: could not allocate data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-							"ERROR: could not allocate data", NULL);
-			return NULL;
-		}
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error", "ERROR: could not allocate data", NULL);
+		return NULL;
+	}
 
 	int i;
-	for( i = 0;i<N_MAX_WIDGETS; i++){ //safety
+	for(i = 0; i < N_MAX_WIDGETS; i++) { // safety
 		screen->widgets[i] = NULL;
 	}
 	screen->widgetsSize = widgetsSize;
 
-	SDL_Window* window = SDL_CreateWindow(
-						screenName,
-						SDL_WINDOWPOS_CENTERED,
-						SDL_WINDOWPOS_CENTERED,
-						width,
-						height,
-						//SDL_WINDOW_OPENGL);
-						SDL_WINDOW_SHOWN);
-
-
-	if (window == NULL ) {
+	SDL_Window* window = SDL_CreateWindow(screenName, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
+										  SDL_WINDOW_SHOWN);
+	if (!window) {
 		printf("ERROR: unable to create window: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-							"ERROR: unable to create window", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error", "ERROR: unable to create window", NULL);
 		free(screen);
 		return NULL;
 	}
 
-	//hide window if necessary
-	screen->shown = shown;
-	if(!shown){
+	screen->shown = shown; // hide window if necessary
+	if (!shown) {
 		SDL_HideWindow(window);
 	}
 
-
-	// create a renderer for the window
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); // create a renderer for the window
+	if (!renderer) {
 		printf("ERROR: unable to create renderer: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-							"ERROR: unable to create renderer", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error", "ERROR: unable to create renderer", NULL);
 		SDL_DestroyWindow(window);	
 		free(screen);
 		return NULL;
@@ -86,34 +52,32 @@ Screen* createScreen(int width,int height,
 	screen->previousWindow = previousWindow;
 	screen->nextWindow = nextWindow;
 
-
 	return screen;
 }
 
-void SPDestroyScreen(Screen* src){
-	if(src!= NULL){
-
-		if(src->renderer != NULL){
+void spDestroyScreen(Screen* src) {
+	if (src) {
+		if(src->renderer) {
 			SDL_DestroyRenderer(src->renderer);	
 		}
-		if(src->window != NULL){
+		if(src->window) {
 			SDL_DestroyWindow(src->window);
 		}
 
 		int i;
-		for( i = 0; i<src->widgetsSize; i++){
+		for (i = 0; i < src->widgetsSize; i++) {
 			destroyWidget(src->widgets[i]);
 		}
 
-
 		free(src);
 	}
-
 }
 
-void SPDestroyScreensArr(Screen** arr,int size){
-	int i;
-	for( i = 0; i<size; i++){
-		SPDestroyScreen(arr[i]);
+void spDestroyScreensArr(Screen** arr, int size) {
+	if (arr) {
+		int i;
+		for (i = 0; i < size; i++) {
+			spDestroyScreen(arr[i]);
+		}
 	}
 }

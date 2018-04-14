@@ -1,6 +1,6 @@
-#include "unit_test_util.h"
-#include "SPChessParser.h"
 #include <string.h>
+#include "SPChessParser.h"
+#include "unit_test_util.h"
 
 static int spParserCheckGetNonNegativeInt() {
 	SPCommand command;

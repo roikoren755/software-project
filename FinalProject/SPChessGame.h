@@ -5,13 +5,15 @@
 #ifndef SOFTWARE_PROJECT_SPCHESSGAME_H
 #define SOFTWARE_PROJECT_SPCHESSGAME_H
 
-#include "SPArrayList.h"
 #include <stdio.h>
+#include "SPArrayList.h"
 
 #define WHITE 1
 #define BLACK 0
+
 #define N_ROWS 8
 #define N_COLUMNS 8
+
 #define STARTING_ROW "RNBQKBNR"
 #define PAWN(color) ('M' + color * ('a' - 'A'))
 #define KNIGHT(color) ('N' + color * ('a' - 'A'))
@@ -21,6 +23,7 @@
 #define KING(color) ('K' + color * ('a' - 'A'))
 #define BLANK '_'
 #define CAPITAL_TO_LOW(c) c + 'a' - 'A'
+
 #define KING_LOC(color) (4 + color * 3 * N_COLUMNS)
 #define QUEEN_LOC(color) (3 + color * 3 * N_COLUMNS)
 #define LEFT_ROOK_LOC(color) (0 + color * 3 * N_COLUMNS)
@@ -29,11 +32,11 @@
 #define RIGHT_KNIGHT_LOC(color) (6 + color * 3 * N_COLUMNS)
 #define LEFT_BISHOP_LOC(color) (2 + color * 3 * N_COLUMNS)
 #define RIGHT_BISHOP_LOC(color) (5 + color * 3 * N_COLUMNS)
-#define CHECK_COLOR(piece) (piece > 'Z')
-#define CHECKMATE 3
-#define CHECK 2
-#define DRAW 1
+
 #define NORMAL 0
+#define DRAW 1
+#define CHECK 2
+#define CHECKMATE 3
 
 typedef struct sp_chess_game_t {
 	int gameMode;

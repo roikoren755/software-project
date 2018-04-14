@@ -3,9 +3,11 @@
 //
 
 #include "SPChessParser.h"
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SP_MAX_LINE_LENGTH 2048
 
 #define DELIMITERS " \t\r\n"
 #define GAME_MODE "game_mode"
@@ -143,10 +145,13 @@ SPCommand spParserParseLine(const char* str) {
         char* nextNextToken = strtok(NULL, DELIMITERS); // And the argument after it
 
         if (nextToken && // There is a word
-                    !strcmp(nextToken, TO) && // And the word is TO
-                    nextNextToken) { // And yet another argument!
+            !strcmp(nextToken, TO) && // And the word is TO
+            nextNextToken) { // And yet another argument!
             cmd.cmd = SP_MOVE;
             strcpy(cmd.arguments + offset, nextNextToken); // Copy second argument, right after the first one
+        }
+        else {
+            cmd.cmd = SP_INVALID_LINE;
         }
     }
 

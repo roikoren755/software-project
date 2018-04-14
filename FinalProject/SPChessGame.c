@@ -3,23 +3,28 @@
 //
 
 #include "SPChessGame.h"
-#include "SPMainAux.h"
 #include <stdlib.h>
+#include "SPMainAux.h"
 
 #define FIRST_ROW 0
 #define LAST_ROW 7
 #define LEFT_MOST_COL 0
 #define RIGHT_MOST_COL 7
+
 #define SEPARATOR '-'
 #define FIRST_COLUMN 'A'
+
 #define CLEAN_EXCESS_BYTES(i) (i << 24) >> 24
+
 #define LEFT -1
 #define RIGHT 1
 #define UP -1
 #define DOWN 1
 #define STAY 0
+
 #define CAPTURES 1
 #define HISTORY_SIZE 3
+#define CHECK_COLOR(piece) (piece > 'Z')
 
 /***
  * Verifies the location represents a valid location on the board.
@@ -834,7 +839,7 @@ SPArrayList* spChessGameGetMoves(SPChessGame* game, char position) {
         return NULL;
     }
 
-    SPArrayList* steps = spArrayListCreate(30); // TODO - find a better way to limit number of moves?
+    SPArrayList* steps = spArrayListCreate(30);
     if (!steps) {
         return NULL;
     }

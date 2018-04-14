@@ -10,20 +10,18 @@
 #define N_MAX_WIDGETS 43
 
 typedef struct screen_t Screen;
-
 /**
 * Widget: A struct containing draw, destroy and handle event function,
 * pointer to data, witch in the chess program can be either button, label or sticker.
 * The int shown indicates whether the widget should be presented or hiden.
 */
-typedef struct widget_t Widget;
-struct widget_t {
+typedef struct widget_t {
 	int shown;
-	void (*draw)(Widget*, SDL_Renderer*);
-	int (*handleEvent)(Widget*, SDL_Event*,Screen**,SPChessGame*,int,int);
-	void (*destroy)(Widget*);
+	void (*draw)(widget_t*, SDL_Renderer*);
+	int (*handleEvent)(widget_t*, SDL_Event*, Screen**, SPChessGame*, int, int);
+	void (*destroy)(widget_t*);
 	void* data;
-};
+} Widget;
 
 /**
 * Screen: A struct used to represent a window and all the data needed for it.
@@ -38,7 +36,7 @@ struct screen_t {
 	int nextWindow;
 	int widgetsSize;
 	int scrollBarPosition;
-	int (*draw)(Screen*,int);
+	int (*draw)(screen_t*, int);
 };
 
 /***
@@ -60,24 +58,20 @@ void destroyWidget(Widget* src);
  * @return NULL if an allocation error occurred.
  *         a pointer to the created screen, otherwise
  */
-Screen* createScreen(int width,int height,
-		char* screenName,
-		int widgetsSize,
-		int shown,
-		int previousWindow,
-		int nextWindow,
-		void (*draw)(Screen*,int));
+Screen* createScreen(int width, int height, char* screenName, int widgetsSize, int shown, int previousWindow,
+					 int nextWindow, void (*draw)(Screen*, int));
 
 /***
  * Destroy's screen, freeing all used memory
  * @param src - Pointer to screen to destroy
  */
-void SPDestroyScreen(Screen* src);
+void spDestroyScreen(Screen* src);
 
 /***
  * Destroy's an array of screen, freeing all used memory
  * @param arr - Pointer to screens array to destroy
  * @param size - the array's number of elements
  */
-void SPDestroyScreensArr(Screen** arr,int size);
+void spDestroyScreensArr(Screen** arr, int size);
+
 #endif /* WIDGET_H_ */

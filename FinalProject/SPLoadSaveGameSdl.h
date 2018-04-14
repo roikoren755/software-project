@@ -1,7 +1,7 @@
 /*
  * SPLoadSaveGameSdl.h
  *
- *  Created on: 10 באפר 2018
+ *  Created on: 10 March 2018
  *      Author: user
  */
 
@@ -35,7 +35,6 @@
  * to be high enough).
  */
 
-
  /**
  *  Creates the Load/Save window. this is the only window shown when initialized
  *  @param  screenIndex
@@ -43,26 +42,26 @@
  *  		Otherwise An instant of a screen with content corresponding to the load/save
  *  		window, according to the given screen index  .
  */
-Screen* SPCreateLoadSaveGameWindow(int screenIndex);
+Screen* spCreateLoadSaveGameWindow(int screenIndex);
 
 /**
 *  Draws the load/save given screen.
 *  @param screen - pointer to a screen.
 *  @param screenIndex - the index of the screen to be drawn.
 */
-void SPDrawLoadSaveScreen(Screen* screen, int screenIndex);
+void spDrawLoadSaveScreen(Screen* screen, int screenIndex);
 
 /**
 *  Checks if there are saved game available for the file names corresponding the slots.
 *  if a slot has a file related to, show the label iindicating it is used. otherwise hide it.
 *  @param screens - pointer to the game's screen array.
 */
-void SPUpdateLoadSaveSlots(Screen** screens);
+void spUpdateLoadSaveSlots(Screen** screens);
 
 /**
 *  NOTE:
-*  The signing of the following functions is
-*  to match them to the signing suitable to the button struct
+*  The signatures of the following functions is
+*  to match them to the signature suitable to the button struct
 */
 
 /**
@@ -73,31 +72,30 @@ void SPUpdateLoadSaveSlots(Screen** screens);
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPMoveScrollbar(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+int spMoveScrollbar(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 
 /**
 *  Loads a game located at the file's path related to a given slot.
-*  If loading failed, shows a massage to the user
-*  Otherwise shows a success massage and loads the game.
+*  If loading failed, shows a message to the user
+*  Otherwise shows a success message and loads the game.
 *  @param screens - pointer to the game's array of screens.
 *  @param game - the game's struct
 *  @param screenIndex - the index of the screen shown at the moment.
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPLoadChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
+int spLoadChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 
 /**
 *  Saves a game to the file's path related to a given slot, overwriting if exist already.
-*  If saving failed, shows a massage to the user
-*  Otherwise shows a success massage and saves the game.
+*  If saving failed, shows a message to the user
+*  Otherwise shows a success message and saves the game.
 *  @param screens - pointer to the game's array of screens.
 *  @param game - the game's struct
 *  @param screenIndex - the index of the screen shown at the moment.
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 */
-int SPSaveChosenGame(Screen** screens ,SPChessGame* game,int screenIndex ,int widgetIndex);
-
+int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 
 #endif /* SPLOADSAVEGAMESDL_H_ */

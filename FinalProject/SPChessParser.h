@@ -5,9 +5,6 @@
 #ifndef SOFTWARE_PROJECT_SPCHESSPARSER_H
 #define SOFTWARE_PROJECT_SPCHESSPARSER_H
 
-// Defines
-#define SP_MAX_LINE_LENGTH 2048
-
 // All the different commands
 typedef enum sp_command_t {
     SP_GAME_MODE,

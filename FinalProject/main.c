@@ -5,14 +5,14 @@
  *      Author: user
  */
 
-#include "SPChessParser.h"
-#include "SPChessGame.h"
-#include "SPArrayList.h"
-#include "SPMainAux.h"
-#include "SPMinimax.h"
-#include "SPBufferset.h"
 #include <stdio.h>
 #include <string.h>
+#include "SPArrayList.h"
+#include "SPBufferset.h"
+#include "SPChessGame.h"
+#include "SPChessParser.h"
+#include "SPMainAux.h"
+#include "SPMinimax.h"
 
 #define CONSOLE 0
 #define GUI 1
