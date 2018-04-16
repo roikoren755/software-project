@@ -468,5 +468,8 @@ int spMinimaxSuggestMove(SPChessGame* currentGame) {
 	minimaxGame->gameMode = currentGame->gameMode;
 	minimaxGame->difficulty = currentGame->difficulty;
 
-	return spMinimaxGetBestMove(minimaxGame); // And gimme a move
+	int move = spMinimaxGetBestMove(minimaxGame); // And gimme a move
+	spChessGameDestroy(minimaxGame);
+
+	return move;
 }
