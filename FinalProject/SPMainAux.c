@@ -2,6 +2,7 @@
 // Created by Roi Koren on 28/12/2017.
 #include "SPMainAux.h"
 #include <string.h>
+#include "Button.h"
 #include "SPChessGameSdl.h"
 #include "SPChessMainSdl.h"
 #include "SPLoadSaveGameSdl.h"

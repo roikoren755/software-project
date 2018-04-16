@@ -7,7 +7,6 @@
 #ifndef SPCHESSGAMESDL_H_
 #define SPCHESSGAMESDL_H_
 
-#include "Button.h"
 #include "Widget.h"
 
 #define GS_SAVE_GAME 33

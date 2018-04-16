@@ -5,6 +5,7 @@
  *      Author: user
  */
 
+#include "Button.h"
 #include "SPChessGameSdl.h"
 #include "SPChessMainSdl.h"
 #include "SPMainAux.h"
