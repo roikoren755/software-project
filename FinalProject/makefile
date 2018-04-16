@@ -3,8 +3,8 @@ OBJS = Button.o main.o SPArrayList.o SPChessGame.o SPChessGameSdl.o SPChessMainS
 
 EXEC = chessprog
 CCC_COMP_FLAG = -std=c99 -Wall -Wextra -Werror -pedantic-errors
-SDL_COMP_FLAG = -I/usr/local/lib/sdl_2.0.5/include/SDL2 -D_REENTRANT
-SDL_LIB = -L/usr/local/lib/sdl_2.0.5/lib -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib -Wl,--enable-new-dtags -lSDL2 -lSDL2main 
+SDL_COMP_FLAG = -I/Library/Frameworks/SDL2.framework/Headers -D_REENTRANT
+SDL_LIB = -L/Library/Frameworks/SDL2.framework/Headers -Wl,-rpath,/usr/local/lib/sdl_2.0.5/lib -Wl,--enable-new-dtags -lSDL2 -lSDL2main
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(SDL_LIB) -o $@

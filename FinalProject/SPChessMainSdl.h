@@ -6,8 +6,8 @@
  */
 #include <SDL.h>
 #include <SDL_video.h>
+#include "Widget.h"
 #include "SPChessGame.h"
-#include "Button.h"
 
 #define NUM_SCREENS 7
 
@@ -16,9 +16,6 @@
 
 #define GAME_SCREEN 0
 #define MAIN_MENU_WINDOW 1
-#define GET_MODE_WINDOW 2
-#define GET_DIFFICULTY_WINDOW 3
-#define GET_COLOR_WINDOW 4
 #define LOAD_GAME_WINDOW 5
 #define SAVE_GAME_WINDOW 6
 

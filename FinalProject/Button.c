@@ -92,8 +92,7 @@ void destroyButton(Widget* src) {
 
 int handleButtonEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* game, int screenIndex,
 					  int widgetIndex) {
-	if (!src || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
-			!screens[screenIndex]->widgets[widgetIndex]) {
+	if (!src || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets[widgetIndex]) {
 			printf("ERROR: Something went wrong while handling button event\n");
 	}
 	if(!screens[screenIndex]->widgets[widgetIndex]->shown){
@@ -187,8 +186,7 @@ int handleLabelEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* g
 		return QUIT;
 	}
 
-	if (!src || !e || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
-	   !screens[screenIndex]->widgets[widgetIndex]) {
+	if (!src || !e || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets[widgetIndex]) {
 		printf("ERROR: Could not handle label event\n");
 		return NONE;
 	}
@@ -285,8 +283,8 @@ void destroySticker(Widget* src) {
 
 int handleStickerEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame* game, int screenIndex,
 					   int widgetIndex) {
-	if (!src || !e || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets ||
-		!screens[screenIndex]->widgets[widgetIndex] || !screens[screenIndex]->widgets[widgetIndex]->shown) {
+	if (!src || !e || !game || !screens || !screens[screenIndex] || !screens[screenIndex]->widgets[widgetIndex]
+		|| !screens[screenIndex]->widgets[widgetIndex]->shown) {
 		return NONE;
 	}
 
@@ -308,8 +306,8 @@ int handleStickerEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame*
 }
 
 
-void drawSticker(Widget* src, SDL_Renderer* rend) {
-	if (!src || !rend) {   //safety
+void drawSticker(Widget* src, SDL_Renderer* renderer) {
+	if (!src || !renderer) {   //safety
 		printf("ERROR: Could not draw sticker\n");
 		return;
 	}
@@ -318,7 +316,7 @@ void drawSticker(Widget* src, SDL_Renderer* rend) {
 		printf("ERROR: an attempt was made to draw a widget that did not exist\n");
 		return;
 	}
-	int success = SDL_RenderCopy(rend, sticker->texture, NULL, &sticker->location);
+	int success = SDL_RenderCopy(renderer, sticker->texture, NULL, &sticker->location);
 	if (success == -1) {
 		printf("unable to draw widget: %s\n", SDL_GetError());
 	}
