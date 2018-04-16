@@ -126,7 +126,11 @@ int runSdl(SPChessGame* game) {
 
 	SDL_Event event;
 	while (!done) {
-		SDL_WaitEvent(&event);
+		success = SDL_WaitEvent(&event);
+			if(!success){
+				spShowEventErrorAndQuit();
+				done = 1;
+			}
 		feedback = NONE;
 			// loop over the shown screen's widgets
 			for(i = 0; i < NUM_SCREENS; i++) {
@@ -149,7 +153,7 @@ int runSdl(SPChessGame* game) {
 					break;
 				}
 			}
-
+			//present the relevant screen
 		for(i = 0; i < NUM_SCREENS; i++) {
 			if (screens[i]->shown) {
 				screens[i]->draw(screens[i], i);
