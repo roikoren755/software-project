@@ -519,7 +519,7 @@ int spMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 		screens[GAME_SCREEN]->draw(screens[GAME_SCREEN], GAME_SCREEN); // draw the game screen
 
 		success = SDL_WaitEvent(event);
-		if (success == -1) {
+		if (!success) {
 			return spShowEventErrorAndQuit();
 		}
 	}
@@ -661,7 +661,7 @@ int spHighlightAllMoves(Widget* src, SDL_Event* event, Screen** screens, SPChess
 
 		SDL_RenderPresent(renderer);
 		success = SDL_WaitEvent(event);
-		if (success == -1) {
+		if (!success) {
 			return spShowEventErrorAndQuit();
 		}
 	}

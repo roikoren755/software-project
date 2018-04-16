@@ -113,4 +113,11 @@ int spMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 */
 int spHighlightAllMoves(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* game);
 
+/**
+ * Displays a massage informing an error occurred while waiting for an event
+ * and returns QUIT signal (if there is a problem with getting events the user
+ * will not be able to quit, quitting from the console is unavailable).
+ * @return QUIT signal.
+*/
+int spShowEventErrorAndQuit() ;
 #endif /* SPCHESSGAMESDL_H_ */
