@@ -7,31 +7,12 @@
 #ifndef SPCHESSGAMESDL_H_
 #define SPCHESSGAMESDL_H_
 
-#include <string.h>
-#include "SPChessMainSdl.h"
+#include "Button.h"
+#include "Widget.h"
 
-#define GS_RESTART_GAME 32
 #define GS_SAVE_GAME 33
 #define GS_LOAD_GAME 34
-#define GS_MAIN_MENU 35
-#define GS_QUIT 36
-#define GS_UNDO 37
-#define GS_GET_MOVES_LEGEND 38
-#define GS_CHECK 39
-#define GS_CHECKMATE 40
-#define GS_DRAW 41
 #define GS_SAVED_GAME_INDICATOR 42
-
-#define SQUARE_WIDTH 80
-#define SQUARE_HEIGHT 80
-#define BOARD_WIDTH 640
-
-#define CHESS_BROWN_COLOR 204, 102, 0, 0
-
-#define ROUNDED_POSITION(x) (40 + x - (x + 30) % 80)
-#define BOARD_TO_SCREEN_LOCATION(x) (10 + 80 * x)
-#define SCREEN_TO_BOARD_LOCATION(x) ((x - 10) / 80)
-
 
 
 /**

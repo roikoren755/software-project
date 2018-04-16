@@ -1,16 +1,20 @@
 /*
  * SPChessMainSdl.c
  *
- *  Created on: 10 ���� 2018
+ *  Created on: 10 March 2018
  *      Author: user
  */
 #include "SPChessMainSdl.h"
 #include <stdio.h>
 #include <string.h>
+#include "Button.h"
 #include "SPChessGameSdl.h"
 #include "SPLoadSaveGameSdl.h"
 #include "SPMainAux.h"
 
+#define GET_MODE_WINDOW 2
+#define GET_DIFFICULTY_WINDOW 3
+#define GET_COLOR_WINDOW 4
 
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
@@ -34,20 +38,6 @@
 #define GC_BACK 3
 #define GC_BACK_TO_MM 4
 #define GET_COLOR_N_WIDGETS 5
-
-int spCheckWidgetsInit(Screen* screen) {
-	int i;
-	for (i = 0; i < screen->widgetsSize; i++) {
-		if (!screen->widgets[i]) {
-			printf("ERROR: could not create widget. Quitting..\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
-									 "ERROR: could not create widget. Quitting..\n", NULL);
-			return 0;
-		}
-	}
-
-	return 1;
-}
 
 /**
  *  Creates the main menu. this is the only window shown when initialized
@@ -167,12 +157,8 @@ Screen* spCreateGetDifficultyWindow() {
 */
 Screen* spCreateGetColorWindow() {
 	// Allocate screen struct
-	Screen* getColorWindow = createScreen(600, 400, "Select Color:",
-										  GET_COLOR_N_WIDGETS,
-										  HIDE,
-										  GET_DIFFICULTY_WINDOW,
-										  GAME_SCREEN,
-										  spDrawScreen);
+	Screen* getColorWindow = createScreen(600, 400, "Select Color:", GET_COLOR_N_WIDGETS, HIDE, GET_DIFFICULTY_WINDOW,
+										  GAME_SCREEN, spDrawScreen);
 	if (getColorWindow == NULL){
 		return NULL;
 	}
@@ -201,6 +187,24 @@ Screen* spCreateGetColorWindow() {
 	return getColorWindow;
 }
 
+/**
+*  Draws the widgets contained in a screen (this function is used by the other drawing functions).
+*  @param screen - pointer to a screen.
+*/
+void spDrawWidgets(Screen* screen) {
+	if (!screen) {
+		return;
+	}
+
+	Widget* widget;
+	int i;
+	for (i = 0; i < screen->widgetsSize; i++) {
+		widget = screen->widgets[i];
+		if (widget && widget->shown) {
+			widget->draw(widget, screen->renderer);
+		}
+	}
+}
 
 int spGameCreateScreens(Screen** screens) {
 	if (!screens) {
@@ -247,23 +251,18 @@ int spGameCreateScreens(Screen** screens) {
 	return 1;
 }
 
-/**
-*  Draws the widgets contained in a screen (this function is used by the other drawing functions).
-*  @param screen - pointer to a screen.
-*/
-void spDrawWidgets(Screen* screen) {
-	if (!screen) {
-		return;
-	}
-
-	Widget* widget;
+int spCheckWidgetsInit(Screen* screen) {
 	int i;
 	for (i = 0; i < screen->widgetsSize; i++) {
-		widget = screen->widgets[i];
-		if (widget && widget->shown) {
-			widget->draw(widget, screen->renderer);
+		if (!screen->widgets[i]) {
+			printf("ERROR: could not create widget. Quitting..\n");
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
+									 "ERROR: could not create widget. Quitting..\n", NULL);
+			return 0;
 		}
 	}
+
+	return 1;
 }
 
 void spDrawScreen(Screen* screen, int screenIndex) {

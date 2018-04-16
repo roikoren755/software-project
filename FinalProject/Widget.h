@@ -15,14 +15,13 @@ typedef struct screen_t Screen;
 * pointer to data, witch in the chess program can be either button, label or sticker.
 * The int shown indicates whether the widget should be presented or hiden.
 */
-typedef struct widget_t Widget;
-struct widget_t {
+typedef struct widget_t {
 	int shown;
-	void (*draw)(Widget*, SDL_Renderer*);
-	int (*handleEvent)(Widget*, SDL_Event*, Screen**, SPChessGame*, int, int);
-	void (*destroy)(Widget*);
+	void (*draw)(struct widget_t*, SDL_Renderer*);
+	int (*handleEvent)(struct widget_t*, SDL_Event*, Screen**, SPChessGame*, int, int);
+	void (*destroy)(struct widget_t*);
 	void* data;
-} ;
+} Widget;
 
 /**
 * Screen: A struct used to represent a window and all the data needed for it.
@@ -37,7 +36,7 @@ struct screen_t {
 	int nextWindow;
 	int widgetsSize;
 	int scrollBarPosition;
-	void (*draw)(Screen*, int);
+	void (*draw)(struct screen_t*, int);
 };
 
 /***

@@ -7,7 +7,6 @@
 #include "SPLoadSaveGameSdl.h"
 #include "SPMinimax.h"
 
-
 #define MAXIMUM_COMMAND_LENGTH 1024
 #define MAX_FILE_LINE_LENGTH 100
 #define DELIMITERS " \t\r\n"
