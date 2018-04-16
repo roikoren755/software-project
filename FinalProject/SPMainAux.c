@@ -5,6 +5,8 @@
 #include "SPChessGameSdl.h"
 #include "SPChessMainSdl.h"
 #include "SPLoadSaveGameSdl.h"
+#include "SPMinimax.h"
+
 
 #define MAXIMUM_COMMAND_LENGTH 1024
 #define MAX_FILE_LINE_LENGTH 100
@@ -122,16 +124,16 @@ int runSdl(SPChessGame* game) {
 		done = 1;
 	}
 
-	SDL_Event* event;
+	SDL_Event event;
 	while (!done) {
-		SDL_WaitEvent(event);
+		SDL_WaitEvent(&event);
 		feedback = NONE;
 			// loop over the shown screen's widgets
 			for(i = 0; i < NUM_SCREENS; i++) {
 				if (screens[i]->shown) {
 					for(j = 0; j < screens[i]->widgetsSize; j++) {
 						if (screens[i]->widgets[j]) {
-							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], event, screens, game,
+							feedback = screens[i]->widgets[j]->handleEvent(screens[i]->widgets[j], &event, screens, game,
 																		   i, j);
 						}
 
@@ -150,10 +152,7 @@ int runSdl(SPChessGame* game) {
 
 		for(i = 0; i < NUM_SCREENS; i++) {
 			if (screens[i]->shown) {
-				feedback = screens[i]->draw(screens[i], i);
-				if (feedback == QUIT) {
-					done = 1;
-				}
+				screens[i]->draw(screens[i], i);
 				break;
 			}
 		}

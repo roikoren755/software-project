@@ -5,23 +5,11 @@
  *      Author: user
  */
 
-#include "SPLoadSaveGameSdl.h"
 #include <unistd.h>
-#include "SPChessMainSdl.h"
+#include "SPLoadSaveGameSdl.h"
+#include "SPChessGameSdl.h"
+#include "SPMainAux.h"
 
-#define NUM_SLOTS 5
-#define SLOT_HEIGHT 70
-#define SCROLLBAR_MAX_POSITION (NUM_SLOTS * SLOT_HEIGHT - 300)
-#define NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS 5
-#define LSG_MESSAGE 0
-#define LSG_BOTTOM_COVER 1
-#define LSG_BACK 2
-#define LSG_UP_ARROW 3
-#define LSG_DOWN_ARROW 4
-#define LSG_SLOT(i) (i + NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS - 1)
-#define LSG_SLOT_INDICATOR(i) (i + NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS + NUM_SLOTS - 1)
-#define WIDGET_TO_SLOT_INDEX(i) (i - NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS)
-#define LOAD_SAVE_N_WIDGETS (NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS + 2 * NUM_SLOTS)
 
 Screen* spCreateLoadSaveGameWindow(int screenIndex) {
 	char screenName[5]; // set right string

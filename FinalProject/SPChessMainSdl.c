@@ -7,13 +7,10 @@
 #include "SPChessMainSdl.h"
 #include <stdio.h>
 #include <string.h>
-#include "Button.h"
 #include "SPChessGameSdl.h"
+#include "SPLoadSaveGameSdl.h"
 #include "SPMainAux.h"
 
-#define GET_MODE_WINDOW 2
-#define GET_DIFFICULTY_WINDOW 3
-#define GET_COLOR_WINDOW 4
 
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
@@ -37,51 +34,6 @@
 #define GC_BACK 3
 #define GC_BACK_TO_MM 4
 #define GET_COLOR_N_WIDGETS 5
-
-int spGameCreateScreens(Screen** screens) {
-	if (!screens) {
-		return 0;
-	}
-
-	screens[GAME_SCREEN] = spGameCreateGameScreen();
-	if (!screens[GAME_SCREEN]) {
-		return 0;
-	}
-
-	screens[MAIN_MENU_WINDOW] = spGameCreateMainMenuWindow();
-	if (!screens[MAIN_MENU_WINDOW]) {
-		return 0;
-	}
-
-	screens[GET_MODE_WINDOW] = spGameCreateGetModeWindow();
-	if (!screens[GET_MODE_WINDOW]) {
-		return 0;
-	}
-
-	screens[GET_DIFFICULTY_WINDOW] = spCreateGetDifficultyWindow();
-	if (!screens[GET_DIFFICULTY_WINDOW]) {
-		return 0;
-	}
-
-	screens[GET_COLOR_WINDOW] = spCreateGetColorWindow();
-	if (!screens[GET_COLOR_WINDOW]) {
-		return 0;
-	}
-
-	screens[LOAD_GAME_WINDOW] = spCreateLoadSaveGameWindow(LOAD_GAME_WINDOW);
-	if (!screens[LOAD_GAME_WINDOW]) {
-		return 0;
-	}
-
-	screens[SAVE_GAME_WINDOW] = spCreateLoadSaveGameWindow(SAVE_GAME_WINDOW);
-	if (!screens[SAVE_GAME_WINDOW]) {
-		return 0;
-	}
-
-	spUpdateLoadSaveSlots(screens); // need to know which slots are used when initializing
-
-	return 1;
-}
 
 int spCheckWidgetsInit(Screen* screen) {
 	int i;
@@ -215,7 +167,11 @@ Screen* spCreateGetDifficultyWindow() {
 */
 Screen* spCreateGetColorWindow() {
 	// Allocate screen struct
-	Screen* getColorWindow = createScreen(600, 400, "Select Color:", GET_COLOR_N_WIDGETS, HIDE, GET_DIFFICULTY_WINDOW,
+	Screen* getColorWindow = createScreen(600, 400, "Select Color:",
+										  GET_COLOR_N_WIDGETS,
+										  HIDE,
+										  GET_DIFFICULTY_WINDOW,
+										  GAME_SCREEN,
 										  spDrawScreen);
 	if (getColorWindow == NULL){
 		return NULL;
@@ -243,6 +199,52 @@ Screen* spCreateGetColorWindow() {
 	}
 
 	return getColorWindow;
+}
+
+
+int spGameCreateScreens(Screen** screens) {
+	if (!screens) {
+		return 0;
+	}
+
+	screens[GAME_SCREEN] = spGameCreateGameScreen();
+	if (!screens[GAME_SCREEN]) {
+		return 0;
+	}
+
+	screens[MAIN_MENU_WINDOW] = spGameCreateMainMenuWindow();
+	if (!screens[MAIN_MENU_WINDOW]) {
+		return 0;
+	}
+
+	screens[GET_MODE_WINDOW] = spGameCreateGetModeWindow();
+	if (!screens[GET_MODE_WINDOW]) {
+		return 0;
+	}
+
+	screens[GET_DIFFICULTY_WINDOW] = spCreateGetDifficultyWindow();
+	if (!screens[GET_DIFFICULTY_WINDOW]) {
+		return 0;
+	}
+
+	screens[GET_COLOR_WINDOW] = spCreateGetColorWindow();
+	if (!screens[GET_COLOR_WINDOW]) {
+		return 0;
+	}
+
+	screens[LOAD_GAME_WINDOW] = spCreateLoadSaveGameWindow(LOAD_GAME_WINDOW);
+	if (!screens[LOAD_GAME_WINDOW]) {
+		return 0;
+	}
+
+	screens[SAVE_GAME_WINDOW] = spCreateLoadSaveGameWindow(SAVE_GAME_WINDOW);
+	if (!screens[SAVE_GAME_WINDOW]) {
+		return 0;
+	}
+
+	spUpdateLoadSaveSlots(screens); // need to know which slots are used when initializing
+
+	return 1;
 }
 
 /**

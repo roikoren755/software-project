@@ -308,7 +308,7 @@ int handleStickerEvent(Widget* src, SDL_Event* e, Screen** screens, SPChessGame*
 }
 
 
-void drawSticker(Widget* src, SDL_Renderer* renderer) {
+void drawSticker(Widget* src, SDL_Renderer* rend) {
 	if (!src || !rend) {   //safety
 		printf("ERROR: Could not draw sticker\n");
 		return;
@@ -318,7 +318,7 @@ void drawSticker(Widget* src, SDL_Renderer* renderer) {
 		printf("ERROR: an attempt was made to draw a widget that did not exist\n");
 		return;
 	}
-	int success = SDL_RenderCopy(renderer, sticker->texture, NULL, &sticker->location);
+	int success = SDL_RenderCopy(rend, sticker->texture, NULL, &sticker->location);
 	if (success == -1) {
 		printf("unable to draw widget: %s\n", SDL_GetError());
 	}
