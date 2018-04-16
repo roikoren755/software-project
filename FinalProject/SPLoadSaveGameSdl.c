@@ -7,6 +7,7 @@
 
 #include "SPLoadSaveGameSdl.h"
 #include <unistd.h>
+#include <string.h>
 #include "Button.h"
 #include "SPChessGameSdl.h"
 #include "SPChessMainSdl.h"
@@ -246,7 +247,12 @@ int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 	screens[screenIndex]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN; // show the game saved indicator
 
-	return PRESSED;
+	//for case where the user got to this screen after pressing quit/main menu
+	//if(screens[screenIndex]->nextWindow != GAME_SCREEN ){
+	//	return spOpenNextWindow(screens,game,screenIndex,widgetIndex);
+	//}
+
+    return spOpenNextWindow(screens,game,screenIndex,widgetIndex);
 }
 
 void spUpdateLoadSaveSlots(Screen** screens) {

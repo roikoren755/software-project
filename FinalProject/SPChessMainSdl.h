@@ -18,6 +18,7 @@
 #define MAIN_MENU_WINDOW 1
 #define LOAD_GAME_WINDOW 5
 #define SAVE_GAME_WINDOW 6
+#define NO_SCREEN -1
 
 #define CONTINUE 1
 #define SHOWN 1

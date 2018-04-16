@@ -84,12 +84,14 @@ int spLoadChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 /**
 *  Saves a game to the file's path related to a given slot, overwriting if exist already.
 *  If saving failed, shows a message to the user
-*  Otherwise shows a success message and saves the game.
+*  Otherwise shows a success message and saves the game, and opens the next window (if
+*  the user opened the screen via "save before quit" message opens the main menu or quit,
+*  otherwise open the game's screen)
 *  @param screens - pointer to the game's array of screens.
 *  @param game - the game's struct
 *  @param screenIndex - the index of the screen shown at the moment.
 *  @param widgetIndex - the Index of the widget within the screen's widgets array
-*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*  @return calls the spOpenNextWindow function.
 */
 int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex);
 

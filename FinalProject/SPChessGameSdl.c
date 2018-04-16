@@ -356,6 +356,7 @@ int spShowSaveBeforeQuitMessage(Screen** screens, SPChessGame* game, int screenI
 		}
     }
     else if (buttonId == YES) {
+    	screens[SAVE_GAME_WINDOW]->nextWindow = (widgetIndex == GS_QUIT)? NO_SCREEN : MAIN_MENU_WINDOW;
     	return spOpenLoadSaveGameWindow(screens,SAVE_GAME_WINDOW,screenIndex);
     }
     else if (buttonId == CANCEL) {

@@ -16,6 +16,7 @@
 #define GET_DIFFICULTY_WINDOW 3
 #define GET_COLOR_WINDOW 4
 
+
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
 #define MM_QUIT 2
@@ -313,13 +314,11 @@ int spOpenWindow(Screen** screens, int window) {
 }
 
 int spOpenLoadSaveGameWindow(Screen** screens, int screenIndex, int previousScreen) {
-	if (!screens) {
-		return -1;
-	}
 
 	screens[screenIndex]->previousWindow = previousScreen; // update where to return
 	screens[screenIndex]->scrollBarPosition = 0; // align scrollbar
 	return spOpenWindow(screens, screenIndex);
+
 }
 
 int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -332,6 +331,8 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 		return spOpenLoadSaveGameWindow(screens, LOAD_GAME_WINDOW, screenIndex);
 	}
 	else if (screenIndex == GAME_SCREEN && widgetIndex == GS_SAVE_GAME) {
+		//update where to go after game is saved.
+		screens[SAVE_GAME_WINDOW]->nextWindow = GAME_SCREEN;
 		return spOpenLoadSaveGameWindow(screens, SAVE_GAME_WINDOW, screenIndex);
 	}
 	else if (screenIndex == GET_MODE_WINDOW) {
@@ -348,6 +349,11 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 		if (widgetIndex == BLACK) { // white starts, so need to update computer first move before game starts
 			spUpdateBoard(screens, game);
 		}
+	}
+
+
+	if(screens[screenIndex]->nextWindow == NO_SCREEN){
+		return QUIT;
 	}
 
 	return  spOpenWindow(screens, screens[screenIndex]->nextWindow);
