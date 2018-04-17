@@ -16,7 +16,6 @@
 #define GET_DIFFICULTY_WINDOW 3
 #define GET_COLOR_WINDOW 4
 
-
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
 #define MM_QUIT 2
@@ -314,11 +313,9 @@ int spOpenWindow(Screen** screens, int window) {
 }
 
 int spOpenLoadSaveGameWindow(Screen** screens, int screenIndex, int previousScreen) {
-
 	screens[screenIndex]->previousWindow = previousScreen; // update where to return
 	screens[screenIndex]->scrollBarPosition = 0; // align scrollbar
 	return spOpenWindow(screens, screenIndex);
-
 }
 
 int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -331,7 +328,7 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 		return spOpenLoadSaveGameWindow(screens, LOAD_GAME_WINDOW, screenIndex);
 	}
 	else if (screenIndex == GAME_SCREEN && widgetIndex == GS_SAVE_GAME) {
-		//update where to go after game is saved.
+		// update where to go after game is saved.
 		screens[SAVE_GAME_WINDOW]->nextWindow = GAME_SCREEN;
 		return spOpenLoadSaveGameWindow(screens, SAVE_GAME_WINDOW, screenIndex);
 	}
@@ -351,8 +348,7 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 		}
 	}
 
-
-	if(screens[screenIndex]->nextWindow == NO_SCREEN){
+	if (screens[screenIndex]->nextWindow == NO_SCREEN) {
 		return QUIT;
 	}
 
