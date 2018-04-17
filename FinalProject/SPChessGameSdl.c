@@ -173,14 +173,14 @@ Screen* spGameCreateGameScreen() {
 
 	gameScreen->widgets[GS_UNDO] = createButton(renderer, "pics/gs_Undo.bmp", spUndoMove, 672, 425, 210, 50, HIDE);
 
-	gameScreen->widgets[GS_GET_MOVES_LEGEND] = createLabel(renderer, "pics/gs_GetMoves_legend.bmp", 665, 525, 227, 125,
+	gameScreen->widgets[GS_GET_MOVES_LEGEND] = createLabel(renderer, "pics/gs_GetMoves_legend.bmp", 665, 532, 227, 125,
 														   HIDE);
 
-	gameScreen->widgets[GS_CHECK] = createLabel(renderer, "pics/gs_Check.bmp", 672, 540, 210, 50, HIDE);
+	gameScreen->widgets[GS_CHECK] = createLabel(renderer, "pics/gs_Check.bmp", 672, 482, 210, 50, HIDE);
 
-	gameScreen->widgets[GS_CHECKMATE] = createLabel(renderer, "pics/gs_Check-mate.bmp", 672, 540, 210, 50, HIDE);
+	gameScreen->widgets[GS_CHECKMATE] = createLabel(renderer, "pics/gs_Check-mate.bmp", 672, 482, 210, 50, HIDE);
 
-	gameScreen->widgets[GS_DRAW] = createLabel(renderer, "pics/gs_Draw.bmp", 672, 540, 210, 50, HIDE);
+	gameScreen->widgets[GS_DRAW] = createLabel(renderer, "pics/gs_Draw.bmp", 672, 482, 210, 50, HIDE);
 
 	int success = spCheckWidgetsInit(gameScreen); // check if widgets were created successfully
 	if (!success) {
@@ -356,6 +356,7 @@ int spShowSaveBeforeQuitMessage(Screen** screens, SPChessGame* game, int screenI
 		}
     }
     else if (buttonId == YES) {
+    	//set where to go to after saving
     	screens[SAVE_GAME_WINDOW]->nextWindow = (widgetIndex == GS_QUIT)? NO_SCREEN : MAIN_MENU_WINDOW;
     	return spOpenLoadSaveGameWindow(screens,SAVE_GAME_WINDOW,screenIndex);
     }
@@ -409,9 +410,9 @@ int spUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 *  		   		will become threatened.
 *  		   SP_CHESS_GAME_SUCCESS if the move is legal and no error occurred
 */
-SP_CHESS_GAME_MESSAGE spChessGameHandleMove(SPChessGame* game, int move) {
+SP_CHESS_GAME_MESSAGE spChessGameHandleMove(Screen** screens, SPChessGame* game, int move) {
 	int moveToRestore = 0;
-	int secondMoveToRestore = 0; // for later use
+	int secondMoveToRestore = 0; // both for later use
 
 	SP_CHESS_GAME_MESSAGE message = spChessGameIsValidMove(game, move);
 	if (message == SP_CHESS_GAME_INVALID_ARGUMENT) {
@@ -449,7 +450,7 @@ SP_CHESS_GAME_MESSAGE spChessGameHandleMove(SPChessGame* game, int move) {
 				secondMoveToRestore = spArrayListGetLast(game->history);
 			}
 
-			move = spMinimaxSuggestMove(game);
+			move = spMinimaxSuggestMove(game); //ask for the computer move
 			if (move == -1) {
 				printf("ERROR: Couldn't figure out computer move. try again...\n");
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
@@ -459,16 +460,17 @@ SP_CHESS_GAME_MESSAGE spChessGameHandleMove(SPChessGame* game, int move) {
 			}
 			else if (move) { // move == 0 indicates computer can't perform any move
 				spChessGameSetMove(game, move);
+
 			}
 		}
 
-		// check and update gamestate
+		// check and update gamestate, handle error
 		if (spChessCheckGameState(game, game->currentPlayer) == SP_CHESS_GAME_INVALID_ARGUMENT) {
 			printf("ERROR: Something went wrong while updating the game state (i.e check, draw, etc.). Try again\n");
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
 									 "ERROR: Something went wrong while updating the game state(i.e check, draw, etc.). Try again",
 									 NULL);
-			spUndoAndRestoreHistory(game, secondMoveToRestore); // if an error occurred
+			spUndoAndRestoreHistory(game, secondMoveToRestore); // if an error occurred,
 			spUndoAndRestoreHistory(game, moveToRestore); // undo the computer and the user's move
 		}
 	}
@@ -532,7 +534,7 @@ int spMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 	int destinationColumn = SCREEN_TO_BOARD_LOCATION(piece->location.x);
 	int move = setMoveCoordinatesToInt(currentRow, currentColumn,  destinationRow,  destinationColumn);
 
-	SP_CHESS_GAME_MESSAGE message = spChessGameHandleMove(game, move); // handle the move
+	SP_CHESS_GAME_MESSAGE message = spChessGameHandleMove(screens, game, move); // handle the move
 
 	if (message != SP_CHESS_GAME_SUCCESS) { // no move occurred, set the piece to it's old location
 		piece->location.x = BOARD_TO_SCREEN_LOCATION(currentColumn);
@@ -540,7 +542,7 @@ int spMovePiece(Widget* src, SDL_Event* event, Screen** screens, SPChessGame* ga
 		return PRESSED;
 	}
 
-	// check if enabling undo is needed
+	// check if un/enabling undo is needed
 	screens[GAME_SCREEN]->widgets[GS_UNDO]->shown = (spArrayListIsEmpty(game->history)) ? HIDE : SHOWN;
 
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = HIDE; // game is not saved anymore
