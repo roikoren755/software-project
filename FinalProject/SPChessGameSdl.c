@@ -356,8 +356,12 @@ int spShowSaveBeforeQuitMessage(Screen** screens, SPChessGame* game, int screenI
 		}
     }
     else if (buttonId == YES) {
+<<<<<<< HEAD
     	//set where to go to after saving
     	screens[SAVE_GAME_WINDOW]->nextWindow = (widgetIndex == GS_QUIT)? NO_SCREEN : MAIN_MENU_WINDOW;
+=======
+    	screens[SAVE_GAME_WINDOW]->nextWindow = widgetIndex == GS_QUIT ? NO_SCREEN : MAIN_MENU_WINDOW;
+>>>>>>> e67e0a33baabe1c16bb5a9aec051af3cf943ab4e
     	return spOpenLoadSaveGameWindow(screens,SAVE_GAME_WINDOW,screenIndex);
     }
     else if (buttonId == CANCEL) {
@@ -389,7 +393,7 @@ int spUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 		if (userMove) {
 			spChessGameSetMove(game, userMove >> 8);
 		}
-		spChessGameSetMove(game, move >> 8); // TODO - Fixed?
+		spChessGameSetMove(game, move >> 8);
 	}
 
 	return spUpdateBoard(screens, game);
