@@ -12,6 +12,20 @@
 #include <unistd.h>
 
 #define NUM_SLOTS 5
+#define SLOT_HEIGHT 70
+#define NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS 5
+#define LSG_MASSAGE 0
+#define LSG_BOTTOM_COVER 1
+#define LSG_BACK 2
+#define LSG_UP_ARRAW 3
+#define LSG_DOWN_ARRAW 4
+
+/**
+ * --------NOTE:--------
+ * The existence of the "games_saved" folder is essential
+ * for the functionality of saving and loading games.
+ * The path has been set to be in a folder for order purposes.
+ */
 
 /**
  * SPLoadSaveGameSdl summary:
