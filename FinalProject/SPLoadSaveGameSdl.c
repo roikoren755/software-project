@@ -24,7 +24,7 @@
 #define LSG_DOWN_ARROW 4
 #define LSG_SLOT(i) (i + NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS - 1)
 #define LSG_SLOT_INDICATOR(i) (i + NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS + NUM_SLOTS - 1)
-#define WIDGET_TO_SLOT_INDEX(i) (i - NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS)
+#define WIDGET_TO_SLOT_INDEX(i) (i - NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS + 1)
 #define LOAD_SAVE_N_WIDGETS (NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS + 2 * NUM_SLOTS)
 
 Screen* spCreateLoadSaveGameWindow(int screenIndex) {
@@ -226,7 +226,7 @@ int spLoadChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN; // show the game saved indicator
 	spUpdateBoard(screens, game); // update the board
 
-	return spOpenWindow(screens, GAME_SCREEN);
+	return spOpenWindow(screens, GAME_SCREEN,game);
 }
 
 int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -246,6 +246,7 @@ int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 	screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[screenIndex]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN; // show the game saved indicator
+
 
     return spOpenNextWindow(screens,game,screenIndex,widgetIndex);
 }

@@ -16,6 +16,7 @@
 #define GET_DIFFICULTY_WINDOW 3
 #define GET_COLOR_WINDOW 4
 
+
 #define MM_NEW_GAME 0
 #define MM_LOAD_GAME 1
 #define MM_QUIT 2
@@ -294,7 +295,7 @@ void spDrawScreen(Screen* screen, int screenIndex) {
 	SDL_RenderPresent(renderer);
 }
 
-int spOpenWindow(Screen** screens, int window) {
+int spOpenWindow(Screen** screens, int window, SPChessGame* game) {
 	if (!screens) {
 		return NONE;
 	}
@@ -309,13 +310,19 @@ int spOpenWindow(Screen** screens, int window) {
 			SDL_HideWindow(screens[i]->window);
 		}
 	}
+	if(window == MAIN_MENU_WINDOW){
+		spChessGameResetGame(game); //need to reset game
+    	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = HIDE; // game will not be save anymore
+	}
 	return PRESSED;
 }
 
-int spOpenLoadSaveGameWindow(Screen** screens, int screenIndex, int previousScreen) {
+int spOpenLoadSaveGameWindow(Screen** screens,SPChessGame* game, int screenIndex, int previousScreen) {
+
 	screens[screenIndex]->previousWindow = previousScreen; // update where to return
 	screens[screenIndex]->scrollBarPosition = 0; // align scrollbar
-	return spOpenWindow(screens, screenIndex);
+	return spOpenWindow(screens, screenIndex ,game);
+
 }
 
 int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -325,12 +332,12 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 	// opening the load/save window if necessary
 	if((screenIndex == GAME_SCREEN && widgetIndex == GS_LOAD_GAME) ||
 	   (screenIndex == MAIN_MENU_WINDOW && widgetIndex == MM_LOAD_GAME)) {
-		return spOpenLoadSaveGameWindow(screens, LOAD_GAME_WINDOW, screenIndex);
+		return spOpenLoadSaveGameWindow(screens,game, LOAD_GAME_WINDOW, screenIndex);
 	}
 	else if (screenIndex == GAME_SCREEN && widgetIndex == GS_SAVE_GAME) {
-		// update where to go after game is saved.
+		//update where to go after game is saved.
 		screens[SAVE_GAME_WINDOW]->nextWindow = GAME_SCREEN;
-		return spOpenLoadSaveGameWindow(screens, SAVE_GAME_WINDOW, screenIndex);
+		return spOpenLoadSaveGameWindow(screens,game,  SAVE_GAME_WINDOW, screenIndex);
 	}
 	else if (screenIndex == GET_MODE_WINDOW) {
 		game->gameMode = widgetIndex;// the game mode is the same as the widget index
@@ -348,11 +355,12 @@ int spOpenNextWindow(Screen** screens, SPChessGame* game, int screenIndex, int w
 		}
 	}
 
-	if (screens[screenIndex]->nextWindow == NO_SCREEN) {
+
+	if(screens[screenIndex]->nextWindow == NO_SCREEN){
 		return QUIT;
 	}
 
-	return  spOpenWindow(screens, screens[screenIndex]->nextWindow);
+	return  spOpenWindow(screens, screens[screenIndex]->nextWindow,game);
 }
 
 int spOpenPreviousWindow(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -363,7 +371,7 @@ int spOpenPreviousWindow(Screen** screens, SPChessGame* game, int screenIndex, i
 		return QUIT;
 	}
 
-	return spOpenWindow(screens, screens[screenIndex]->previousWindow);
+	return spOpenWindow(screens, screens[screenIndex]->previousWindow,game);
 }
 
 int spQuit(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -386,11 +394,6 @@ int spOpenMainMenuWindow(Screen** screens, SPChessGame* game, int screenIndex, i
 		screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown == HIDE) {
 		return spShowSaveBeforeQuitMessage(screens, game, screenIndex, widgetIndex);
 	}
-
-	else if (screenIndex == GAME_SCREEN) { // game is saved
-		spChessGameResetGame(game);
-    	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = HIDE; // game will not be save anymore
-	}
 	
-	return spOpenWindow(screens, MAIN_MENU_WINDOW);
+	return spOpenWindow(screens, MAIN_MENU_WINDOW,game);
 }

@@ -80,23 +80,26 @@ void spDrawScreen(Screen* screen,int screenIndex);
 
 /**
 *  Shows a window and hides all the others in the given array.
+*  If the window is main menu, resets the game.
 *  @param screens - pointer to the game's array of screens.
 *  		  screenIndex - the index of the screen to be shown.
+*  		  game - the game's struct
+*
 *  @return PRESSED signal, indicating a widget was pressed in order to call this action.
 *
 */
-int spOpenWindow(Screen** screens, int screenIndex);
+int spOpenWindow(Screen** screens, int window, SPChessGame* game) ;
 
 /**
 *  Shows the load/save window.
 *  @param screens - pointer to the game's array of screens.
 *  @param screenIndex - the index of the screen: load or save.
+*  @param game - the game's struct
 *  @param previousScreen - the index of the screen currently opened, needed
 		  because we need to know where to return
-*  @return PRESSED signal, indicating a widget was pressed in order to call this action.
+*  @return PRESSED signal (after calling the spOpenWindow function), indicating a widget was pressed in order to call this action.
 */
-int spOpenLoadSaveGameWindow(Screen** screens, int screenIndex, int previousScreen);
-
+int spOpenLoadSaveGameWindow(Screen** screens,SPChessGame* game, int screenIndex, int previousScreen);
 /**
 *  NOTE:
 *  The signatures of the following functions is

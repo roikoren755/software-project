@@ -210,7 +210,7 @@ int spUpdateBoard(Screen** screens, SPChessGame* game){
 			printf("ERROR: Couldn't figure out computer's first move. Returning to main menu...\n");
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
 									 "ERROR: Couldn't figure out computer's first move. Returning to main menu..", NULL);
-			return spOpenWindow(screens, MAIN_MENU_WINDOW); // this is the first step, we must quit the current game
+			return spOpenWindow(screens, MAIN_MENU_WINDOW, game); // this is the first step, we must quit the current game
 		}
 		else {
 			spChessGameSetMove(game, move);
@@ -351,18 +351,13 @@ int spShowSaveBeforeQuitMessage(Screen** screens, SPChessGame* game, int screenI
     		return QUIT;
     	}
     	else { // user requested main menu
-			spChessGameResetGame(game);
-			return spOpenWindow(screens,MAIN_MENU_WINDOW);
+    		return spOpenWindow(screens,MAIN_MENU_WINDOW,game);
 		}
     }
     else if (buttonId == YES) {
-<<<<<<< HEAD
     	//set where to go to after saving
     	screens[SAVE_GAME_WINDOW]->nextWindow = (widgetIndex == GS_QUIT)? NO_SCREEN : MAIN_MENU_WINDOW;
-=======
-    	screens[SAVE_GAME_WINDOW]->nextWindow = widgetIndex == GS_QUIT ? NO_SCREEN : MAIN_MENU_WINDOW;
->>>>>>> e67e0a33baabe1c16bb5a9aec051af3cf943ab4e
-    	return spOpenLoadSaveGameWindow(screens,SAVE_GAME_WINDOW,screenIndex);
+    	return spOpenLoadSaveGameWindow(screens,game,SAVE_GAME_WINDOW,screenIndex);
     }
     else if (buttonId == CANCEL) {
     	return PRESSED;
@@ -393,7 +388,7 @@ int spUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 		if (userMove) {
 			spChessGameSetMove(game, userMove >> 8);
 		}
-		spChessGameSetMove(game, move >> 8);
+		spChessGameSetMove(game, move >> 8); // TODO - Fixed?
 	}
 
 	return spUpdateBoard(screens, game);
@@ -425,7 +420,7 @@ SP_CHESS_GAME_MESSAGE spChessGameHandleMove(Screen** screens, SPChessGame* game,
 								 NULL);
 	}
 	else if (message == SP_CHESS_GAME_NO_PIECE_IN_POSITION) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move", "That's not your piece!", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move", "That's not current user's piece!", NULL);
 	}
 	else if (message == SP_CHESS_GAME_ILLEGAL_MOVE) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Invalid Move", "Illegal move!", NULL);
