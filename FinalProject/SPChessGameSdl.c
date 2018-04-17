@@ -411,6 +411,9 @@ int spUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 *  		   SP_CHESS_GAME_SUCCESS if the move is legal and no error occurred
 */
 SP_CHESS_GAME_MESSAGE spChessGameHandleMove(Screen** screens, SPChessGame* game, int move) {
+	if (!screens || !game) {
+		return SP_CHESS_GAME_INVALID_ARGUMENT;
+	}
 	int moveToRestore = 0;
 	int secondMoveToRestore = 0; // both for later use
 
