@@ -96,10 +96,11 @@ int spOpenWindow(Screen** screens, int window, SPChessGame* game) ;
 *  @param screenIndex - the index of the screen: load or save.
 *  @param game - the game's struct
 *  @param previousScreen - the index of the screen currently opened, needed
-		  because we need to know where to return
+*		  because we need to know where to return
 *  @return PRESSED signal (after calling the spOpenWindow function), indicating a widget was pressed in order to call this action.
 */
-int spOpenLoadSaveGameWindow(Screen** screens,SPChessGame* game, int screenIndex, int previousScreen);
+int spOpenLoadSaveGameWindow(Screen** screens, SPChessGame* game, int screenIndex, int previousScreen);
+
 /**
 *  NOTE:
 *  The signatures of the following functions is

@@ -13,7 +13,6 @@
 #include "SPChessMainSdl.h"
 #include "SPMainAux.h"
 
-#define NUM_SLOTS 5
 #define SLOT_HEIGHT 70
 #define SCROLLBAR_MAX_POSITION (NUM_SLOTS * SLOT_HEIGHT - 300)
 #define NUM_SAVE_LOAD_SCREEN_DEFUALT_WIDGETS 5
@@ -226,7 +225,7 @@ int spLoadChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN; // show the game saved indicator
 	spUpdateBoard(screens, game); // update the board
 
-	return spOpenWindow(screens, GAME_SCREEN,game);
+	return spOpenWindow(screens, GAME_SCREEN, game);
 }
 
 int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int widgetIndex) {
@@ -246,7 +245,6 @@ int spSaveChosenGame(Screen** screens, SPChessGame* game, int screenIndex, int w
 	screens[LOAD_GAME_WINDOW]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[screenIndex]->widgets[LSG_SLOT_INDICATOR(slotIndex)]->shown =  SHOWN;
 	screens[GAME_SCREEN]->widgets[GS_SAVED_GAME_INDICATOR]->shown = SHOWN; // show the game saved indicator
-
 
     return spOpenNextWindow(screens,game,screenIndex,widgetIndex);
 }

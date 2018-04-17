@@ -351,13 +351,13 @@ int spShowSaveBeforeQuitMessage(Screen** screens, SPChessGame* game, int screenI
     		return QUIT;
     	}
     	else { // user requested main menu
-    		return spOpenWindow(screens,MAIN_MENU_WINDOW,game);
+    		return spOpenWindow(screens, MAIN_MENU_WINDOW, game);
 		}
     }
     else if (buttonId == YES) {
-    	//set where to go to after saving
-    	screens[SAVE_GAME_WINDOW]->nextWindow = (widgetIndex == GS_QUIT)? NO_SCREEN : MAIN_MENU_WINDOW;
-    	return spOpenLoadSaveGameWindow(screens,game,SAVE_GAME_WINDOW,screenIndex);
+    	// set where to go to after saving
+    	screens[SAVE_GAME_WINDOW]->nextWindow = widgetIndex == GS_QUIT ? NO_SCREEN : MAIN_MENU_WINDOW;
+    	return spOpenLoadSaveGameWindow(screens, game, SAVE_GAME_WINDOW, screenIndex);
     }
     else if (buttonId == CANCEL) {
     	return PRESSED;
@@ -397,6 +397,7 @@ int spUndoMove(Screen** screens, SPChessGame* game, int screenIndex, int widgetI
 /**
 *  Handles a move the user has performed, setting it or showing a message
 *  explaining why it is not valid.
+*  @param screens - Screen array containing game screen.
 *  @param game - pointer the game's struct.
 *  @param step - the move.
 *  @return SP_CHESS_GAME_INVALID_ARGUMENT if an error occurred.
@@ -449,7 +450,7 @@ SP_CHESS_GAME_MESSAGE spChessGameHandleMove(Screen** screens, SPChessGame* game,
 				secondMoveToRestore = spArrayListGetLast(game->history);
 			}
 
-			move = spMinimaxSuggestMove(game); //ask for the computer move
+			move = spMinimaxSuggestMove(game); // ask for the computer move
 			if (move == -1) {
 				printf("ERROR: Couldn't figure out computer move. try again...\n");
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",
@@ -459,11 +460,10 @@ SP_CHESS_GAME_MESSAGE spChessGameHandleMove(Screen** screens, SPChessGame* game,
 			}
 			else if (move) { // move == 0 indicates computer can't perform any move
 				spChessGameSetMove(game, move);
-
 			}
 		}
 
-		// check and update gamestate, handle error
+		// check and update game state, handle error
 		if (spChessCheckGameState(game, game->currentPlayer) == SP_CHESS_GAME_INVALID_ARGUMENT) {
 			printf("ERROR: Something went wrong while updating the game state (i.e check, draw, etc.). Try again\n");
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Error",

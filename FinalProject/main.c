@@ -7,12 +7,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "SPArrayList.h"
-#include "SPBufferset.h"
 #include "SPChessGame.h"
-#include "SPChessParser.h"
 #include "SPMainAux.h"
-#include "SPMinimax.h"
 
 #define CONSOLE 0
 #define GUI 1
@@ -21,7 +17,6 @@
 #define USAGE "Usage: ./chessprog [-c | -g]\n"
 
 int main(int argc, char* argv[]) {
-	SP_BUFF_SET();
     int mode = CONSOLE;
     if (argc == 1) {
 		mode = CONSOLE;
